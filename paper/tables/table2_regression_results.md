@@ -1,0 +1,21 @@
+# Table 2: Econometric Panel Regression Results
+
+*Standard errors clustered at the country level reported in parentheses. * p < 0.10, ** p < 0.05, *** p < 0.01. Dependent variable in Columns (1)-(4) and (6) is Annual Growth of Real GDP per Capita (%). Dependent variable in Column (5) is Agriculture, Forestry, and Fishing Value Added as a % of GDP. Vulnerable Group includes Spain, Brazil, India, and Kenya.*
+
+| Variable                       | (1) Pooled OLS   | (2) Country FE   | (3) Two-Way FE   | (4) Non-Linear TWFE   | (5) Agri Share TWFE   | (6) Vulnerability Split   |
+|:-------------------------------|:-----------------|:-----------------|:-----------------|:----------------------|:----------------------|:--------------------------|
+| Temperature Anomaly (°C)       | -0.5009***       | -0.4904***       | -0.0325          | 0.0146                | 0.7827                | -0.2254                   |
+|                                | (0.1780)         | (0.1875)         | (0.4301)         | (0.4390)              | (1.0898)              | (0.4457)                  |
+| Temperature Anomaly Squared    | -                | -                | -                | -0.0432               | -                     | -                         |
+|                                |                  |                  |                  | (0.0833)              |                       |                           |
+| Precipitation Anomaly (100mm)  | 0.0596           | 0.0347           | 0.0635           | 0.0653                | -0.0766               | -0.1597                   |
+|                                | (0.0703)         | (0.0634)         | (0.0550)         | (0.0525)              | (0.1121)              | (0.1712)                  |
+| Temp Anom × Vulnerable Group   | -                | -                | -                | -                     | -                     | 0.3989                    |
+|                                |                  |                  |                  |                       |                       | (0.3670)                  |
+| Precip Anom × Vulnerable Group | -                | -                | -                | -                     | -                     | 0.2862                    |
+|                                |                  |                  |                  |                       |                       | (0.1955)                  |
+| Country Fixed Effects          | No               | Yes              | Yes              | Yes                   | Yes                   | Yes                       |
+| Year Fixed Effects             | No               | No               | Yes              | Yes                   | Yes                   | Yes                       |
+| Clustered SEs (Country)        | Yes              | Yes              | Yes              | Yes                   | Yes                   | Yes                       |
+| Observations (N)               | 504              | 504              | 504              | 504                   | 373                   | 504                       |
+| R-squared                      | 0.0210           | 0.0444           | 0.3300           | 0.3301                | 0.9170                | 0.3361                    |
