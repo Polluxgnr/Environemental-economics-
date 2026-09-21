@@ -453,15 +453,22 @@ if __name__ == "__main__":
     print("STARTING FIGURE GENERATION PIPELINE (TRACK 1)")
     print("="*70)
     p_df, m_df, s_df = load_all_data()
-    plot_fig1_historical_trends(p_df)
-    plot_fig2_warming_stripes(m_df)
-    plot_fig3_signal_noise_quadrant(p_df)
-    plot_fig4_seasonal_asymmetry(s_df)
-    plot_fig5_climate_economic_shocks(p_df)
-    plot_fig6_econometric_coefficients()
-    plot_fig7_agricultural_vulnerability(p_df)
-    plot_fig8_nonlinear_optimum(p_df)
-    plot_fig9_distributional_shifts(p_df)
+    
+    print("\n--- Generating Core Paper Figures (Featured in Section 4 of Paper) ---")
+    plot_fig1_historical_trends(p_df)           # Core Fig 1: Observed 64-Year Climate Records
+    plot_fig2_warming_stripes(m_df)             # Core Fig 2: Warming Stripes & Monthly Anomalies
+    plot_fig3_signal_noise_quadrant(p_df)       # Core Fig 3: Signal-to-Noise & Quadrants
+    plot_fig4_seasonal_asymmetry(s_df)          # Core Fig 4: Seasonal Warming Asymmetry
+    plot_fig5_climate_economic_shocks(p_df)     # Core Fig 5: Extreme Weather Shocks vs. Economic Dips
+    
+    print("\n--- Generating Supplementary / Robustness Figures ---")
+    plot_fig6_econometric_coefficients()        # Fig 6: Regression Forest Plot
+    plot_fig7_agricultural_vulnerability(p_df)  # Fig 7: Agricultural Vulnerability Slopes
+    plot_fig8_nonlinear_optimum(p_df)           # Fig 8: Non-Linear Temperature Optimum
+    plot_fig9_distributional_shifts(p_df)       # Fig 9: Empirical Distributional Shifts
+    
     print("\n" + "="*70)
-    print("ALL 9 PUBLICATION-GRADE FIGURES GENERATED SUCCESSFULLY IN figures/!")
+    print("ALL FIGURES GENERATED SUCCESSFULLY IN figures/!")
+    print("-> Figures 1-5: Primary figures featured in the 10-page research paper.")
+    print("-> Figures 6-9: Supplementary figures available for slides & oral defense.")
     print("="*70)
