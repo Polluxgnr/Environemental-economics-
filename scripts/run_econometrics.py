@@ -199,25 +199,20 @@ def run_econometric_regressions(panel_df):
     res6 = mod6.fit(cov_type="cluster", cov_kwds={"groups": df_reg["country_code"]})
     
     # --------------------------------------------------------------------------
-    # ASSEMBLE PUBLICATION REGRESSION TABLE
+    # ASSEMBLE PUBLICATION REGRESSION TABLE (4 CORE DEFENSIVE MODELS)
     # --------------------------------------------------------------------------
     models = [
         ("(1) Pooled OLS", res1, "GDP pc Growth"),
         ("(2) Country FE", res2, "GDP pc Growth"),
-        ("(3) Two-Way FE", res3, "GDP pc Growth"),
-        ("(4) Non-Linear TWFE", res4, "GDP pc Growth"),
-        ("(5) Agri Share TWFE", res5, "Agri Share (% GDP)"),
-        ("(6) Vulnerability Split", res6, "GDP pc Growth")
+        ("(3) Two-Way FE (Preferred)", res3, "GDP pc Growth"),
+        ("(4) Agri Share TWFE", res5, "Agri Share (% GDP)")
     ]
     
     reg_summary_data = []
     
     variables_to_report = [
         ("temp_annual_anomaly", "Temperature Anomaly (°C)"),
-        ("temp_anomaly_squared", "Temperature Anomaly Squared"),
-        ("precip_anom_100mm", "Precipitation Anomaly (100mm)"),
-        ("temp_annual_anomaly:is_vulnerable", "Temp Anom × Vulnerable Group"),
-        ("precip_anom_100mm:is_vulnerable", "Precip Anom × Vulnerable Group")
+        ("precip_anom_100mm", "Precipitation Anomaly (100mm)")
     ]
     
     for var_key, var_label in variables_to_report:
@@ -238,11 +233,11 @@ def run_econometric_regressions(panel_df):
         reg_summary_data.append(row_se)
         
     # Metadata rows
-    row_fe_c = {"Variable": "Country Fixed Effects", "(1) Pooled OLS": "No", "(2) Country FE": "Yes", "(3) Two-Way FE": "Yes", "(4) Non-Linear TWFE": "Yes", "(5) Agri Share TWFE": "Yes", "(6) Vulnerability Split": "Yes"}
-    row_fe_y = {"Variable": "Year Fixed Effects", "(1) Pooled OLS": "No", "(2) Country FE": "No", "(3) Two-Way FE": "Yes", "(4) Non-Linear TWFE": "Yes", "(5) Agri Share TWFE": "Yes", "(6) Vulnerability Split": "Yes"}
-    row_clust = {"Variable": "Clustered SEs (Country)", "(1) Pooled OLS": "Yes", "(2) Country FE": "Yes", "(3) Two-Way FE": "Yes", "(4) Non-Linear TWFE": "Yes", "(5) Agri Share TWFE": "Yes", "(6) Vulnerability Split": "Yes"}
-    row_n = {"Variable": "Observations (N)", "(1) Pooled OLS": f"{int(res1.nobs)}", "(2) Country FE": f"{int(res2.nobs)}", "(3) Two-Way FE": f"{int(res3.nobs)}", "(4) Non-Linear TWFE": f"{int(res4.nobs)}", "(5) Agri Share TWFE": f"{int(res5.nobs)}", "(6) Vulnerability Split": f"{int(res6.nobs)}"}
-    row_r2 = {"Variable": "R-squared", "(1) Pooled OLS": f"{res1.rsquared:.4f}", "(2) Country FE": f"{res2.rsquared:.4f}", "(3) Two-Way FE": f"{res3.rsquared:.4f}", "(4) Non-Linear TWFE": f"{res4.rsquared:.4f}", "(5) Agri Share TWFE": f"{res5.rsquared:.4f}", "(6) Vulnerability Split": f"{res6.rsquared:.4f}"}
+    row_fe_c = {"Variable": "Country Fixed Effects", "(1) Pooled OLS": "No", "(2) Country FE": "Yes", "(3) Two-Way FE (Preferred)": "Yes", "(4) Agri Share TWFE": "Yes"}
+    row_fe_y = {"Variable": "Year Fixed Effects", "(1) Pooled OLS": "No", "(2) Country FE": "No", "(3) Two-Way FE (Preferred)": "Yes", "(4) Agri Share TWFE": "Yes"}
+    row_clust = {"Variable": "Clustered SEs (Country)", "(1) Pooled OLS": "Yes", "(2) Country FE": "Yes", "(3) Two-Way FE (Preferred)": "Yes", "(4) Agri Share TWFE": "Yes"}
+    row_n = {"Variable": "Observations (N)", "(1) Pooled OLS": f"{int(res1.nobs)}", "(2) Country FE": f"{int(res2.nobs)}", "(3) Two-Way FE (Preferred)": f"{int(res3.nobs)}", "(4) Agri Share TWFE": f"{int(res5.nobs)}"}
+    row_r2 = {"Variable": "R-squared", "(1) Pooled OLS": f"{res1.rsquared:.4f}", "(2) Country FE": f"{res2.rsquared:.4f}", "(3) Two-Way FE (Preferred)": f"{res3.rsquared:.4f}", "(4) Agri Share TWFE": f"{res5.rsquared:.4f}"}
     
     for r in [row_fe_c, row_fe_y, row_clust, row_n, row_r2]:
         reg_summary_data.append(r)
@@ -256,7 +251,7 @@ def run_econometric_regressions(panel_df):
     
     with open(md_path, "w", encoding="utf-8") as f:
         f.write("# Table 2: Econometric Panel Regression Results\n\n")
-        f.write("*Standard errors clustered at the country level reported in parentheses. * p < 0.10, ** p < 0.05, *** p < 0.01. Dependent variable in Columns (1)-(4) and (6) is Annual Growth of Real GDP per Capita (%). Dependent variable in Column (5) is Agriculture, Forestry, and Fishing Value Added as a % of GDP. Vulnerable Group includes Spain, Brazil, India, and Kenya.*\n\n")
+        f.write("*Standard errors clustered at the country level reported in parentheses. * p < 0.10, ** p < 0.05, *** p < 0.01. Dependent variable in Columns (1)-(3) is Annual Growth of Real GDP per Capita (%). Dependent variable in Column (4) is Agriculture, Forestry, and Fishing Value Added as a % of GDP. Sample spans 1960–2023 across 8 countries (1960 dropped because growth is first-differenced; Column 4 restricted by historical WDI agricultural data availability).*\n\n")
         f.write(reg_table.to_markdown(index=False))
         
     print(f"--> Saved Table 2 to {csv_path} and {md_path}")
