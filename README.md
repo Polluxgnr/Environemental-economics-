@@ -191,7 +191,7 @@ All figures are rendered at 300 DPI in `figures/` and stand entirely on their ow
 | Figure | Filename | Topic | Core Conclusion |
 | :---: | :--- | :--- | :--- |
 | **Fig 1** | `figures/fig1_historical_climate_trends.png` | Observed Climate Records (1960–2023) | Unmistakable upward temperature inflection beginning in late 1980s; multi-year drought troughs visible in Europe (1976, 2003, 2022). |
-| **Fig 2** | `figures/fig2_warming_stripes_anomalies.png` | Warming Stripes & Monthly Anomalies | De-seasonalization reveals that positive thermal anomalies (reds) become near-universal post-1995 across all calendar months. |
+| **Fig 2** | `figures/fig2_warming_stripes_anomalies.png` | Why De-Seasonalize? (Raw Cycle vs. Anomalies) | Demonstrates why subtracting 1961–1990 baseline is essential: the ~20°C annual solar cycle dominates raw data, while anomalies unmask the post-1985 secular warming signal. |
 | **Fig 3** | `figures/fig3_warming_vs_precipitation_quadrant.png` | Signal-to-Noise & Climate Quadrants | Secular warming exceeds noise ($\text{SNR} > 1$) across Europe and Africa; Spain and Brazil occupy the compounding "Warming & Drying" quadrant. |
 | **Fig 4** | `figures/fig4_seasonal_asymmetry.png` | Seasonal Warming Asymmetry | Summer warming outpaces winter warming by 45%–60% in Western/Mediterranean Europe, compounding agricultural drought risk. |
 | **Fig 5** | `figures/fig5_climate_shocks_vs_economic_dips.png` | Weather Shocks vs. Economic Dips | Landmark shock years align with real losses: 1976 French drought (6B franc tax), 2003 heatwave (€4B loss), and severe agrarian dips in Kenya/India. |

@@ -44,7 +44,7 @@
 
 ### Slide 2: Data Genesis & The 1961–1990 Baseline [01:15 – 02:30]
 - **Slide Title:** Data Architecture: High-Resolution Reanalysis & Harmonized Macro Panel
-- **Visuals:** Data flow diagram: ECMWF ERA5 Reanalysis (0.25° grid) → Agricultural centroids → 1961–1990 WMO baseline → World Bank WDI panel.
+- **Visuals:** Figure 2 (Panel A: Raw 20°C seasonal cycle vs. Panel B: De-seasonalized monthly anomalies) + Data flow diagram: ECMWF ERA5 Reanalysis (0.25° grid) → Agricultural centroids → 1961–1990 WMO baseline → World Bank WDI panel.
 - **Key Talking Points (Speaker 1):**
   - **Why ERA5 Reanalysis over weather stations:** Zero missing observations across 187,008 nation-days; eliminates station relocations and urban airport heat-island effects.
   - **Spatial Strategy:** Centroids placed in agricultural and geographic heartlands (e.g. Berry/Loire for France, Midwest for USA, Meseta for Spain).

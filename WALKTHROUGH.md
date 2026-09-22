@@ -90,7 +90,7 @@ Every script in the `scripts/` directory is modular, reproducible, and documente
   - Standard errors are clustered at the country level across all models to correct for serial autocorrelation.
 
 ### Script 4: `scripts/generate_visualizations.py`
-- **What it does:** Renders the 5 publication-grade core figures at 300 DPI into `figures/`, with complete stand-alone captions, stated units, and explicit takeaways.
+- **What it does:** Renders the 5 publication-grade core figures at 300 DPI into `figures/`, directly mapped to syllabus steps (1)–(4). Figure 2 specifically demonstrates syllabus step (2) by juxtaposing the raw ~20°C solar cycle against the de-seasonalized monthly anomaly series, proving why the 1961–1990 baseline is essential. Also generates 4 supplementary figures (Figs 6–9) for the defense.
 
 ---
 

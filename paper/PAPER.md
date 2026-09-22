@@ -131,11 +131,11 @@ Table 1 reports baseline averages, secular decadal changes, interannual volatili
 
 ---
 
-### Figure 2: Warming Stripes and Monthly Anomalies (1960–2023)
-![Figure 2: Warming Stripes and Monthly Anomaly Heatmaps](../figures/fig2_warming_stripes_anomalies.png)
-*Figure 2: Monthly temperature anomalies (°C) relative to the 1961–1990 climatological baseline across all 12 calendar months from 1960 to 2023. Blue indicates negative anomalies (cooler than baseline); red indicates positive anomalies (warmer). Source: ECMWF ERA5.*
+### Figure 2: Why De-Seasonalize? Raw Temperature Cycle vs. Monthly Anomalies
+![Figure 2: Raw Temperature Cycle vs Monthly Anomalies](../figures/fig2_warming_stripes_anomalies.png)
+*Figure 2: Methodological demonstration of de-seasonalization using monthly ERA5 records for France (1960–2023). Panel A shows the raw monthly mean temperature (°C), where the ~20°C annual solar cycle dominates the variance and obscures secular trends. Panel B shows de-seasonalized monthly anomalies relative to the 1961–1990 baseline norm ($\Delta T_{m} = T_{m} - \bar{T}_{m}^{\text{base}}$), purging the seasonal cycle and revealing the post-1985 secular warming trend (+1.75°C decadal shift). Source: ECMWF ERA5.*
 
-**Findings:** De-seasonalization confirms that warming is persistent throughout the calendar year rather than confined to one month. Negative anomalies (blues) predominate before 1985. After 1995, positive anomalies (reds) become near-universal, with anomalies exceeding +2.5°C concentrated in European summer months (June–August).
+**Findings:** This comparison addresses syllabus step (2). In the raw series (Panel A), over 95% of total temperature variance is driven by the regular winter-to-summer solar cycle (January norm ~3.2°C vs. July norm ~19.3°C), rendering cross-month or multi-year secular comparisons impossible. Once each calendar month's 1961–1990 baseline mean is subtracted (Panel B), the annual cycle collapses to zero and the underlying secular signal becomes unmistakable: negative anomalies (cooler than baseline) predominate before 1985, while positive anomalies (warmer than baseline, up to +4.5°C) dominate the post-1995 era.
 
 ---
 
