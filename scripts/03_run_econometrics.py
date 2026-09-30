@@ -8,229 +8,236 @@ COURSE: Environmental Economics — BSc AIDAMS, T1 2026–2027
 INSTRUCTOR: Caterina Seghini · ESSEC Department of Economics
 AUTHORS: Student Research Group 1
 
-PURPOSE & METHODOLOGICAL JUSTIFICATION:
-----------------------------------------
-This script produces the core empirical tables for Section 3 (Summary Statistics)
-and Section 5 (Econometrics) of the research paper:
-
-1. Summary Statistics (Section 3 of Paper):
-   - Table 1 reports: Mean Temperature (°C), Temperature SD (°C), Secular Warming
-     Delta T (°C, 2014-2023 minus 1960-1969 decadal means), YoY Volatility sigma (°C),
-     Signal-to-Noise Ratio (SNR = Delta T / sigma), Mean Precipitation (mm),
-     Precipitation SD (mm), Secular Delta P (mm), Mean GDPpc Growth (%),
-     and Agriculture Value Added Share of GDP (%).
-
-2. Econometric Panel Regressions (Section 5 of Paper):
-   - We estimate four core specifications to investigate whether annual weather
-     anomalies transmit into macroeconomic growth contractions:
-     * Model 1: Pooled OLS (Baseline correlation)
-     * Model 2: Country Fixed Effects (Within Estimator - eliminates time-invariant country traits)
-     * Model 3: Two-Way Fixed Effects (TWFE - Country FE + Year FE - PREFERRED SPECIFICATION)
-     * Model 4: Agricultural Sector Transmission (TWFE on Agriculture Share of GDP)
-
-3. The Econometric Lesson (Spurious Co-Trend vs. Two-Way Fixed Effects):
-   - In Model 2 (Country FE), temperature anomaly has a large, statistically significant
-     negative coefficient (beta = -0.4904***, p < 0.01).
-   - In Model 3 (Two-Way FE), adding Year Fixed Effects (gamma_t) drops the coefficient
-     to beta = -0.0325 (p = 0.940), while R-squared jumps from 0.044 to 0.330.
-   - Economic Explanation: Over 1960–2023, two multi-decadal macro phenomena coincided:
-     (1) Western economies experienced a post-WWII growth slowdown from the high-growth
-         "Trente Glorieuses" of the 1960s to lower trend growth in the 1980s-2000s;
-     (2) Global mean temperature steadily rose over that same period.
-     Country FE mistakes this chronological co-occurrence for a causal climate penalty.
-     Two-Way FE absorbs common global trends and macro cycles (oil crises, GFC, COVID),
-     revealing that idiosyncratic annual temperature shocks have no statistically
-     significant effect on aggregate annual GDP per capita growth in this diversified sample.
-
-4. Sample Size Accounting:
-   - Full panel: 8 countries * 64 years = 512 country-years.
-   - Growth models (Models 1-3): N = 504 (1960 dropped because growth is first-differenced).
-   - Agriculture model (Model 4): N = 373 (131 missing country-years in early WDI decades
-     across USA, Germany pre-reunification, Spain, and Australia).
-
-5. Standard Error Clustering:
-   - Standard errors are clustered at the country level across all specifications
-     to allow arbitrary within-country serial correlation and heteroskedasticity
-     (Bertrand, Duflo, & Mullainathan, 2004).
+PURPOSE:
+--------
+Produces the core empirical tables for Section 3 (Summary Statistics) and Section 5
+(Econometrics) of the research paper, strictly following small-sample cluster
+inference with G = 8 clusters (t(7) distribution) and reporting within-R2.
 ================================================================================
 """
 
 import os
-import sys
+import json
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
+from scipy import stats
 
 WORKSPACE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_PROC_DIR = os.path.join(WORKSPACE_DIR, "data", "processed")
 TABLES_DIR = os.path.join(WORKSPACE_DIR, "paper", "tables")
 os.makedirs(TABLES_DIR, exist_ok=True)
 
-# ------------------------------------------------------------------------------
-# 1. LOAD PROCESSED PANEL DATA
-# ------------------------------------------------------------------------------
 def load_data():
-    panel_file = os.path.join(DATA_PROC_DIR, "merged_climate_economic_panel.csv")
-    monthly_file = os.path.join(DATA_PROC_DIR, "climate_monthly_anomalies.csv")
-    seasonal_file = os.path.join(DATA_PROC_DIR, "climate_seasonal_anomalies.csv")
-    
-    if not os.path.exists(panel_file):
-        raise FileNotFoundError(f"Missing {panel_file}. Please run scripts/process_data.py first.")
-        
-    panel_df = pd.read_csv(panel_file)
-    monthly_df = pd.read_csv(monthly_file)
-    seasonal_df = pd.read_csv(seasonal_file)
+    panel_df = pd.read_csv(os.path.join(DATA_PROC_DIR, "merged_climate_economic_panel.csv"))
+    monthly_df = pd.read_csv(os.path.join(DATA_PROC_DIR, "climate_monthly_anomalies.csv"))
+    seasonal_df = pd.read_csv(os.path.join(DATA_PROC_DIR, "climate_seasonal_anomalies.csv"))
     return panel_df, monthly_df, seasonal_df
 
 # ------------------------------------------------------------------------------
-# 2. GENERATE SUMMARY STATISTICS TABLE (TABLE 1)
+# 1. TABLE 1: SUMMARY STATISTICS & CLIMATE TRENDS
 # ------------------------------------------------------------------------------
 def generate_summary_statistics(panel_df):
-    print("\nGenerating Summary Statistics Table (Section 3 of Paper)...")
+    print("\nGenerating Summary Statistics Table (Table 1)...")
     
     records = []
-    for code, group in panel_df.groupby("country_code"):
+    countries = ["AUS", "BRA", "DEU", "ESP", "FRA", "IND", "KEN", "USA"]
+    
+    for code in countries:
+        group = panel_df[panel_df["country_code"] == code].sort_values("year")
         name = group["country_name"].iloc[0]
         region = group["region"].iloc[0]
         
-        # Secular trend: 2014-2023 mean vs 1960-1969 mean
-        early_temp = group[group["year"].between(1960, 1969)]["temp_annual_mean"].mean()
-        late_temp = group[group["year"].between(2014, 2023)]["temp_annual_mean"].mean()
-        delta_temp = late_temp - early_temp
+        # Absolute levels
+        mean_t = group["temp_annual_mean"].mean()
+        std_t = group["temp_annual_mean"].std(ddof=1)
+        mean_p = group["precip_annual_total"].mean()
+        std_p = group["precip_annual_total"].std(ddof=1)
         
-        early_precip = group[group["year"].between(1960, 1969)]["precip_annual_total"].mean()
-        late_precip = group[group["year"].between(2014, 2023)]["precip_annual_total"].mean()
-        delta_precip = late_precip - early_precip
+        # Decadal differences (2014-2023 vs 1960-1969)
+        early_t = group[group["year"].between(1960, 1969)]["temp_annual_mean"].mean()
+        late_t = group[group["year"].between(2014, 2023)]["temp_annual_mean"].mean()
+        delta_t = late_t - early_t
         
-        # Interannual YoY Volatility: sample SD of delta_T_y
-        yoy_temp_sd = group["temp_yoy_diff"].dropna().std()
-        snr_temp = delta_temp / yoy_temp_sd if yoy_temp_sd > 0 else np.nan
+        early_p = group[group["year"].between(1960, 1969)]["precip_annual_total"].mean()
+        late_p = group[group["year"].between(2014, 2023)]["precip_annual_total"].mean()
+        delta_p = late_p - early_p
+        pct_delta_p_60s = (delta_p / early_p) * 100.0
+        
+        # OLS Trend with HAC Standard Errors (Newey-West, maxlags=3)
+        X = sm.add_constant(group["year"])
+        ols = sm.OLS(group["temp_annual_mean"], X).fit(cov_type="HAC", cov_kwds={"maxlags": 3})
+        trend_c_dec = ols.params["year"] * 10.0
+        se_trend = ols.bse["year"] * 10.0
+        detrended_sd = ols.resid.std(ddof=2)
+        fd_sd = group["temp_yoy_diff"].dropna().std(ddof=1)
+        
+        # Signal to Noise: Trend / SE (t-stat) and Delta T / detrended SD
+        snr_detrended = delta_t / detrended_sd if detrended_sd > 0 else np.nan
         
         records.append({
             "Country": name,
             "Code": code,
             "Region": region,
-            "Mean Temp (°C)": f"{group['temp_annual_mean'].mean():.2f}",
-            "Temp SD (°C)": f"{group['temp_annual_mean'].std():.2f}",
-            "Secular Warming ΔT (°C)": f"{delta_temp:+.2f}",
-            "YoY Temp Volatility σ (°C)": f"{yoy_temp_sd:.2f}",
-            "Signal/Noise (SNR)": f"{snr_temp:.2f}",
-            "Mean Precip (mm)": f"{group['precip_annual_total'].mean():.1f}",
-            "Precip SD (mm)": f"{group['precip_annual_total'].std():.1f}",
-            "Secular ΔP (mm)": f"{delta_precip:+.1f}",
+            "Mean Temp (°C)": f"{mean_t:.2f}",
+            "Temp SD (°C)": f"{std_t:.2f}",
+            "Secular ΔT (°C)": f"{delta_t:+.2f}",
+            "OLS Trend (°C/dec)": f"{trend_c_dec:+.3f} (±{se_trend:.3f})",
+            "Detrended SD σ (°C)": f"{detrended_sd:.2f}",
+            "SNR (ΔT/σ)": f"{snr_detrended:.2f}",
+            "Mean Precip (mm)": f"{mean_p:.1f}",
+            "Precip SD (mm)": f"{std_p:.1f}",
+            "Secular ΔP (mm)": f"{delta_p:+.1f}",
+            "Secular ΔP (%)": f"{pct_delta_p_60s:+.1f}%",
             "Mean GDPpc Growth (%)": f"{group['gdp_per_capita_growth'].mean():.2f}",
-            "Agri Share GDP (%)": f"{group['agriculture_share_gdp'].mean():.1f}",
-            "N (Years)": len(group)
+            "Agri Share GDP (%)": f"{group['agriculture_share_gdp'].mean():.1f}" if not np.isnan(group['agriculture_share_gdp'].mean()) else "-",
+            "N": len(group)
         })
         
     summary_table = pd.DataFrame(records)
     
-    # Save CSV and Markdown
     csv_path = os.path.join(TABLES_DIR, "table1_summary_statistics.csv")
     md_path = os.path.join(TABLES_DIR, "table1_summary_statistics.md")
     
     summary_table.to_csv(csv_path, index=False)
     
     with open(md_path, "w", encoding="utf-8") as f:
-        f.write("# Table 1: Summary Statistics by Country (1960–2023)\n\n")
-        f.write("*Notes: Mean Temp and Mean Precip derived from ERA5 surface reanalysis. Secular change ΔT and ΔP represent differences between the 2014–2023 and 1960–1969 decadal means. YoY Volatility σ is the sample standard deviation of first-differenced annual values. Economic variables sourced from World Bank WDI (1960–2023).*\n\n")
+        f.write("# Table 1: Climatological and Macroeconomic Summary Statistics (1960–2023)\n\n")
+        f.write("*Notes: Mean Temp and Mean Precip derived from ECMWF ERA5 surface reanalysis (1960–2023). Secular warming ΔT and secular precipitation ΔP measure the difference between the 2014–2023 and 1960–1969 decadal means. OLS Trend reports the linear warming rate in °C/decade with Newey-West HAC standard errors in parentheses (maxlags=3). Detrended SD σ is the sample standard deviation of residuals from the country linear trend. SNR is ΔT / σ. Secular ΔP (%) uses the 1960–1969 baseline as denominator. Economic variables sourced from World Bank WDI.*\n\n")
         f.write(summary_table.to_markdown(index=False))
         
     print(f"--> Saved Table 1 to {csv_path} and {md_path}")
     return summary_table
 
 # ------------------------------------------------------------------------------
-# 3. ECONOMETRIC PANEL REGRESSIONS (TABLE 2)
+# 2. TABLE 2: ECONOMETRIC PANEL REGRESSIONS
 # ------------------------------------------------------------------------------
 def run_econometric_regressions(panel_df):
-    print("\nEstimating Econometric Panel Regressions (Section 5 of Paper)...")
+    print("\nEstimating Econometric Panel Regressions (Table 2)...")
     
-    # Filter dataset where core estimation variables are non-missing
     df_reg = panel_df.dropna(subset=["gdp_per_capita_growth", "temp_annual_anomaly", "precip_annual_anomaly"]).copy()
-    
-    # Scale precipitation anomaly to 100mm units for readable coefficient interpretation
-    df_reg["precip_anom_100mm"] = df_reg["precip_annual_anomaly"] / 100.0
-    
-    # --------------------------------------------------------------------------
-    # MODEL 1: Pooled OLS
-    # --------------------------------------------------------------------------
-    mod1 = smf.ols("gdp_per_capita_growth ~ temp_annual_anomaly + precip_anom_100mm", data=df_reg)
-    res1 = mod1.fit(cov_type="cluster", cov_kwds={"groups": df_reg["country_code"]})
+    df_reg["precip_100"] = df_reg["precip_annual_anomaly"] / 100.0
+    G = df_reg["country_code"].nunique()
+    df_c = G - 1  # 7 degrees of freedom
     
     # --------------------------------------------------------------------------
-    # MODEL 2: Country Fixed Effects (Within Estimator)
+    # Demeaning & Within-R2 Computation
     # --------------------------------------------------------------------------
-    mod2 = smf.ols("gdp_per_capita_growth ~ temp_annual_anomaly + precip_anom_100mm + C(country_code)", data=df_reg)
-    res2 = mod2.fit(cov_type="cluster", cov_kwds={"groups": df_reg["country_code"]})
+    # Country FE Demeaning
+    y_cm = df_reg.groupby("country_code")["gdp_per_capita_growth"].transform("mean")
+    t_cm = df_reg.groupby("country_code")["temp_annual_anomaly"].transform("mean")
+    p_cm = df_reg.groupby("country_code")["precip_100"].transform("mean")
     
-    # --------------------------------------------------------------------------
-    # MODEL 3: Two-Way Fixed Effects (Country FE + Year FE) - Preferred Specification
-    # --------------------------------------------------------------------------
-    mod3 = smf.ols("gdp_per_capita_growth ~ temp_annual_anomaly + precip_anom_100mm + C(country_code) + C(year)", data=df_reg)
-    res3 = mod3.fit(cov_type="cluster", cov_kwds={"groups": df_reg["country_code"]})
+    df_reg["y_c"] = df_reg["gdp_per_capita_growth"] - y_cm
+    df_reg["t_c"] = df_reg["temp_annual_anomaly"] - t_cm
+    df_reg["p_c"] = df_reg["precip_100"] - p_cm
     
-    # --------------------------------------------------------------------------
-    # MODEL 4: Agricultural Share of GDP Response (TWFE)
-    # --------------------------------------------------------------------------
+    res_within_c = smf.ols("y_c ~ t_c + p_c - 1", data=df_reg).fit()
+    tss_c = ((df_reg["y_c"] - df_reg["y_c"].mean())**2).sum()
+    within_r2_m2 = 1.0 - (res_within_c.resid**2).sum() / tss_c
+    
+    # Two-Way FE Demeaning
+    y_tw = df_reg["gdp_per_capita_growth"] - y_cm - df_reg.groupby("year")["gdp_per_capita_growth"].transform("mean") + df_reg["gdp_per_capita_growth"].mean()
+    t_tw = df_reg["temp_annual_anomaly"] - t_cm - df_reg.groupby("year")["temp_annual_anomaly"].transform("mean") + df_reg["temp_annual_anomaly"].mean()
+    p_tw = df_reg["precip_100"] - p_cm - df_reg.groupby("year")["precip_100"].transform("mean") + df_reg["precip_100"].mean()
+    
+    df_reg["y_tw"] = y_tw
+    df_reg["t_tw"] = t_tw
+    df_reg["p_tw"] = p_tw
+    
+    res_within_tw = smf.ols("y_tw ~ t_tw + p_tw - 1", data=df_reg).fit()
+    tss_tw = ((df_reg["y_tw"] - df_reg["y_tw"].mean())**2).sum()
+    within_r2_m3 = 1.0 - (res_within_tw.resid**2).sum() / tss_tw
+    
+    # Model 1: Pooled OLS
+    m1 = smf.ols("gdp_per_capita_growth ~ temp_annual_anomaly + precip_100", data=df_reg).fit(cov_type="cluster", cov_kwds={"groups": df_reg["country_code"]})
+    
+    # Model 2: Country FE
+    m2 = smf.ols("gdp_per_capita_growth ~ temp_annual_anomaly + precip_100 + C(country_code)", data=df_reg).fit(cov_type="cluster", cov_kwds={"groups": df_reg["country_code"]})
+    
+    # Model 3: Two-Way FE
+    m3 = smf.ols("gdp_per_capita_growth ~ temp_annual_anomaly + precip_100 + C(country_code) + C(year)", data=df_reg).fit(cov_type="cluster", cov_kwds={"groups": df_reg["country_code"]})
+    
+    # Model 4: Agricultural Share of GDP TWFE
     df_agri = df_reg.dropna(subset=["agriculture_share_gdp"]).copy()
-    mod4 = smf.ols("agriculture_share_gdp ~ temp_annual_anomaly + precip_anom_100mm + C(country_code) + C(year)", data=df_agri)
-    res4 = mod4.fit(cov_type="cluster", cov_kwds={"groups": df_agri["country_code"]})
+    m4 = smf.ols("agriculture_share_gdp ~ temp_annual_anomaly + precip_100 + C(country_code) + C(year)", data=df_agri).fit(cov_type="cluster", cov_kwds={"groups": df_agri["country_code"]})
     
-    # --------------------------------------------------------------------------
-    # ASSEMBLE 4 CORE DEFENSIVE MODELS FOR TABLE 2
-    # --------------------------------------------------------------------------
+    # Model 5: Crop Production Growth TWFE (Direct physical yield response)
+    panel_crop = panel_df.sort_values(["country_code", "year"]).copy()
+    panel_crop["crop_growth"] = panel_crop.groupby("country_code")["crop_production_index"].pct_change() * 100.0
+    panel_crop["precip_100"] = panel_crop["precip_annual_anomaly"] / 100.0
+    df_crop = panel_crop.dropna(subset=["crop_growth", "temp_annual_anomaly", "precip_100"]).copy()
+    m5 = smf.ols("crop_growth ~ temp_annual_anomaly + precip_100 + C(country_code) + C(year)", data=df_crop).fit(cov_type="cluster", cov_kwds={"groups": df_crop["country_code"]})
+    
+    # Build Table 2
     models = [
-        ("(1) Pooled OLS", res1, "GDP pc Growth"),
-        ("(2) Country FE", res2, "GDP pc Growth"),
-        ("(3) Two-Way FE (Preferred)", res3, "GDP pc Growth"),
-        ("(4) Agri Share TWFE", res4, "Agri Share (% GDP)")
+        ("(1) Pooled OLS", m1, "GDPpc Growth", m1.rsquared, None),
+        ("(2) Country FE", m2, "GDPpc Growth", m2.rsquared, within_r2_m2),
+        ("(3) Two-Way FE (Preferred)", m3, "GDPpc Growth", m3.rsquared, within_r2_m3),
+        ("(4) Agri Share TWFE", m4, "Agri Share %", m4.rsquared, None),
+        ("(5) Crop Growth TWFE", m5, "Crop Growth %", m5.rsquared, None)
     ]
     
-    reg_summary_data = []
+    reg_rows = []
     
-    variables_to_report = [
-        ("temp_annual_anomaly", "Temperature Anomaly (°C)"),
-        ("precip_anom_100mm", "Precipitation Anomaly (100mm)")
-    ]
+    # Temperature row
+    row_t = {"Variable": "Temperature Anomaly (°C)"}
+    row_t_se = {"Variable": "  (Cluster SE)"}
+    row_t_ci = {"Variable": "  [95% CI with t(7)]"}
+    row_t_pval = {"Variable": "  p-value (t(7))"}
     
-    for var_key, var_label in variables_to_report:
-        row_coef = {"Variable": var_label}
-        row_se = {"Variable": ""}
-        for col_name, model_res, dep in models:
-            if var_key in model_res.params:
-                coef = model_res.params[var_key]
-                se = model_res.bse[var_key]
-                pval = model_res.pvalues[var_key]
-                stars = "***" if pval < 0.01 else ("**" if pval < 0.05 else ("*" if pval < 0.1 else ""))
-                row_coef[col_name] = f"{coef:.4f}{stars}"
-                row_se[col_name] = f"({se:.4f})"
-            else:
-                row_coef[col_name] = "-"
-                row_se[col_name] = ""
-        reg_summary_data.append(row_coef)
-        reg_summary_data.append(row_se)
+    for label, m, dep, r2, wr2 in models:
+        b = m.params["temp_annual_anomaly"]
+        se = m.bse["temp_annual_anomaly"]
+        t_stat = b / se
+        p_val = 2 * (1 - stats.t.cdf(abs(t_stat), df=df_c))
+        ci_l = b - stats.t.ppf(0.975, df=df_c) * se
+        ci_h = b + stats.t.ppf(0.975, df=df_c) * se
+        stars = "***" if p_val < 0.01 else ("**" if p_val < 0.05 else ("*" if p_val < 0.1 else ""))
         
-    # Metadata rows
-    row_fe_c = {"Variable": "Country Fixed Effects", "(1) Pooled OLS": "No", "(2) Country FE": "Yes", "(3) Two-Way FE (Preferred)": "Yes", "(4) Agri Share TWFE": "Yes"}
-    row_fe_y = {"Variable": "Year Fixed Effects", "(1) Pooled OLS": "No", "(2) Country FE": "No", "(3) Two-Way FE (Preferred)": "Yes", "(4) Agri Share TWFE": "Yes"}
-    row_clust = {"Variable": "Clustered SEs (Country)", "(1) Pooled OLS": "Yes", "(2) Country FE": "Yes", "(3) Two-Way FE (Preferred)": "Yes", "(4) Agri Share TWFE": "Yes"}
-    row_n = {"Variable": "Observations (N)", "(1) Pooled OLS": f"{int(res1.nobs)}", "(2) Country FE": f"{int(res2.nobs)}", "(3) Two-Way FE (Preferred)": f"{int(res3.nobs)}", "(4) Agri Share TWFE": f"{int(res4.nobs)}"}
-    row_r2 = {"Variable": "R-squared", "(1) Pooled OLS": f"{res1.rsquared:.4f}", "(2) Country FE": f"{res2.rsquared:.4f}", "(3) Two-Way FE (Preferred)": f"{res3.rsquared:.4f}", "(4) Agri Share TWFE": f"{res4.rsquared:.4f}"}
-    
-    for r in [row_fe_c, row_fe_y, row_clust, row_n, row_r2]:
-        reg_summary_data.append(r)
+        row_t[label] = f"{b:.4f}{stars}"
+        row_t_se[label] = f"({se:.4f})"
+        row_t_ci[label] = f"[{ci_l:.4f}, {ci_h:.4f}]"
+        row_t_pval[label] = f"{p_val:.4f}"
         
-    reg_table = pd.DataFrame(reg_summary_data)
+    reg_rows.extend([row_t, row_t_se, row_t_ci, row_t_pval])
+    
+    # Precipitation row
+    row_p = {"Variable": "Precipitation Anomaly (100mm)"}
+    row_p_se = {"Variable": "  (Cluster SE)"}
+    row_p_pval = {"Variable": "  p-value (t(7))"}
+    
+    for label, m, dep, r2, wr2 in models:
+        b = m.params["precip_100"]
+        se = m.bse["precip_100"]
+        t_stat = b / se
+        p_val = 2 * (1 - stats.t.cdf(abs(t_stat), df=df_c))
+        stars = "***" if p_val < 0.01 else ("**" if p_val < 0.05 else ("*" if p_val < 0.1 else ""))
+        
+        row_p[label] = f"{b:.4f}{stars}"
+        row_p_se[label] = f"({se:.4f})"
+        row_p_pval[label] = f"{p_val:.4f}"
+        
+    reg_rows.extend([row_p, row_p_se, row_p_pval])
+    
+    # Diagnostics
+    reg_rows.append({"Variable": "Country Fixed Effects", "(1) Pooled OLS": "No", "(2) Country FE": "Yes", "(3) Two-Way FE (Preferred)": "Yes", "(4) Agri Share TWFE": "Yes", "(5) Crop Growth TWFE": "Yes"})
+    reg_rows.append({"Variable": "Year Fixed Effects", "(1) Pooled OLS": "No", "(2) Country FE": "No", "(3) Two-Way FE (Preferred)": "Yes", "(4) Agri Share TWFE": "Yes", "(5) Crop Growth TWFE": "Yes"})
+    reg_rows.append({"Variable": "Clustered SEs (Country)", "(1) Pooled OLS": "Yes (G=8)", "(2) Country FE": "Yes (G=8)", "(3) Two-Way FE (Preferred)": "Yes (G=8)", "(4) Agri Share TWFE": "Yes (G=8)", "(5) Crop Growth TWFE": "Yes (G=8)"})
+    reg_rows.append({"Variable": "Observations (N)", "(1) Pooled OLS": f"{int(m1.nobs)}", "(2) Country FE": f"{int(m2.nobs)}", "(3) Two-Way FE (Preferred)": f"{int(m3.nobs)}", "(4) Agri Share TWFE": f"{int(m4.nobs)}", "(5) Crop Growth TWFE": f"{int(m5.nobs)}"})
+    reg_rows.append({"Variable": "R-squared (overall)", "(1) Pooled OLS": f"{m1.rsquared:.4f}", "(2) Country FE": f"{m2.rsquared:.4f}", "(3) Two-Way FE (Preferred)": f"{m3.rsquared:.4f}", "(4) Agri Share TWFE": f"{m4.rsquared:.4f}", "(5) Crop Growth TWFE": f"{m5.rsquared:.4f}"})
+    reg_rows.append({"Variable": "Within R-squared", "(1) Pooled OLS": "-", "(2) Country FE": f"{within_r2_m2:.4f}", "(3) Two-Way FE (Preferred)": f"{within_r2_m3:.4f}", "(4) Agri Share TWFE": "-", "(5) Crop Growth TWFE": "-"})
+    
+    reg_table = pd.DataFrame(reg_rows)
     
     csv_path = os.path.join(TABLES_DIR, "table2_regression_results.csv")
     md_path = os.path.join(TABLES_DIR, "table2_regression_results.md")
-    
     reg_table.to_csv(csv_path, index=False)
     
     with open(md_path, "w", encoding="utf-8") as f:
         f.write("# Table 2: Econometric Panel Regression Results\n\n")
-        f.write("*Standard errors clustered at the country level reported in parentheses. * p < 0.10, ** p < 0.05, *** p < 0.01. Dependent variable in Columns (1)-(3) is Annual Growth of Real GDP per Capita (%). Dependent variable in Column (4) is Agriculture, Forestry, and Fishing Value Added as a % of GDP. Sample spans 1960–2023 across 8 countries (1960 dropped because growth is first-differenced; Column 4 restricted by historical WDI agricultural data availability).*\n\n")
+        f.write("*Standard errors clustered at the country level reported in parentheses. Inference conducted using small-sample cluster critical values from t(G-1) = t(7). * p < 0.10, ** p < 0.05, *** p < 0.01. Dependent variable in Columns (1)–(3) is Annual Real GDP per Capita Growth (%). Dependent variable in Column (4) is Agriculture Value Added as a % of GDP. Dependent variable in Column (5) is Crop Production Annual Growth (%). 95% Confidence Intervals reported in brackets based on t(7). Sample covers 1960–2023 across 8 countries (1960 dropped because growth is first-differenced; Column 4 restricted by historical WDI reporting inception).*\n\n")
         f.write(reg_table.to_markdown(index=False))
         
     print(f"--> Saved Table 2 to {csv_path} and {md_path}")
@@ -238,43 +245,100 @@ def run_econometric_regressions(panel_df):
     # Save coefficient dictionary for forest plot
     coefs_dict = {
         "models": ["Pooled OLS", "Country FE", "Two-Way FE"],
-        "temp_coef": [res1.params["temp_annual_anomaly"], res2.params["temp_annual_anomaly"], res3.params["temp_annual_anomaly"]],
-        "temp_se": [res1.bse["temp_annual_anomaly"], res2.bse["temp_annual_anomaly"], res3.bse["temp_annual_anomaly"]],
-        "precip_coef": [res1.params["precip_anom_100mm"], res2.params["precip_anom_100mm"], res3.params["precip_anom_100mm"]],
-        "precip_se": [res1.bse["precip_anom_100mm"], res2.bse["precip_anom_100mm"], res3.bse["precip_anom_100mm"]]
+        "temp_coef": [m1.params["temp_annual_anomaly"], m2.params["temp_annual_anomaly"], m3.params["temp_annual_anomaly"]],
+        "temp_se": [m1.bse["temp_annual_anomaly"], m2.bse["temp_annual_anomaly"], m3.bse["temp_annual_anomaly"]],
+        "temp_ci_low": [m1.params["temp_annual_anomaly"] - stats.t.ppf(0.975, df=df_c)*m1.bse["temp_annual_anomaly"],
+                        m2.params["temp_annual_anomaly"] - stats.t.ppf(0.975, df=df_c)*m2.bse["temp_annual_anomaly"],
+                        m3.params["temp_annual_anomaly"] - stats.t.ppf(0.975, df=df_c)*m3.bse["temp_annual_anomaly"]],
+        "temp_ci_high": [m1.params["temp_annual_anomaly"] + stats.t.ppf(0.975, df=df_c)*m1.bse["temp_annual_anomaly"],
+                         m2.params["temp_annual_anomaly"] + stats.t.ppf(0.975, df=df_c)*m2.bse["temp_annual_anomaly"],
+                         m3.params["temp_annual_anomaly"] + stats.t.ppf(0.975, df=df_c)*m3.bse["temp_annual_anomaly"]],
+        "precip_coef": [m1.params["precip_100"], m2.params["precip_100"], m3.params["precip_100"]],
+        "precip_se": [m1.bse["precip_100"], m2.bse["precip_100"], m3.bse["precip_100"]]
     }
     pd.DataFrame(coefs_dict).to_csv(os.path.join(TABLES_DIR, "regression_coefficients_for_plot.csv"), index=False)
     
-    return reg_table, res1, res2, res3, res4
+    return reg_table
 
 # ------------------------------------------------------------------------------
-# MAIN EXECUTION & ECONOMETRIC TAKEAWAY REPORT
+# 3. TABLE 3: SHOCK VS NON-SHOCK GROWTH COMPARISON
 # ------------------------------------------------------------------------------
+def generate_shock_growth_table(panel_df):
+    print("\nGenerating Detrended Climate Shock Growth Comparison Table (Table 3)...")
+    
+    detrended_records = []
+    for code, group in panel_df.groupby("country_code"):
+        g = group.sort_values("year").copy()
+        X = sm.add_constant(g["year"])
+        
+        # Temp detrending
+        res_t = sm.OLS(g["temp_annual_mean"], X).fit()
+        g["temp_detrended_z"] = (res_t.resid - res_t.resid.mean()) / res_t.resid.std()
+        
+        # Precip detrending
+        res_p = sm.OLS(g["precip_annual_total"], X).fit()
+        g["precip_detrended_z"] = (res_p.resid - res_p.resid.mean()) / res_p.resid.std()
+        
+        g["shock_heat"] = (g["temp_detrended_z"] > 1.5).astype(int)
+        g["shock_drought"] = (g["precip_detrended_z"] < -1.5).astype(int)
+        detrended_records.append(g)
+        
+    df_det = pd.concat(detrended_records).dropna(subset=["gdp_per_capita_growth"])
+    
+    rows = []
+    # Heat shock
+    g_heat = df_det[df_det["shock_heat"] == 1]["gdp_per_capita_growth"]
+    g_noheat = df_det[df_det["shock_heat"] == 0]["gdp_per_capita_growth"]
+    t_stat_h, p_val_h = stats.ttest_ind(g_heat, g_noheat, equal_var=False)
+    
+    rows.append({
+        "Atmospheric Event": "Detrended Heat Shock (> +1.5 SD)",
+        "Shock Years (N)": int(g_heat.count()),
+        "Mean Growth in Shock (%)": f"{g_heat.mean():.2f}% (±{g_heat.std():.2f})",
+        "Non-Shock Years (N)": int(g_noheat.count()),
+        "Mean Growth in Non-Shock (%)": f"{g_noheat.mean():.2f}% (±{g_noheat.std():.2f})",
+        "Growth Difference (pp)": f"{g_heat.mean() - g_noheat.mean():+.2f}",
+        "Two-Sample t-test p-value": f"{p_val_h:.3f}"
+    })
+    
+    # Drought shock
+    g_drought = df_det[df_det["shock_drought"] == 1]["gdp_per_capita_growth"]
+    g_nodrought = df_det[df_det["shock_drought"] == 0]["gdp_per_capita_growth"]
+    t_stat_d, p_val_d = stats.ttest_ind(g_drought, g_nodrought, equal_var=False)
+    
+    rows.append({
+        "Atmospheric Event": "Detrended Drought Shock (< -1.5 SD)",
+        "Shock Years (N)": int(g_drought.count()),
+        "Mean Growth in Shock (%)": f"{g_drought.mean():.2f}% (±{g_drought.std():.2f})",
+        "Non-Shock Years (N)": int(g_nodrought.count()),
+        "Mean Growth in Non-Shock (%)": f"{g_nodrought.mean():.2f}% (±{g_nodrought.std():.2f})",
+        "Growth Difference (pp)": f"{g_drought.mean() - g_nodrought.mean():+.2f}",
+        "Two-Sample t-test p-value": f"{p_val_d:.3f}"
+    })
+    
+    shock_table = pd.DataFrame(rows)
+    csv_path = os.path.join(TABLES_DIR, "table3_shock_growth_comparison.csv")
+    md_path = os.path.join(TABLES_DIR, "table3_shock_growth_comparison.md")
+    shock_table.to_csv(csv_path, index=False)
+    
+    with open(md_path, "w", encoding="utf-8") as f:
+        f.write("# Table 3: Macroeconomic Growth in Detrended Climate Shock vs. Non-Shock Years (1960–2023)\n\n")
+        f.write("*Notes: Climate shocks are defined strictly on detrended residuals (standardized z-scores relative to country linear time trends). Heat shock defined as detrended temperature z > +1.5; Drought shock defined as detrended precipitation z < -1.5. Welch's two-sample t-test p-values reported.*\n\n")
+        f.write(shock_table.to_markdown(index=False))
+        
+    print(f"--> Saved Table 3 to {csv_path} and {md_path}")
+    return shock_table
+
 if __name__ == "__main__":
     print("="*70)
     print("STARTING ECONOMETRIC ESTIMATION PIPELINE (TRACK 1)")
     print("="*70)
     
     p_df, m_df, s_df = load_data()
-    summary_tab = generate_summary_statistics(p_df)
-    reg_tab, r1, r2, r3, r4 = run_econometric_regressions(p_df)
+    generate_summary_statistics(p_df)
+    run_econometric_regressions(p_df)
+    generate_shock_growth_table(p_df)
     
     print("\n" + "="*70)
-    print("ECONOMETRIC ESTIMATION COMPLETED SUCCESSFULLY!")
-    print("="*70)
-    print("\nCORE ECONOMETRIC FINDINGS & INTELLECTUAL TAKEAWAY:")
-    print("-" * 70)
-    print(f"1. Model (1) Pooled OLS:    beta = {r1.params['temp_annual_anomaly']:.4f}*** (SE = {r1.bse['temp_annual_anomaly']:.4f}, p = {r1.pvalues['temp_annual_anomaly']:.4f})")
-    print(f"2. Model (2) Country FE:    beta = {r2.params['temp_annual_anomaly']:.4f}*** (SE = {r2.bse['temp_annual_anomaly']:.4f}, p = {r2.pvalues['temp_annual_anomaly']:.4f})")
-    print(f"3. Model (3) Two-Way FE:    beta = {r3.params['temp_annual_anomaly']:.4f}    (SE = {r3.bse['temp_annual_anomaly']:.4f}, p = {r3.pvalues['temp_annual_anomaly']:.4f})  <-- PREFERRED")
-    print("-" * 70)
-    print("WHY DO MODELS (2) AND (3) DIVERGE SO DRAMATICALLY?")
-    print("-> Model (2) is contaminated by a multi-decadal SPURIOUS CO-TREND:")
-    print("   Post-WWII growth naturally slowed from the 1960s 'Trente Glorieuses' to lower")
-    print("   trend growth in the 1980s-2000s, exactly as global temperatures were rising.")
-    print("   Country FE mistakes this chronological co-occurrence for a causal penalty.")
-    print("-> Model (3) Two-Way FE absorbs global secular trends using Year Dummies (gamma_t).")
-    print(f"   The estimated effect drops to {r3.params['temp_annual_anomaly']:.4f} (p = {r3.pvalues['temp_annual_anomaly']:.2f}, statistically indistinguishable from zero).")
-    print("-> CONCLUSION: Short-run annual temperature anomalies do NOT have a measurable")
-    print("   impact on aggregate annual GDP per capita growth in this diversified sample.")
+    print("ALL ECONOMETRIC TABLES GENERATED IN paper/tables/!")
     print("="*70)

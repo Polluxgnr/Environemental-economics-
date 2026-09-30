@@ -299,16 +299,19 @@ def plot_fig4_seasonal_asymmetry(seasonal_df):
     ax.set_ylabel("Secular Decadal Warming ΔT (°C)", fontsize=11, fontweight="bold")
     ax.set_xlabel("Country", fontsize=11, fontweight="bold")
     ax.set_title("Figure 4: Seasonal Asymmetry of Climate Change: Are Seasons Moving Evenly?\n"
-                 "Step (4, Option A): In Western and Mediterranean Europe (France, Spain), summer warming (+2.2°C to +2.4°C) has outpaced winter warming by 45% to 60%.",
-                 fontsize=12, fontweight="bold", pad=12)
+                 "Step (4, Option A): Summer warming outpaces winter in France (+2.35°C vs +2.08°C, +13.0%) and Spain (+2.04°C vs +1.33°C, +53.4%),\n"
+                 "while winter warming dominates in Germany (+3.38°C vs +2.48°C) and the United States (+2.54°C vs +0.74°C).",
+                 fontsize=11.5, fontweight="bold", pad=12)
     ax.legend(title="Meteorological Season", title_fontsize=10, loc="upper right", frameon=True)
     plt.xticks(rotation=20, fontweight="bold", fontsize=10)
     
     # Highlight annotation for France & Spain
-    ax.text(0.02, 0.85, "European Summer Amplification:\n"
-                        "In France and Spain, summer warming exceeds winter warming by ~50%,\n"
-                        "accelerating crop evapotranspiration during the critical dry season.",
-            transform=ax.transAxes, fontsize=9.5, bbox=dict(boxstyle="round,pad=0.5", fc="#fee0d2", ec="#de2d26", alpha=0.9))
+    ax.text(0.02, 0.82, "Summer vs. Winter Warming Asymmetry:\n"
+                        "• Spain: Summer +2.04°C vs Winter +1.33°C (+53.4% faster)\n"
+                        "• France: Summer +2.35°C vs Winter +2.08°C (+13.0% faster)\n"
+                        "• Germany: Winter +3.38°C vs Summer +2.48°C (winter leads)\n"
+                        "• USA: Winter +2.54°C vs Summer +0.74°C (winter leads)",
+            transform=ax.transAxes, fontsize=9.0, bbox=dict(boxstyle="round,pad=0.5", fc="#fee0d2", ec="#de2d26", alpha=0.9))
             
     plt.tight_layout()
     out_path = os.path.join(FIG_DIR, "fig4_seasonal_asymmetry.png")
@@ -388,12 +391,24 @@ def plot_fig6_econometric_coefficients():
     df_coef = pd.read_csv(coef_path)
     fig, ax = plt.subplots(figsize=(10, 5))
     y_pos = np.arange(len(df_coef))
-    ax.errorbar(df_coef["temp_coef"], y_pos, xerr=1.96*df_coef["temp_se"], fmt='o', color='#d73027', ecolor='#d73027', elinewidth=2, capsize=6, markersize=8)
+    
+    # Calculate asymmetric error bar lengths from exact t(7) CIs
+    xerr_low = df_coef["temp_coef"] - df_coef["temp_ci_low"]
+    xerr_high = df_coef["temp_ci_high"] - df_coef["temp_coef"]
+    ax.errorbar(df_coef["temp_coef"], y_pos, xerr=[xerr_low, xerr_high], fmt='o', color='#d73027', ecolor='#d73027', elinewidth=2, capsize=6, markersize=8)
     ax.axvline(0, color='black', ls='--', lw=1)
     ax.set_yticks(y_pos)
     ax.set_yticklabels(df_coef["models"], fontsize=10.5, fontweight="bold")
-    ax.set_xlabel("Estimated Temperature Coefficient (pp growth per +1°C)", fontsize=10.5, fontweight="bold")
-    ax.set_title("Supplementary Fig 6: Econometric Estimates of Annual Temperature Anomaly on Growth", fontsize=11, fontweight="bold")
+    ax.set_xlabel("Estimated Temperature Coefficient (pp GDPpc growth per +1°C)", fontsize=10.5, fontweight="bold")
+    ax.set_title("Supplementary Fig 6: Econometric Estimates of Annual Temperature Anomaly on Growth\n"
+                 "Error bars represent exact 95% CIs with small-sample cluster t(7) critical value = 2.365 (Cameron et al. 2008)",
+                 fontsize=11, fontweight="bold")
+    
+    # Add annotation for uninformative null
+    ax.text(0.55, 0.25, "TWFE 95% CI: [-1.05, +0.98] pp/°C\n"
+                         "Wide interval encompasses naive estimate (-0.49).\n"
+                         "Demonstrates an uninformative null due to cluster sample size (G=8).",
+            transform=ax.transAxes, fontsize=9.0, bbox=dict(boxstyle="round,pad=0.5", fc="#f7f7f7", ec="gray", alpha=0.9))
     plt.tight_layout()
     plt.savefig(os.path.join(FIG_DIR, "fig6_econometric_panel_coefficients.png"))
     plt.close()
