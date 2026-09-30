@@ -1,7 +1,7 @@
 """
 ================================================================================
 TRACK 1: TEMPERATURE AND PRECIPITATION RECORDS
-SCRIPT 03: ECONOMETRIC MODELING & EMPIRICAL ESTIMATION (scripts/run_econometrics.py)
+SCRIPT 03: ECONOMETRIC MODELING & EMPIRICAL ESTIMATION (scripts/03_run_econometrics.py)
 ================================================================================
 
 COURSE: Environmental Economics — BSc AIDAMS, T1 2026–2027

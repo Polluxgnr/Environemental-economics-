@@ -1,7 +1,7 @@
 """
 ================================================================================
 TRACK 1: TEMPERATURE AND PRECIPITATION RECORDS
-SCRIPT 01: DATA ACQUISITION PIPELINE (scripts/download_data.py)
+SCRIPT 01: DATA ACQUISITION PIPELINE (scripts/01_download_data.py)
 ================================================================================
 
 COURSE: Environmental Economics — BSc AIDAMS, T1 2026–2027

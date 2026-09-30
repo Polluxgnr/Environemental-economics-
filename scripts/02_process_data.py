@@ -1,7 +1,7 @@
 """
 ================================================================================
 TRACK 1: TEMPERATURE AND PRECIPITATION RECORDS
-SCRIPT 02: DATA PROCESSING, ANOMALY CALCULATION & MERGING (scripts/process_data.py)
+SCRIPT 02: DATA PROCESSING, ANOMALY CALCULATION & MERGING (scripts/02_process_data.py)
 ================================================================================
 
 COURSE: Environmental Economics — BSc AIDAMS, T1 2026–2027

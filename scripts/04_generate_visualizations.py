@@ -1,7 +1,7 @@
 """
 ================================================================================
 TRACK 1: TEMPERATURE AND PRECIPITATION RECORDS
-SCRIPT 04: PUBLICATION-GRADE VISUALIZATIONS (scripts/generate_visualizations.py)
+SCRIPT 04: PUBLICATION-GRADE VISUALIZATIONS (scripts/04_generate_visualizations.py)
 ================================================================================
 
 COURSE: Environmental Economics — BSc AIDAMS, T1 2026–2027

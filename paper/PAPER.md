@@ -266,7 +266,7 @@ The contrast between Columns (2) and (3) provides an instructive econometric les
 
 ### Declaration on AI Tool Usage:
 - **Tools Used:** Antigravity AI coding assistant (Google DeepMind agentic framework).
-- **Role of AI:** Assisted with writing repetitive Python pipeline code (`download_data.py`, `process_data.py`, `run_econometrics.py`, `generate_visualizations.py`), formatting Markdown tables, and structuring LaTeX formulas.
+- **Role of AI:** Assisted with writing repetitive Python pipeline code (`01_download_data.py`, `02_process_data.py`, `03_run_econometrics.py`, `04_generate_visualizations.py`), formatting Markdown tables, and structuring LaTeX formulas.
 - **Human Intellectual Oversight:** The student authors formulated the research questions, chose the country sample and centroid coordinates, directed the econometric modeling, discovered and resolved the spurious correlation in the Country FE specification, verified all empirical numbers against the raw data, and wrote the final text.
 
 ### Code Reproducibility:
@@ -279,9 +279,9 @@ cd "Environemental economics track 1"
 pip install -r requirements.txt
 
 # 3. Run complete empirical pipeline
-python scripts/download_data.py
-python scripts/process_data.py
-python scripts/run_econometrics.py
-python scripts/generate_visualizations.py
+python scripts/01_download_data.py
+python scripts/02_process_data.py
+python scripts/03_run_econometrics.py
+python scripts/04_generate_visualizations.py
 ```
 Output files are generated in `data/processed/`, `figures/`, and `paper/tables/`.
