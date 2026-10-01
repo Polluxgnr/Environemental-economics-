@@ -20,6 +20,7 @@
    - [2.7 Representative Centroid Strategy & Köppen-Geiger Classifications](#27-representative-centroid-strategy--k%C3%B6ppen-geiger-classifications)
    - [2.8 Baseline Choice (1961–1990) & Note on Absolute Values vs. Anomalies](#28-baseline-choice-19611990--note-on-absolute-values-vs-anomalies)
    - [2.9 Transparent Sample Size Accounting (N = 512, 504, 496, 373)](#29-transparent-sample-size-accounting-n--512-504-496-373)
+   - [2.10 Glossary of Key Technical Terms & Methodological Concepts](#210-glossary-of-key-technical-terms--methodological-concepts)
 3. [Empirical Audit & Discrepancy Log](#3-empirical-audit--discrepancy-log)
    - [3.1 Diagnostic Problem-by-Problem Audit](#31-diagnostic-problem-by-problem-audit)
    - [3.2 The Germany vs. Spain Precipitation Coincidence (-97mm)](#32-the-germany-vs-spain-precipitation-coincidence--97mm)
@@ -239,6 +240,25 @@ Rather than sampling unpopulated deserts or tundra, centroids were placed in eac
 
 ---
 
+### 2.10 Glossary of Key Technical Terms & Methodological Concepts
+
+To ensure full transparency and enable any student to defend the methodology with confidence, here is a concise explanation of every technical term used throughout this research:
+
+1. **ECMWF (European Centre for Medium-Range Weather Forecasts):** An independent intergovernmental organization supported by 35 nations, recognized as the world leader in global numerical weather prediction and climate modelling.
+2. **ERA5 Reanalysis:** ECMWF's fifth-generation atmospheric reanalysis dataset. Rather than relying on weather stations with missing days and station moves, ERA5 blends fundamental atmospheric physics equations with billions of historical sensor observations (satellites, weather balloons, oceanic buoys, aircraft, and surface stations) to reconstruct the planet's atmospheric history on an unbroken 4D grid at $0.25^\circ \times 0.25^\circ$ resolution (~31 km) from 1940 to the present.
+3. **4D-Var Data Assimilation:** Four-Dimensional Variational data assimilation. The continuous optimization algorithm used by ECMWF. It computes the physically optimal atmospheric state across a 12-hour continuous time window by minimizing the error between physical laws (fluid dynamics, thermodynamics) and incoming sensor observations across space and time.
+4. **Köppen-Geiger Climate Classification:** The standard empirical climate taxonomy developed by Wladimir Köppen and Rudolf Geiger. It categorizes world regions into five primary vegetation-climate zones (A: Tropical, B: Arid, C: Temperate, D: Continental, E: Polar) based on monthly temperature and precipitation thresholds.
+5. **WMO Baseline (1961–1990):** The World Meteorological Organization's standard 30-year reference normal. We chose 1961–1990 because it predates the accelerated greenhouse warming of recent decades, avoiding "shifting baseline syndrome" (where using a modern 1991–2020 baseline makes severe heatwaves appear artificially mild).
+6. **Signal-to-Noise Ratio (SNR = $\Delta T / \sigma$):** A dimensionless metric that divides the secular warming signal ($\Delta T$, difference between 2014–2023 and 1960–1969 decadal means) by natural interannual weather noise ($\sigma$, detrended standard deviation of residuals). When $\text{SNR} > 1.0$, the warming signal has decisively broken out of natural weather volatility.
+7. **HAC Newey-West Standard Errors:** Heteroskedasticity and Autocorrelation Consistent standard errors. Because annual weather series exhibit multi-year persistence (autocorrelation) and unequal variance (heteroskedasticity), ordinary OLS standard errors underestimate true uncertainty. Newey-West standard errors (with 3 lags) correct this bias.
+8. **Fixed Effects (FE) / Within Estimator:** A panel regression method that demeans all variables relative to each country's time-series mean ($\tilde{y}_{it} = y_{it} - \bar{y}_i$). This completely purges all unobserved, time-invariant country-specific characteristics (e.g., geography, baseline climate, topography, distance to the equator, historical legal systems).
+9. **Two-Way Fixed Effects (TWFE):** Controls for both Country Fixed Effects ($\alpha_i$) and Year Fixed Effects ($\gamma_t$). Year fixed effects absorb all global macro shocks (such as the 1973/1979 oil crises, the 2008 financial crash, and COVID-19) as well as global secular trends (such as post-WWII productivity slowdowns and global greenhouse warming trends) common to all countries in year $t$.
+10. **Within-$R^2$:** The proportion of variance explained *strictly within* countries over time by the climate variables, after removing the variance explained by the country and year dummy fixed effects. Standard software often reports an overall $R^2$ that is artificially inflated by the fixed effect intercept dummies.
+11. **Uninformative Null:** A regression result with a non-significant $p$-value ($p > 0.10$) whose confidence interval is broad enough to contain economically meaningful positive and negative effects. It reflects insufficient statistical power (here, $G = 8$ countries) rather than affirmative evidence that climate change has zero economic impact.
+12. **Small-Sample Cluster Inference ($t(G-1) = t(7)$):** When clustering standard errors by country with few clusters ($G = 8$), the standard normal distribution ($z = 1.96$) severely understates estimation uncertainty and yields false positive rates up to 20%. Cameron, Gelbach, & Miller (2008) show that one must use critical values from the Student's $t$ distribution with $G - 1 = 7$ degrees of freedom ($t_{\text{crit}} = 2.365$ at the 5% level).
+
+---
+
 ## 3. Empirical Audit & Discrepancy Log
 
 ### 3.1 Diagnostic Problem-by-Problem Audit
@@ -256,7 +276,7 @@ Following peer review, an exhaustive audit was performed across all scripts, tab
 | **Two-Way FE Null Interpretation** | Interpreted as affirmative evidence that diversified economies are "resilient". | **TWFE Estimate:** $\hat{\beta} = -0.0325$, $\text{SE} = 0.4301$.<br>**$95\%\text{ CI} = [-1.0496, +0.9847]$**. | The 95% CI is wide and encompasses the naive estimate of $-0.49$. Reported honestly as an **uninformative null**, not proof of zero impact. |
 | **Spurious Co-Trend Hypothesis** | Asserted theoretically without an empirical test. | **Country Trends:** $\beta = +0.1848$ ($p = 0.43$).<br>**Decade FE:** $\beta = -0.2200$ ($p = 0.47$). | Confirmed empirically: controlling for secular time trends directly eliminates the naive negative correlation. |
 | **Climate Shock Definition** | Fixed $1.5\sigma$ threshold on raw temperature selected mostly recent warmed years. | **Detrended Shocks:** Defined on residuals after removing country linear trends. | Heat shocks ($N=30$): mean growth 1.47% vs non-shock 2.19% ($-0.72$ pp penalty, $p=0.34$). Drought shocks ($N=28$): mean growth 2.45% vs 2.13%. Created Table 3. |
-| **Coordinate Formatting** | Double signs in text (e.g., "$-4.02^\circ\text{E}$", "$-89.00^\circ\text{W}$"). | Clean signed decimals: `(39.88, -4.02)`. | Standardized coordinates to clean signed decimals across all prose. |
+| **Coordinate Formatting** | Double signs in text (e.g., "-4.02°E", "-89.00°W"). | Clean signed decimals: `(39.88, -4.02)`. | Standardized coordinates to clean signed decimals across all prose. |
 | **Within-$R^2$ Reporting** | Reported overall $R^2$ including fixed effects (0.044 and 0.330). | **Within-$R^2$:**<br>Model 2 (Country FE): **0.0176** (1.76%).<br>Model 3 (Two-Way FE): **0.0030** (0.30%). | Added explicit within-$R^2$ rows in Table 2. |
 | **Temperature Variance Demeaning** | Untested how much climate variation survives Year FE. | Raw variance: $0.6008$. After TWFE: **$0.3067$ (51.1% remains)**. | Year FE removes 48.9% of temperature variance. The remaining 51.1% is idiosyncratic country weather variation. |
 

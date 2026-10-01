@@ -46,19 +46,29 @@ We extracted daily data from **January 1, 1960 to December 31, 2023** (64 comple
 
 #### Sampling Strategy & Köppen-Geiger Regimes:
 To avoid coastal urban bias, national series were sampled at representative agricultural and geographic centroids capturing the core productive zones of each country:
-1. **France (`FRA`):** Central Agricultural Plains (Berry / Loire Basin: $46.80^\circ\text{N}, 2.60^\circ\text{E}$), Köppen `Cfb` (Temperate oceanic).
-2. **Germany (`DEU`):** Central Basin (Thuringia / Hesse: $51.16^\circ\text{N}, 10.45^\circ\text{E}$), Köppen `Cfb/Dfb` (Temperate continental).
-3. **Spain (`ESP`):** Central Iberian Meseta (Toledo: $39.88^\circ\text{N}, 4.02^\circ\text{W}$), Köppen `Csa` (Mediterranean semi-arid).
-4. **United States (`USA`):** Midwestern Corn Belt (Illinois: $40.00^\circ\text{N}, 89.00^\circ\text{W}$), Köppen `Dfa` (Humid continental).
-5. **Brazil (`BRA`):** Central Cerrado Heartland (Brasília: $15.78^\circ\text{S}, 47.93^\circ\text{W}$), Köppen `Aw` (Tropical savannah).
-6. **India (`IND`):** Central Agricultural Plains (Madhya Pradesh: $23.00^\circ\text{N}, 78.50^\circ\text{E}$), Köppen `Cwa/Aw` (Monsoon subtropical).
-7. **Kenya (`KEN`):** Central Agricultural Highlands (Mount Kenya: $0.50^\circ\text{S}, 37.00^\circ\text{E}$), Köppen `Cfb/Cwb` (Equatorial highland).
-8. **Australia (`AUS`):** Murray-Darling Agricultural Basin ($33.50^\circ\text{S}, 147.00^\circ\text{E}$), Köppen `BSh/Cfa` (Semi-arid steppe).
+1. **France (`FRA`):** Central Agricultural Plains (Berry / Loire Basin: 46.80°N, 2.60°E), Köppen `Cfb` (Temperate oceanic).
+2. **Germany (`DEU`):** Central Basin (Thuringia / Hesse: 51.16°N, 10.45°E), Köppen `Cfb/Dfb` (Temperate continental).
+3. **Spain (`ESP`):** Central Iberian Meseta (Toledo: 39.88°N, 4.02°W), Köppen `Csa` (Mediterranean semi-arid).
+4. **United States (`USA`):** Midwestern Corn Belt (Illinois: 40.00°N, 89.00°W), Köppen `Dfa` (Humid continental).
+5. **Brazil (`BRA`):** Central Cerrado Heartland (Brasília: 15.78°S, 47.93°W), Köppen `Aw` (Tropical savannah).
+6. **India (`IND`):** Central Agricultural Plains (Madhya Pradesh: 23.00°N, 78.50°E), Köppen `Cwa/Aw` (Monsoon subtropical).
+7. **Kenya (`KEN`):** Central Agricultural Highlands (Mount Kenya: 0.50°S, 37.00°E), Köppen `Cfb/Cwb` (Equatorial highland).
+8. **Australia (`AUS`):** Murray-Darling Agricultural Basin (33.50°S, 147.00°E), Köppen `BSh/Cfa` (Semi-arid steppe).
 
 ### 2.2 Climatological Baseline and Monthly Anomalies
-Raw monthly temperatures cannot be pooled across seasons because the annual solar cycle drives within-year variation. In France, the seasonal cycle accounts for 89.5% of total monthly temperature variance. We de-seasonalize monthly records using the **1961–1990 Climatological Reference Baseline** recommended by the World Meteorological Organization (WMO):
-$$\bar{T}_{i,m}^{\text{base}} = \frac{1}{30} \sum_{y=1961}^{1990} T_{i,y,m}, \quad \bar{P}_{i,m}^{\text{base}} = \frac{1}{30} \sum_{y=1961}^{1990} P_{i,y,m}$$
-$$\Delta T_{i,y,m} = T_{i,y,m} - \bar{T}_{i,m}^{\text{base}} \quad (^\circ\text{C}), \qquad \Delta P_{i,y,m} = P_{i,y,m} - \bar{P}_{i,m}^{\text{base}} \quad (\text{mm})$$
+Raw monthly temperatures cannot be pooled across seasons because the annual solar cycle drives within-year variation. In France, the seasonal cycle accounts for 89.5% of total monthly temperature variance. We de-seasonalize monthly records using the **1961–1990 Climatological Reference Baseline** recommended by the World Meteorological Organization (WMO).
+
+For each country $i$, month $m \in \{1, \dots, 12\}$, and year $y$, the baseline climatology is the 30-year calendar-month average:
+
+$$
+\bar{T}_{i,m}^{\text{base}} = \frac{1}{30} \sum_{y=1961}^{1990} T_{i,y,m}, \qquad \bar{P}_{i,m}^{\text{base}} = \frac{1}{30} \sum_{y=1961}^{1990} P_{i,y,m}
+$$
+
+The de-seasonalized monthly anomalies are then obtained by subtraction:
+
+$$
+\Delta T_{i,y,m} = T_{i,y,m} - \bar{T}_{i,m}^{\text{base}} \quad (\text{°C}), \qquad \Delta P_{i,y,m} = P_{i,y,m} - \bar{P}_{i,m}^{\text{base}} \quad (\text{mm})
+$$
 
 *Why 1961–1990 over 1991–2020?* Using a recent baseline (1991–2020) introduces shifting baseline syndrome: because 1991–2020 was already warmed, recent anomalies appear artificially small. Furthermore, in regressions with Country Fixed Effects, changing the baseline is mathematically absorbed by the country intercept ($\alpha_i$) and leaves slope coefficients and standard errors identical.
 
@@ -126,7 +136,7 @@ Atmospheric and economic data were merged deterministically on `(country_code, y
 *Note on Baseline:* The ERA5 series we downloaded are **absolute daily observations** (°C and mm), not pre-computed anomalies. We explicitly constructed the 1961–1990 baseline ourselves following WMO international standards. As shown in Panel B of Figure 2, de-seasonalizing reveals the underlying anthropogenic signal: cool negative anomalies prior to 1985 give way to persistent positive warm anomalies post-1995.
 
 ![Figure 2: Raw Temperature Cycle vs Monthly Anomalies](../figures/fig2_warming_stripes_anomalies.png)
-*Figure 2: Monthly temperature series for France (1960–2023). Panel A shows the raw monthly mean temperature (°C); Panel B shows de-seasonalized monthly anomalies relative to the 1961–1990 baseline norm ($\Delta T_{ym} = T_{ym} - \bar{T}_m^{\text{base}}$). Source: ECMWF ERA5.*
+*Figure 2: Monthly temperature series for France (1960–2023). Panel A shows the raw monthly mean temperature (°C); Panel B shows de-seasonalized monthly anomalies relative to the 1961–1990 baseline norm (Monthly Anomaly = Monthly Mean - 1961–1990 Calendar Baseline). Source: ECMWF ERA5.*
 
 ---
 
@@ -195,13 +205,19 @@ During detrended heat shock years, average GDP per capita growth was 0.72 percen
 We estimate panel regressions on our country-year dataset (1960–2023):
 
 #### Model 1: Pooled OLS
-$$\text{Growth}_{it} = \beta_0 + \beta_1 \Delta T_{it} + \beta_2 \Delta P_{it}^{100\text{mm}} + \varepsilon_{it}$$
+$$
+\text{Growth}_{it} = \beta_0 + \beta_1 \Delta T_{it} + \beta_2 \Delta P_{it}^{100\text{mm}} + \varepsilon_{it}
+$$
 
 #### Model 2: Country Fixed Effects (Within Estimator)
-$$\text{Growth}_{it} = \alpha_i + \beta_1 \Delta T_{it} + \beta_2 \Delta P_{it}^{100\text{mm}} + \varepsilon_{it}$$
+$$
+\text{Growth}_{it} = \alpha_i + \beta_1 \Delta T_{it} + \beta_2 \Delta P_{it}^{100\text{mm}} + \varepsilon_{it}
+$$
 
 #### Model 3: Two-Way Fixed Effects (Country FE + Year FE) — Preferred Specification
-$$\text{Growth}_{it} = \alpha_i + \gamma_t + \beta_1 \Delta T_{it} + \beta_2 \Delta P_{it}^{100\text{mm}} + \varepsilon_{it}$$
+$$
+\text{Growth}_{it} = \alpha_i + \gamma_t + \beta_1 \Delta T_{it} + \beta_2 \Delta P_{it}^{100\text{mm}} + \varepsilon_{it}
+$$
 Year fixed effects ($\gamma_t$) absorb common global shocks (oil crises, 2008 financial crisis, COVID-19) and global secular trends. Here, $\beta_1$ is identified strictly from idiosyncratic, within-country weather deviations relative to the global annual average.
 
 #### Model 4 & 5: Sectoral Output Responses (TWFE)

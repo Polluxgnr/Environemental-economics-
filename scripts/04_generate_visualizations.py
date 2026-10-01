@@ -44,7 +44,8 @@ the four specific numbered questions in the Track 1 syllabus:
    anomalies from step (2), is the change spread evenly across the year, or are some seasons
    moving faster than others?"
    - Decomposes decadal warming by meteorological season (Winter, Spring, Summer, Autumn).
-   - Highlights European Summer Amplification (+2.2°C to +2.4°C in summer vs +1.2°C in winter).
+   - Highlights European Summer Amplification: France summer +2.35°C vs winter +2.08°C (+13.0%),
+     Spain summer +2.04°C vs winter +1.33°C (+53.4%).
 
 5. Figure 5 -> Answers Step (4, Direction B - Climate vs. Economy):
    "Either bring in an economic variable of your choice from the World Development Indicators
@@ -212,14 +213,19 @@ def plot_fig3_signal_noise_quadrant(panel_df):
         late_p = group[group["year"].between(2014, 2023)]["precip_annual_total"].mean()
         delta_p = ((late_p - early_p) / early_p) * 100.0
         
-        vol_t = group["temp_yoy_diff"].std()
-        snr = delta_t / vol_t if vol_t > 0 else np.nan
+        # Calculate detrended noise sigma (matching Table 1 detrended SD)
+        years = group["year"].values
+        temps = group["temp_annual_mean"].values
+        p_fit = np.polyfit(years, temps, 1)
+        resid = temps - (p_fit[0] * years + p_fit[1])
+        detrended_sd = np.std(resid, ddof=2)
+        snr = delta_t / detrended_sd if detrended_sd > 0 else np.nan
         
         records.append({
             "code": code,
             "name": group["country_name"].iloc[0],
             "delta_t": delta_t,
-            "vol_t": vol_t,
+            "vol_t": detrended_sd,
             "snr": snr,
             "delta_p": delta_p
         })
@@ -229,11 +235,11 @@ def plot_fig3_signal_noise_quadrant(panel_df):
     x = np.arange(len(df_metrics))
     width = 0.36
     ax1.bar(x - width/2, df_metrics["delta_t"], width, label="Secular Warming ΔT (°C)", color="#d73027", edgecolor="black", alpha=0.85)
-    ax1.bar(x + width/2, df_metrics["vol_t"], width, label="YoY Volatility σ (°C)", color="#4575b4", edgecolor="black", alpha=0.85)
+    ax1.bar(x + width/2, df_metrics["vol_t"], width, label="Interannual Noise σ (°C)", color="#4575b4", edgecolor="black", alpha=0.85)
     ax1.set_xticks(x)
     ax1.set_xticklabels(df_metrics["name"], rotation=25, ha="right", fontweight="bold", fontsize=9.5)
     ax1.set_ylabel("Temperature (°C)", fontsize=11, fontweight="bold")
-    ax1.set_title("A: Secular Warming (Signal) vs. Annual Volatility (Noise)", fontsize=11.5, fontweight="bold")
+    ax1.set_title("A: Secular Warming (Signal) vs. Natural Noise (σ)", fontsize=11.5, fontweight="bold")
     ax1.legend(loc="upper right", frameon=True, fontsize=9.5)
     
     # Annotate SNR on top
@@ -258,7 +264,7 @@ def plot_fig3_signal_noise_quadrant(panel_df):
     ax2.text(0.97, 0.06, "Warming & Drying Stress Regime\n(Spain, Brazil, Germany, France)", transform=ax2.transAxes, ha="right", va="bottom", fontsize=9.5, color="#b2182b", fontweight="bold", bbox=dict(boxstyle="round,pad=0.3", fc="#fee0d2", ec="#de2d26", alpha=0.8))
     
     fig.suptitle("Figure 3: Cross-Country Climate Comparisons: Signal-to-Noise Ratio and Hydrological Divergence\n"
-                 "Step (3): Secular warming outpaces annual volatility in all countries (SNR > 1.0). Precipitation exhibits severe divergence: Spain & Brazil face compounding drying.",
+                 "Step (3): Secular warming outpaces annual noise in Europe and Kenya (SNR 2.7–3.3x), while interannual noise dominates in India and Australia (SNR < 0.4x). Precipitation exhibits severe divergence: Spain & Brazil face compounding drying.",
                  fontsize=12.5, fontweight="bold", y=1.01)
     plt.tight_layout()
     out_path = os.path.join(FIG_DIR, "fig3_warming_vs_precipitation_quadrant.png")
