@@ -107,35 +107,68 @@ Atmospheric and economic data were merged deterministically on `(country_code, y
 
 ---
 
-## 4. Figures and Empirical Analysis
+## 4. Figures and Empirical Analysis (The Four Steps of the Brief)
 
-### Figure 1: Observed Annual Climate Records (1960–2023)
+### 4.1 Step (1): The Instrumental Climate Record (Figure 1)
+**Question from Brief:** *Plot temperature and precipitation over the full available record for a set of countries chosen across different regions.*
+
+**Direct Answer:** Over 1960–2023 across all eight countries, annual mean temperatures show a clear upward inflection point beginning around 1985–1990. Warming is strongest in continental Europe (Germany, France, Spain) and East Africa (Kenya). Precipitation does not follow a uniform upward trend: it exhibits wide multi-year volatility, with historic European droughts visible in 1976, 2003, and 2022, and severe tropical droughts in Kenya (1984, 1997).
+
 ![Figure 1: Historical Climate Trends](../figures/fig1_historical_climate_trends.png)
-*Figure 1: Annual Mean Temperature (°C, red line with 10-year dashed trend) and Annual Precipitation (mm, blue bars with 10-year dotted trend) across eight countries from 1960 to 2023. Source: ECMWF ERA5. **Conclusion:** Temperature trends show an upward inflection beginning around 1985–1990 across all regions, while precipitation exhibits high multi-year volatility with major European droughts visible in 1976, 2003, and 2022.*
+*Figure 1: Annual Mean Temperature (°C, red line with 10-year dashed trend) and Annual Precipitation (mm, blue bars with 10-year dotted trend) across eight countries from 1960 to 2023. Source: ECMWF ERA5.*
 
 ---
 
-### Figure 2: Why De-Seasonalize? Raw Temperature Cycle vs. Monthly Anomalies
+### 4.2 Step (2): Why De-Seasonalize? Computing the Monthly Anomaly (Figure 2)
+**Question from Brief:** *Compute a monthly anomaly by subtracting the calendar-month average over a chosen baseline (1961–1990). Why is this necessary?*
+
+**Direct Answer:** Raw monthly temperatures are dominated by the annual solar cycle: in France, the ~18°C swing between January and July accounts for 89.5% of total temperature variance. Without de-seasonalization, a mild winter looks colder than a chilly summer, completely obscuring the multi-decadal warming trend. Subtracting the 1961–1990 monthly baseline removes this seasonal wave, allowing any month to be compared directly with any other.
+*Note on Baseline:* The ERA5 series we downloaded are **absolute daily observations** (°C and mm), not pre-computed anomalies. We explicitly constructed the 1961–1990 baseline ourselves following WMO international standards. As shown in Panel B of Figure 2, de-seasonalizing reveals the underlying anthropogenic signal: cool negative anomalies prior to 1985 give way to persistent positive warm anomalies post-1995.
+
 ![Figure 2: Raw Temperature Cycle vs Monthly Anomalies](../figures/fig2_warming_stripes_anomalies.png)
-*Figure 2: Monthly temperature series for France (1960–2023). Panel A shows the raw monthly mean temperature (°C); Panel B shows de-seasonalized monthly anomalies relative to the 1961–1990 baseline norm ($\Delta T_{ym} = T_{ym} - \bar{T}_m^{\text{base}}$). Source: ECMWF ERA5. **Conclusion:** De-seasonalization removes the ~20°C annual solar cycle—which accounts for 89.5% of total monthly variance—revealing the underlying secular warming trend (+1.75°C decadal shift).*
+*Figure 2: Monthly temperature series for France (1960–2023). Panel A shows the raw monthly mean temperature (°C); Panel B shows de-seasonalized monthly anomalies relative to the 1961–1990 baseline norm ($\Delta T_{ym} = T_{ym} - \bar{T}_m^{\text{base}}$). Source: ECMWF ERA5.*
 
 ---
 
-### Figure 3: Signal-to-Noise Ratios and Climate Trajectory Quadrants
+### 4.3 Step (3): Signal vs. Noise and Cross-Country Comparison (Figure 3)
+**Questions from Brief:**
+1. *How much has the average changed between the start and the end of the record?*
+2. *How large is year-to-year variation compared with that change?*
+3. *Where has temperature moved most, and does precipitation move in the same places or in different ones?*
+
+**Direct Answers:**
+1. **Average Change:** Comparing 2014–2023 to 1960–1969, Germany warmed by **+2.09°C**, Kenya by **+1.85°C**, France by **+1.75°C**, Spain by **+1.63°C**, the US by **+1.26°C**, Brazil by **+0.70°C**, Australia by **+0.24°C**, and India by **+0.07°C**.
+2. **Signal-to-Noise Ratio ($\text{SNR} = \Delta T / \sigma$):** In Western Europe and Kenya, secular warming is **2.7 to 3.3 times larger than natural year-to-year noise** ($\text{SNR} > 2.0$), meaning warming has decisively broken through the weather noise envelope. In inland Australia and central India, annual noise exceeds the local trend ($\text{SNR} < 0.4$).
+3. **Where Temperature Moved Most:** Continental Europe (Germany, France, Spain) and East Africa (Kenya).
+4. **Precipitation Coupling:** Precipitation does **not** move in the same places as temperature. The US (+25.2%) and India (+15.4%) experienced wetting, whereas Spain (-18.5%), Brazil (-29.1%), and Germany (-13.6%) experienced severe drying. Spain and Brazil face compounding warming and drying stress.
+
 ![Figure 3: Signal-to-Noise Ratio and Quadrant Chart](../figures/fig3_warming_vs_precipitation_quadrant.png)
-*Figure 3: Panel A: Secular warming ($\Delta T$, °C) versus annual volatility ($\sigma$, °C) with Signal-to-Noise Ratios (SNR). Panel B: Quadrant plot of Secular Warming ($\Delta T$, °C) against Percentage Precipitation Change ($\% \Delta P$, 1960s baseline). Source: ECMWF ERA5. **Conclusion:** Secular warming exceeds natural noise in six of eight countries ($\text{SNR} > 1.0$), while precipitation diverges sharply: Spain (-18.5%) and Brazil (-29.1%) face compounding drying, whereas the USA (+25.2%) and India (+15.4%) experience wetting.*
+*Figure 3: Panel A: Secular warming ($\Delta T$, °C) versus annual volatility ($\sigma$, °C) with Signal-to-Noise Ratios (SNR). Panel B: Quadrant plot of Secular Warming ($\Delta T$, °C) against Percentage Precipitation Change ($\% \Delta P$, 1960s baseline). Source: ECMWF ERA5.*
 
 ---
 
-### Figure 4: Seasonal Asymmetry of Warming
+### 4.4 Step (4, Direction A): The Shape of the Change Across Seasons (Figure 4)
+**Question from Brief:** *Using the monthly anomalies from step (2), is the change spread evenly across the year, or are some seasons moving faster than others?*
+
+**Direct Answer:** The change is **not spread evenly across the year**.
+- In Mediterranean Spain, summer warmed **+53.4% faster** than winter (+2.04°C summer vs. +1.33°C winter).
+- In France, summer warmed **+13.0% faster** than winter (+2.35°C summer vs. +2.08°C winter).
+This summer amplification accelerates soil evapotranspiration during the critical dry season when crop water demand peaks. Conversely, higher-latitude continental regimes (Germany at +3.38°C and the US at +2.54°C) experienced winter-led warming.
+
 ![Figure 4: Seasonal Warming Asymmetry](../figures/fig4_seasonal_asymmetry.png)
-*Figure 4: Decadal warming ($\Delta T$, 2014–2023 vs. 1960–1969) decomposed by meteorological season: Winter (DJF), Spring (MAM), Summer (JJA), and Autumn (SON) in the Northern Hemisphere (adjusted for Southern Hemisphere). Source: ECMWF ERA5. **Conclusion:** In Spain, summer warming (+2.04°C) outpaced winter warming (+1.33°C) by 53.4%, accelerating crop water stress during the dry season. In France, summer warmed by +2.35°C vs +2.08°C in winter (+13.0%). In Germany and the USA, winter warmed faster than summer.*
+*Figure 4: Decadal warming ($\Delta T$, 2014–2023 vs. 1960–1969) decomposed by meteorological season: Winter (DJF), Spring (MAM), Summer (JJA), and Autumn (SON) in the Northern Hemisphere (adjusted for Southern Hemisphere). Source: ECMWF ERA5.*
 
 ---
 
-### Figure 5: Extreme Climate Shocks vs. Economic Growth Dips
+### 4.5 Step (4, Direction B): Economic Transmission of Climate Shocks (Figure 5 & Table 3)
+**Question from Brief:** *Were the years that were unusually warm or unusually dry also unusual for the economy?*
+
+**Direct Answer:**
+- **In landmark shock years, yes:** Historical extreme heat and drought years caused documented agricultural crises (the 1976 drought prompted France's 6-billion-franc *impôt sécheresse*; the 2003 European heatwave caused €4 billion in farm losses; the 1984 and 1997 droughts severely depressed Kenyan agricultural GDP).
+- **Across the full 64-year panel, no:** In our Two-Way Fixed Effects econometric model, annual weather anomalies do not exert a statistically detectable drag on aggregate national GDP per capita growth ($\hat{\beta} = -0.0325, p = 0.9419$, 95% CI $[-1.0496, +0.9847]$ pp/°C). This is an uninformative null due to small sample cluster size ($G=8$), not proof of total economic resilience. Direct physical crop yields, however, confirm significant positive moisture elasticity ($\hat{\beta}_{\text{precip}} = +0.5664^*, p = 0.077$).
+
 ![Figure 5: Climate Shocks vs Economic Dips](../figures/fig5_climate_shocks_vs_economic_dips.png)
-*Figure 5: Annual Real GDP per Capita Growth (%, blue line) alongside Annual Temperature Anomalies (°C, red dashed line). Red vertical bands mark positive thermal shocks exceeding 1.5 standard deviations above the country mean. Source: ECMWF ERA5 and World Bank WDI. **Conclusion:** Visual overlays reveal that landmark climate shock years coincide with documented historical agricultural losses (France 1976 drought tax; 2003 heatwave €4B losses; Kenya 1984 drought).*
+*Figure 5: Annual Real GDP per Capita Growth (%, blue line) alongside Annual Temperature Anomalies (°C, red dashed line). Red vertical bands mark positive thermal shocks exceeding 1.5 standard deviations above the country mean. Source: ECMWF ERA5 and World Bank WDI.*
 
 ---
 

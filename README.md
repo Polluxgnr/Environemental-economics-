@@ -4,19 +4,22 @@
 **Course:** Environmental Economics — BSc AIDAMS, T1 2026–2027  
 **Instructor:** Caterina Seghini · ESSEC Department of Economics  
 **Authors:** Student Research Group 1  
-**Repository:** [https://github.com/Polluxgnr/Environemental-economics-.git](https://github.com/Polluxgnr/Environemental-economics-.git)  
+**GitHub Repository:** [https://github.com/Polluxgnr/Environemental-economics-.git](https://github.com/Polluxgnr/Environemental-economics-.git)  
 
 ---
 
 ## Table of Contents
-1. [Executive Summary & Research Mandate](#1-executive-summary--research-mandate)
-2. [Data Genesis & Provenance: Where and How Data Was Obtained](#2-data-genesis--provenance-where-and-how-data-was-obtained)
-   - [2.1 ECMWF & ERA5 Atmospheric Reanalysis](#21-ecmwf--era5-atmospheric-reanalysis)
-   - [2.2 Demystifying Copernicus: CDS vs. Interactive Climate Atlas vs. Open-Meteo REST API](#22-demystifying-copernicus-cds-vs-interactive-climate-atlas-vs-open-meteo-rest-api)
-   - [2.3 Representative Centroid Selection & Köppen-Geiger Regimes](#23-representative-centroid-selection--k%C3%B6ppen-geiger-regimes)
-   - [2.4 Climatological Baseline: Why 1961–1990?](#24-climatological-baseline-why-19611990)
-   - [2.5 Macroeconomic Indicators & Acquisition via World Bank API v2](#25-macroeconomic-indicators--acquisition-via-world-bank-api-v2)
-   - [2.6 Exact Sample Size Accounting (N = 512, 504, 496, 373)](#26-exact-sample-size-accounting-n--512-504-496-373)
+1. [Executive Summary & Direct Answers to the 4 Assignment Questions](#1-executive-summary--direct-answers-to-the-4-assignment-questions)
+2. [Data Engineering Strategy & The API Dilemma (Why, What, How)](#2-data-engineering-strategy--the-api-dilemma-why-what-how)
+   - [2.1 The Architectural Choice: To API or Not to API?](#21-the-architectural-choice-to-api-or-not-to-api)
+   - [2.2 Why We Rejected the Alternatives (CDS API, Atlas GUI, Ground Stations)](#22-why-we-rejected-the-alternatives-cds-api-atlas-gui-ground-stations)
+   - [2.3 Our Solution: Programmatic ERA5 Extraction via Open-Meteo Scientific REST API](#23-our-solution-programmatic-era5-extraction-via-open-meteo-scientific-rest-api)
+   - [2.4 Which Data Did We Get Exactly?](#24-which-data-did-we-get-exactly)
+   - [2.5 What Does the Data Look Like? (Real Before vs. After Processing Data Rows)](#25-what-does-the-data-look-like-real-before-vs-after-processing-data-rows)
+   - [2.6 Why Save It as Plain-Text CSV?](#26-why-save-it-as-plain-text-csv)
+   - [2.7 Representative Centroid Strategy & Köppen-Geiger Classifications](#27-representative-centroid-strategy--k%C3%B6ppen-geiger-classifications)
+   - [2.8 Baseline Choice (1961–1990) & Note on Absolute Values vs. Anomalies](#28-baseline-choice-19611990--note-on-absolute-values-vs-anomalies)
+   - [2.9 Transparent Sample Size Accounting (N = 512, 504, 496, 373)](#29-transparent-sample-size-accounting-n--512-504-496-373)
 3. [Empirical Audit & Discrepancy Log](#3-empirical-audit--discrepancy-log)
    - [3.1 Diagnostic Problem-by-Problem Audit](#31-diagnostic-problem-by-problem-audit)
    - [3.2 The Germany vs. Spain Precipitation Coincidence (-97mm)](#32-the-germany-vs-spain-precipitation-coincidence--97mm)
@@ -26,105 +29,183 @@
    - [4.2 Small-Sample Cluster Inference with t(7) Degrees of Freedom](#42-small-sample-cluster-inference-with-t7-degrees-of-freedom)
    - [4.3 Resolving the Model Contradiction: Spurious Co-Trend vs. Two-Way Fixed Effects](#43-resolving-the-model-contradiction-spurious-co-trend-vs-two-way-fixed-effects)
    - [4.4 Physical Agricultural Yields: Crop Production Index (Model 5)](#44-physical-agricultural-yields-crop-production-index-model-5)
-5. [Open Methodological Items & Defense Strategies for Authors](#5-open-methodological-items--defense-strategies-for-authors)
+5. [Open Methodological Decisions & Author Defense Guide](#5-open-methodological-decisions--author-defense-guide)
 6. [Core Syllabus Steps & Visualizations (Figures 1 to 5)](#6-core-syllabus-steps--visualizations-figures-1-to-5)
-7. [Repository Structure & Reproduction Guide](#7-repository-structure--reproduction-guide)
+7. [Step-by-Step Reproduction Guide & Code Walkthrough](#7-step-by-step-reproduction-guide--code-walkthrough)
 
 ---
 
-## 1. Executive Summary & Research Mandate
+## 1. Executive Summary & Direct Answers to the 4 Assignment Questions
 
-When climate change is debated in international policy, it is almost exclusively framed around a global aggregate: $+1.5^\circ\text{C}$ or $+2.0^\circ\text{C}$ above pre-industrial levels. Yet economic activity, crop yields, and municipal budgets do not experience global averages. They experience local, seasonal weather: summer heat domes, shifting monsoon rains, and prolonged dry spells, superimposed on natural year-to-year volatility.
+This project executes **Track 1: Temperature and Precipitation Records** for the Environmental Economics course at ESSEC Business School (BSc AIDAMS). Over 64 continuous calendar years (1960–2023) across eight climatically diverse countries—**France, Germany, Spain, the United States, Brazil, India, Kenya, and Australia**—we answer each sequential question in the syllabus:
 
-This project implements **Track 1: Temperature and Precipitation Records** for the Environmental Economics course at ESSEC Business School (BSc AIDAMS). Over 64 unbroken calendar years (1960–2023) across eight climatically diverse economies—**France, Germany, Spain, the United States, Brazil, India, Kenya, and Australia**—we address the four sequential empirical questions defined in the course brief:
+### Direct Answers to the Course Brief:
 
-1. **The Instrumental Signal:** How have annual mean temperatures and precipitation totals evolved across distinct Köppen climate zones?
-2. **Signal-to-Noise Ratio (SNR):** Has multi-decadal warming outpaced natural year-to-year weather volatility ($\Delta T / \sigma$), allowing agents to recognize secular climate change against ambient weather noise?
-3. **Seasonal Asymmetry & Hydrological Divergence:** Is warming spread evenly across the calendar year, or are summers warming faster than winters? Does rainfall increase where temperatures rise, or do regions face compounding heat and drying?
-4. **Macroeconomic Shocks & Econometric Estimation:** Do landmark shock years translate into visible growth contractions? And when controlling for unobserved country heterogeneity and global macro cycles, what is the true short-run elasticity of GDP per capita growth to temperature anomalies?
+#### Step (1) — Plot temperature and precipitation over the full available record:
+- **Direct Answer:** Over the 1960–2023 instrumental record, mean annual temperatures show a noticeable upward inflection beginning around 1985–1990 across all eight regions. Decadal warming between 1960–1969 and 2014–2023 reached $+2.09^\circ\text{C}$ in Germany, $+1.85^\circ\text{C}$ in Kenya, $+1.75^\circ\text{C}$ in France, $+1.63^\circ\text{C}$ in Spain, and $+1.26^\circ\text{C}$ in the United States. Precipitation, by contrast, does not follow a simple upward trend: it exhibits heavy multi-year fluctuations, with major historical droughts visible in Europe (1976, 2003, 2022) and East Africa (1984, 1997).
 
-### The Core Econometric Finding:
-A naive panel regression with Country Fixed Effects yields a statistically significant negative growth elasticity of **$-0.4904$ percentage points per $+1.0^\circ\text{C}$ ($p = 0.035$, Within-$R^2 = 0.0176$)**. 
+#### Step (2) — Compute a monthly anomaly using a chosen baseline (1961–1990):
+- **Direct Answer:** The annual seasonal cycle accounts for over 89% of total monthly temperature variance in temperate climates (an ~18°C swing between winter and summer). Without de-seasonalization, a mild winter looks colder than a frigid summer, making months impossible to compare across years. Subtracting the 1961–1990 calendar-month norm purges the solar cycle and reveals the secular trend: cool negative anomalies dominate prior to 1985, replaced by persistent warm positive anomalies post-1995.
+- *Note on Downloaded Data:* The ERA5 data we downloaded are **absolute physical daily values** (°C and mm), not pre-computed anomalies. We explicitly chose and constructed the 1961–1990 WMO baseline ourselves.
 
-However, our empirical audit demonstrates that this penalty is a **spurious co-trend**: post-WWII productivity growth decelerated across Western economies after the 1960s reconstruction boom (*"Les Trente Glorieuses"* in France, the *Wirtschaftswunder* in Germany) over the exact same decades that global atmospheric temperatures rose. Country Fixed Effects mistakenly attribute this secular growth slowdown to climate.
+#### Step (3) — Describe change vs. volatility, and compare across countries:
+- **How much has the average changed?** Comparing 2014–2023 to 1960–1969: Germany $+2.09^\circ\text{C}$, Kenya $+1.85^\circ\text{C}$, France $+1.75^\circ\text{C}$, Spain $+1.63^\circ\text{C}$, USA $+1.26^\circ\text{C}$, Brazil $+0.70^\circ\text{C}$, Australia $+0.24^\circ\text{C}$, and India $+0.07^\circ\text{C}$.
+- **How large is year-to-year variation compared with that change ($\text{SNR} = \Delta T / \sigma$)?** In Western Europe and Kenya, secular warming is **2.7 to 3.3 times larger than natural year-to-year noise** ($\text{SNR} > 2.0$), meaning warming has decisively broken through the weather noise envelope. In inland Australia and central India, annual noise exceeds the local trend ($\text{SNR} < 0.4$).
+- **Where has temperature moved most?** Continental Europe (Germany, France, Spain) and East Africa (Kenya).
+- **Does precipitation move in the same places?** No, precipitation moves in completely different places. The US ($+25.2\%$) and India ($+15.4\%$) experienced wetting, whereas Spain ($-18.5\%$), Brazil ($-29.1\%$), and Germany ($-13.6\%$) suffered severe drying. Spain and Brazil face compounding warming and drying stress.
 
-When Year Fixed Effects absorb common global macro cycles and productivity trends (**Two-Way Fixed Effects**, our preferred specification), the estimated coefficient drops to **$-0.0325$ percentage points per $+1.0^\circ\text{C}$ ($p = 0.942$, Within-$R^2 = 0.0030$)**, with a 95% confidence interval of **$[-1.0496, +0.9847]$ pp/°C**. Because this confidence interval is wide and encompasses both zero and the naive estimate of $-0.49$, it represents an **uninformative null** due to sample size constraints ($G = 8$ clusters). In diversified economies, one-year weather fluctuations do not exert a statistically detectable drag on aggregate national GDP per capita growth. However, direct physical agricultural output (Model 5) remains sensitive to moisture, exhibiting a positive precipitation elasticity of **$+0.5664$ percentage points per 100mm ($p = 0.077$)**.
+#### Step (4, Direction A) — Is the change spread evenly across seasons?
+- **Direct Answer:** No, warming is seasonally asymmetric:
+  - In Mediterranean Spain, summer warmed **+53.4% faster** than winter ($+2.04^\circ\text{C}$ in summer vs. $+1.33^\circ\text{C}$ in winter).
+  - In France, summer warmed **+13.0% faster** than winter ($+2.35^\circ\text{C}$ in summer vs. $+2.08^\circ\text{C}$ in winter).
+  - This summer amplification accelerates soil moisture depletion during the critical agricultural dry season. Conversely, higher-latitude continental regimes (Germany at $+3.38^\circ\text{C}$ and the US at $+2.54^\circ\text{C}$) experienced winter-led warming.
 
----
-
-## 2. Data Genesis & Provenance: Where and How Data Was Obtained
-
-### 2.1 ECMWF & ERA5 Atmospheric Reanalysis
-
-#### What is ECMWF?
-The **European Centre for Medium-Range Weather Forecasts (ECMWF)** is an independent intergovernmental organization supported by 35 nations, recognized as the world leader in numerical weather prediction and atmospheric modeling.
-
-#### What is Copernicus Climate Change Service (C3S)?
-The European Union operates the **Copernicus Programme**, the world's flagship Earth observation initiative. The Copernicus Climate Change Service (C3S) is implemented directly by ECMWF on behalf of the European Commission.
-
-#### What is ERA5 Reanalysis?
-**ERA5** is the fifth-generation global atmospheric reanalysis produced by ECMWF under C3S (Hersbach et al., 2020). Rather than relying on simple interpolation or unconstrained forecasts, ERA5 combines millions of historical observations (satellites, weather balloons, surface weather stations, ocean buoys, aircraft) with a state-of-the-art numerical weather prediction model using **4D-Var data assimilation**.
-- **Physics-Based Consistency:** Fulfills physical laws of mass, energy, momentum, and moisture conservation.
-- **Continuous Unbroken Coverage:** Provides an unbroken hourly global grid ($0.25^\circ \times 0.25^\circ$, $\approx 31\text{ km} \times 31\text{ km}$) from 1940 to the present with **zero missing values**.
-- **Superiority Over Ground Stations:** Raw ground station networks (e.g. GHCN) suffer from missing observations, instrument relocations, station closures, and urban heat island (UHI) contamination around growing airports. ERA5 eliminates these observational artifacts, providing a physically consistent, continuous 64-year daily record (187,008 nation-days total).
+#### Step (4, Direction B) — Were unusually warm or dry years unusual for the economy?
+- **Direct Answer:** 
+  - **In landmark shock years, yes:** Landmark heat and drought events align with documented sector-specific economic crises: the 1976 European drought caused a 10% drop in French farm output and triggered a 6-billion-franc drought tax (*impôt sécheresse*); the 2003 European heatwave caused €4 billion in farm losses; and the 1984/1997 Kenyan droughts caused sharp contractions in agricultural output.
+  - **Across the full 64-year panel, no:** In our Two-Way Fixed Effects econometric model, annual weather anomalies do not exert a statistically detectable drag on aggregate national GDP per capita growth ($\hat{\beta} = -0.0325, p = 0.9419$, 95% CI $[-1.0496, +0.9847]$ pp/°C). A naive Country Fixed Effects model showed a large penalty ($-0.4904^{**}$ pp/°C), but this was a **spurious co-trend** caused by post-WWII growth naturally slowing down after the 1960s reconstruction boom over the exact same decades that global temperatures rose. Two-Way Fixed Effects purges this macro trend. The resulting null is an **uninformative null** due to sample size ($G=8$), not proof of total economic resilience. Direct physical crop yields, however, confirm significant positive moisture elasticity ($\hat{\beta}_{\text{precip}} = +0.5664^*, p = 0.077$).
 
 ---
 
-### 2.2 Demystifying Copernicus: CDS vs. Interactive Climate Atlas vs. Open-Meteo REST API
+## 2. Data Engineering Strategy & The API Dilemma (Why, What, How)
 
-In the course instructions, students are directed toward the **Copernicus Interactive Climate Atlas** (`atlas.climate.copernicus.eu`) and the **Copernicus Climate Data Store (CDS)** dataset:
-> *"Gridded dataset underpinning the Copernicus Interactive Climate Atlas"* (`multi-origin-c3s-atlas`).
+### 2.1 The Architectural Choice: To API or Not to API?
 
-To evaluate this setup like an applied environmental economist, consider how these access pathways relate to one another:
+When approaching the assignment instructions, a researcher faces four potential avenues for acquiring 64 years of daily climate records across eight countries:
 
 ```
-                      [ECMWF Supercomputers]
-                                │
-                                ▼
-                    [Official ERA5 Reanalysis]
-                   (0.25° Gridded Global Archive)
-                                │
-        ┌───────────────────────┼───────────────────────┐
-        ▼                       ▼                       ▼
- [Copernicus Climate     [Copernicus Interactive    [Open-Meteo Scientific
-     Data Store (CDS)]       Climate Atlas Web GUI]      ERA5 Mirror API]
-        │                       │                       │
- • Requires personal login • Point-and-click GUI    • Keyless, instant REST API
- • Async batch queue (24h) • Pre-cooked monthly     • Direct extraction of
- • Multi-GB NetCDF arrays    aggregates only          daily ERA5 grid cells
- • Requires GIS masking   • Prone to 502 timeouts  • 100% code reproducibility
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    FOUR WAYS TO ACQUIRE THE CLIMATE DATA                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+       │                              │                             │
+       ▼                              ▼                             ▼
+[Approach 1: CDS API]      [Approach 2: Atlas GUI]     [Approach 3: Weather Stations]
+• Python `cdsapi` client   • Point-and-click browser   • NOAA GHCN / Meteo-France
+• Asynchronous batch queue • 16 manual CSV downloads   • Missing station days
+• 50+ GB NetCDF rasters    • Prone to 502/504 timeouts • Urban heat-island biases
+• Heavy GIS polygon mask   • Monthly pre-cooked only   • Station closures/moves
+       │                              │                             │
+       └──────────────────────────────┼─────────────────────────────┘
+                                      │
+                                      ▼
+             [Approach 4 (Our Chosen Solution): Open-Meteo ERA5 API]
+             • Direct programmatic REST query to ECMWF ERA5 reanalysis archive
+             • Keyless, instant response (< 2 minutes execution)
+             • Raw daily physical observations (187,008 nation-days)
+             • Zero missing values, zero GIS dependency compilation crashes
+             • 100% automated, one-command reproducibility for any student
 ```
-
-#### Why didn't we use the CDS download queue directly?
-1. **The Authentication Barrier:** The CDS requires each user to register an account, sign licence agreements, and configure a private API key in a local `~/.cdsapirc` file. A script that depends on individual student credentials cannot be cloned and executed out-of-the-box by a grader or peer.
-2. **Asynchronous Batch Queuing:** Requests submitted via `cdsapi` enter a shared European supercomputer batch queue. During peak hours, requests can sit in the queue for several hours to days, making automated, reproducible execution impossible.
-3. **Massive Multidimensional NetCDF Arrays:** CDS delivers data in multi-gigabyte NetCDF rasters. Extracting country time series requires downloading 50+ GB of data, rasterizing national boundary shapefiles, and running memory-heavy spatial masks.
-
-#### Why not the Copernicus Interactive Climate Atlas GUI?
-1. **Manual Web Scraping vs. Script Automation:** Downloading 8 countries requires 16 manual point-and-click browser downloads, violating the core computer science requirement of an automated, end-to-end reproducible Python pipeline.
-2. **Web Server Vulnerability:** The Atlas GUI is prone to HTTP 502/504 gateway timeouts when multiple university cohorts query it simultaneously.
-3. **Pre-Cooked Monthly Summaries Only:** The Atlas GUI provides only monthly aggregates; it does not allow users to inspect raw *daily* records, preventing custom daily heatwave or drought duration analysis.
-
-#### Why Open-Meteo? Is it different data?
-**No, it is the exact same ERA5 reanalysis data.**  
-Open-Meteo is an open-source scientific initiative that mirrors the official ECMWF ERA5 reanalysis archive and exposes it through an open, high-performance REST API:
-- It queries the **exact $0.25^\circ \times 0.25^\circ$ ECMWF ERA5 grid**.
-- It requires **no private API keys**, **no personal login**, and **zero wait-time in batch queues**.
-- It delivers raw daily observations (187,008 nation-days total), allowing us to calculate baseline climatologies and seasonal decompositions from first physical principles.
-- Running `python scripts/01_download_data.py` pulls the exact underlying Copernicus ERA5 data in under 3 minutes.
-
-#### What is "missing" compared to the full CDS dataset?
-The full CDS multi-origin atlas dataset includes future climate model projections (CMIP6 models under SSP1-2.6 to SSP5-8.5 up to 2100) and full continental rasters. Because Track 1 focuses strictly on **historical observed records (1960–2023)**, future climate projections are outside our empirical scope. The historical observed data within CDS *is* ERA5.
 
 ---
 
-### 2.3 Representative Centroid Selection & Köppen-Geiger Regimes
+### 2.2 Why We Rejected the Alternatives (CDS API, Atlas GUI, Ground Stations)
 
-To capture weather where people live and crops grow, national series were sampled at representative centroids positioned in each country's primary agricultural and geographic heartland. All coordinates use clean signed decimal notation:
+#### Why Not Approach 1: The Official Copernicus Climate Data Store (CDS) API (`cdsapi`)?
+1. **The Authentication Barrier:** CDS requires every user to create a personal account on `cds.climate.copernicus.eu`, agree to terms, generate a personal API key, and configure a hidden `~/.cdsapirc` file on their operating system. If a student or professor clones the repository, the script fails immediately unless they have their own credentials configured.
+2. **Supercomputing Queue Bottlenecks:** CDS is designed for massive archival extractions. When a script calls `cdsapi.Client().retrieve()`, the request enters a shared European supercomputer queue. During peak university semesters, jobs can sit queued for **several hours to several days** before downloading. This makes automated, dynamic execution impossible.
+3. **Massive Multidimensional NetCDF Arrays:** CDS delivers global grids in NetCDF (`.nc`) or GRIB format. Extracting eight countries requires downloading 50+ GB of gridded rasters, installing complex C/Fortran geospatial libraries (`netCDF4`, `h5py`, `geopandas`, `rioxarray`, `libgdal`), and rasterizing national polygon boundaries. These libraries frequently fail to compile on student Windows/Mac laptops.
 
-| Country | Code | Coordinates | Geographic / Agricultural Heartland | Köppen-Geiger Classification | Rationale |
+#### Why Not Approach 2: The Copernicus Interactive Climate Atlas Web GUI (`atlas.climate.copernicus.eu`)?
+1. **Manual Web Scraping vs. Reproducible Code:** The Atlas is an interactive web frontend. Downloading eight countries requires clicking through the UI 16 times (temperature and precipitation for 8 countries). This violates the foundational computer science requirement of an automated, end-to-end Python pipeline.
+2. **Web Server Instability:** During academic submission deadlines, the Atlas web server frequently returns HTTP 502 Bad Gateway and 504 Gateway Timeout errors.
+3. **Pre-Cooked Monthly Summaries Only:** The Atlas GUI only provides monthly aggregate indices. It does not provide raw daily time series, preventing researchers from examining daily temperature distributions, heatwave durations, or daily-derived variance.
+
+#### Why Not Approach 3: Raw Weather Station Networks (NOAA GHCN / Ground Stations)?
+1. **Missing Data & Attrition Bias:** Physical weather stations suffer power failures, instrument breakdowns, and missing observation records.
+2. **Station Relocations:** Moving a station from a city center to an airport introduces an artificial non-climatic jump in the temperature series.
+3. **Urban Heat Island (UHI) Contamination:** Stations located near growing urban airports measure artificial warming caused by expanding asphalt runways and concrete terminals rather than greenhouse forcing.
+4. **Spatial Sparsity:** Stations are dense in wealthy coastal cities but sparse in agricultural basins.
+
+---
+
+### 2.3 Our Solution: Programmatic ERA5 Extraction via Open-Meteo Scientific REST API
+
+**Is Open-Meteo different data? No. It is the exact same ECMWF ERA5 reanalysis archive.**  
+Open-Meteo is an open-source scientific initiative that mirrors the official ECMWF ERA5 atmospheric reanalysis grid ($0.25^\circ \times 0.25^\circ$, $\approx 31\text{ km} \times 31\text{ km}$) and exposes it via an open REST API:
+- **100% Programmatic Reproducibility:** No account registration, no private API tokens, no hidden configuration files. Anyone can clone this repository and run `python scripts/01_download_data.py`.
+- **Instant Speed:** Pulls 64 years of daily data for all eight countries in under two minutes, bypassing multi-hour supercomputing batch queues.
+- **Physical Accuracy & Completeness:** Provides unbroken, physics-based daily observations across all 187,008 nation-days with **zero missing values**.
+
+---
+
+### 2.4 Which Data Did We Get Exactly?
+
+| Domain | Source | Parameter / Indicator | Description | Temporal Scope | Units |
+| :--- | :--- | :--- | :--- | :---: | :---: |
+| **Climate** | ECMWF ERA5 | `temperature_2m_mean` | Daily 24-hour mean surface air temperature at 2 meters | 1960–2023 (daily) | °C |
+| **Climate** | ECMWF ERA5 | `precipitation_sum` | Daily 24-hour cumulative liquid water equivalent | 1960–2023 (daily) | mm |
+| **Economy** | World Bank WDI | `NY.GDP.PCAP.KD.ZG` | Annual percentage growth rate of real GDP per capita | 1960–2023 (annual) | % |
+| **Economy** | World Bank WDI | `NV.AGR.TOTL.ZS` | Agriculture, forestry, and fishing value added | 1960–2023 (annual) | % of GDP |
+| **Economy** | World Bank WDI | `AG.PRD.CROP.XD` | Crop production index ($2014\text{–}2016 = 100$) | 1960–2023 (annual) | Index |
+
+---
+
+### 2.5 What Does the Data Look Like? (Real Before vs. After Processing Data Rows)
+
+To see the exact transformations, here are actual sample rows from the raw and processed datasets:
+
+#### 1. Raw Daily Climate Extraction (`data/raw/climate_raw_FRA.csv`):
+```csv
+date,temperature_2m_mean,precipitation_sum,country_code,country_name,region,climate_zone,latitude,longitude,location_desc
+1960-01-01,10.2,0.2,FRA,France,Western Europe,Temperate Oceanic,46.8,2.6,Central Agricultural Plains (Berry / Loire Basin)
+1960-01-02,9.7,17.4,FRA,France,Western Europe,Temperate Oceanic,46.8,2.6,Central Agricultural Plains (Berry / Loire Basin)
+1960-01-03,8.8,2.3,FRA,France,Western Europe,Temperate Oceanic,46.8,2.6,Central Agricultural Plains (Berry / Loire Basin)
+```
+*Notice: Raw daily values are absolute numbers (°C and mm) with exact geographic metadata.*
+
+#### 2. Raw World Bank Macroeconomic Extraction (`data/raw/worldbank_wdi_1960_2023.csv`):
+```csv
+year,country_code,country_name,region,gdp_per_capita_growth,agriculture_share_gdp,gdp_growth,inflation_cpi,crop_production_index
+1960,FRA,France,Western Europe,,10.1484983970751,,4.13993575518437,
+1961,FRA,France,Western Europe,3.86638337263079,8.71811104626433,4.94642545980355,2.40046104546311,65.75
+1962,FRA,France,Western Europe,5.78849953083436,9.42435111401664,6.85626464484753,5.33128007065639,83.29
+```
+*Notice: 1960 GDP growth is missing because annual growth requires the t-1 lag (1959).*
+
+#### 3. Processed Monthly Anomalies (`data/processed/climate_monthly_anomalies.csv`):
+```csv
+country_code,year,month,date,temp_monthly_mean,temp_baseline_climatology,temp_monthly_anomaly,precip_monthly_total,precip_baseline_climatology,precip_monthly_anomaly
+FRA,1960,1,1960-01-01,3.545,3.243,+0.302,72.4,62.1,+10.3
+FRA,1960,2,1960-02-01,5.348,4.471,+0.877,88.1,51.8,+36.3
+FRA,1960,3,1960-03-01,8.542,6.495,+2.047,45.2,49.1,-3.9
+```
+*Notice: The calendar-month baseline (1961–1990) is subtracted from each month's observed mean to isolate the anomaly.*
+
+#### 4. Processed Seasonal Aggregates (`data/processed/climate_seasonal_anomalies.csv`):
+```csv
+country_code,year,season,temp_seasonal_mean,temp_seasonal_anomaly,precip_seasonal_total
+FRA,1960,Winter (DJF),3.46,-0.12,210.5
+FRA,1960,Spring (MAM),9.98,-0.15,185.3
+FRA,1960,Summer (JJA),18.00,-0.45,165.2
+FRA,1960,Autumn (SON),11.98,-0.08,239.7
+```
+*Notice: Calendar months are grouped into standard meteorological seasons (inverted for Southern Hemisphere countries).*
+
+#### 5. Merged Climate-Economic Panel (`data/processed/merged_climate_economic_panel.csv`):
+```csv
+country_code,year,temp_annual_mean,temp_annual_anomaly,precip_annual_total,precip_annual_anomaly_100mm,gdp_per_capita_growth,agriculture_share_gdp,shock_heatwave
+FRA,2003,12.51,+1.64,726.9,-0.35,0.26,2.41,1
+```
+*Notice: All physical and macroeconomic variables are harmonized on (country_code, year) for panel econometric estimation.*
+
+---
+
+### 2.6 Why Save It as Plain-Text CSV?
+
+1. **Universality & Cross-Platform Accessibility:** Plain-text CSV can be opened and verified by anyone—in Excel, Python (`pandas`), R, Stata, Julia, or a standard text editor—with zero proprietary software.
+2. **Zero GIS Compilation Failures:** NetCDF (`.nc`) and GRIB (`.grib`) files require specialized C/Fortran binary packages (`libgdal`, `netCDF4`, `h5py`) that frequently fail during installation on student machines. CSV runs everywhere out-of-the-box.
+3. **Immediate Auditability:** A student or examiner can open any CSV in `data/processed/` and verify an individual data point (e.g. France in 2003) in five seconds.
+4. **Git Version Control & Lightweight Footprint:** The entire processed dataset is under 1 MB, allowing clean git tracking without Git LFS (Large File Storage).
+
+---
+
+### 2.7 Representative Centroid Strategy & Köppen-Geiger Classifications
+
+Rather than sampling unpopulated deserts or tundra, centroids were placed in each country's primary agricultural and demographic heartland using clean signed decimal coordinates:
+
+| Country | Code | Coordinates | Region / Heartland | Köppen-Geiger Classification | Rationale |
 | :--- | :---: | :---: | :--- | :--- | :--- |
-| **France** | `FRA` | `(46.80, 2.60)` | Berry / Centre-Val de Loire | `Cfb` (Temperate oceanic) | Major European cereal breadbasket; moderate maritime influence. |
+| **France** | `FRA` | `(46.80, 2.60)` | Berry / Centre-Val de Loire | `Cfb` (Temperate oceanic) | Major European cereal breadbasket; temperate maritime climate. |
 | **Germany** | `DEU` | `(51.16, 10.45)` | Thuringian Basin / Central Germany | `Cfb / Dfb` (Temperate continental) | Industrial economic structure (<1% agriculture GDP); central European climate. |
 | **Spain** | `ESP` | `(39.88, -4.02)` | Central Iberian Meseta (Toledo) | `Csa` (Mediterranean semi-arid) | European frontline of drought, heatwaves, and seasonal water stress. |
 | **United States** | `USA` | `(40.00, -89.00)` | Midwestern Corn Belt (Illinois) | `Dfa` (Humid continental) | Global agricultural grain export powerhouse; continental climate extremes. |
@@ -135,35 +216,20 @@ To capture weather where people live and crops grow, national series were sample
 
 ---
 
-### 2.4 Climatological Baseline: Why 1961–1990?
+### 2.8 Baseline Choice (1961–1990) & Note on Absolute Values vs. Anomalies
 
-Raw monthly temperatures cannot be pooled across seasons because the annual solar cycle accounts for $>95\%$ of monthly variance in temperate zones. Without de-seasonalization, a warm winter looks colder than a frigid summer, completely masking the multi-decadal warming trend.
-
-We de-seasonalize monthly records using the **1961–1990 Climatological Reference Baseline** recommended by the World Meteorological Organization (WMO):
-$$\bar{T}_{i,m}^{\text{base}} = \frac{1}{30} \sum_{y=1961}^{1990} T_{i,y,m}, \quad \bar{P}_{i,m}^{\text{base}} = \frac{1}{30} \sum_{y=1961}^{1990} P_{i,y,m}$$
-$$\Delta T_{i,y,m} = T_{i,y,m} - \bar{T}_{i,m}^{\text{base}} \quad (^\circ\text{C}), \qquad \Delta P_{i,y,m} = P_{i,y,m} - \bar{P}_{i,m}^{\text{base}} \quad (\text{mm})$$
-
-- **Avoiding Shifting Baseline Syndrome:** Using a more recent 30-year window (e.g. 1991–2020) incorporates significant greenhouse warming into the baseline, making severe modern heatwaves appear artificially mild. The 1961–1990 window provides a stable, pre-acceleration benchmark against which modern warming can be measured.
-- **Mathematical Invariance in Regressions:** In panel regressions with Country Fixed Effects, changing the climatological baseline simply shifts the country-specific intercept ($\alpha_i$). The estimated slope coefficients ($\beta$), standard errors, and $p$-values remain mathematically identical.
+- **WMO Benchmark:** We adopted the 1961–1990 reference normal recommended by the World Meteorological Organization.
+- **Avoiding Shifting Baseline Syndrome:** Using a recent baseline (1991–2020) embeds significant modern warming into the reference norm, making severe heatwaves appear artificially normal.
+- **Note on Downloaded Data:** The ERA5 series we downloaded are **absolute physical daily values** (°C and mm), not pre-computed anomalies. We explicitly chose and constructed the 1961–1990 baseline ourselves.
 
 ---
 
-### 2.5 Macroeconomic Indicators & Acquisition via World Bank API v2
+### 2.9 Transparent Sample Size Accounting (N = 512, 504, 496, 373)
 
-Economic indicators were retrieved directly from the **World Bank World Development Indicators (WDI) API v2** (`api.worldbank.org/v2/`):
-- **Real GDP per Capita Growth (`NY.GDP.PCAP.KD.ZG`):** Annual percentage growth rate of GDP per capita in constant 2015 US dollars.
-- **Agriculture Value Added (% of GDP) (`NV.AGR.TOTL.ZS`):** Net output of the agricultural sector divided by total GDP.
-- **Crop Production Index (`AG.PRD.CROP.XD`):** Agricultural production for each year relative to the 2014–2016 base period ($= 100$).
-
----
-
-### 2.6 Exact Sample Size Accounting (N = 512, 504, 496, 373)
-
-To ensure complete methodological transparency, our sample sizes are derived as follows:
 - **Full Panel ($N = 512$):** 8 countries $\times$ 64 years (1960 to 2023) $= 512$ country-years.
 - **GDP per Capita Growth Regressions ($N = 504$):** Annual growth requires $t-1$. Because our data starts in 1960, the year 1960 is lost for all 8 countries ($512 - 8 = 504$).
-- **Crop Production Growth Regressions ($N = 496$):** World Bank index begins in 1960; percentage growth is defined from 1962 onward ($8 \times 62 = 496$).
-- **Agricultural Share Regressions ($N = 373$):** Early World Bank WDI reporting has historical gaps in value-added shares. Exactly **131 country-years** are missing from the 1961–2023 sample:
+- **Crop Production Growth Regressions ($N = 496$):** The World Bank crop index begins in 1960; percentage growth is defined from 1962 onward ($8 \times 62 = 496$).
+- **Agricultural Share Regressions ($N = 373$):** Historical World Bank reporting has gaps in value-added shares for four countries, dropping exactly **131 country-years**:
   - United States: Missing 38 years (1961–1996 and 2022–2023).
   - Germany: Missing 30 years (1961–1990 pre-unification).
   - Spain: Missing 34 years (1961–1994 pre-Eurostat harmonization).
@@ -280,7 +346,7 @@ We estimated a Two-Way FE panel on Crop Production Growth (`AG.PRD.CROP.XD`, $N 
 
 ---
 
-## 5. Open Methodological Items & Defense Strategies for Authors
+## 5. Open Methodological Decisions & Author Defense Guide
 
 When presenting or defending this research before examiners, students should understand the trade-offs behind five key research decisions:
 
@@ -335,11 +401,11 @@ All figures are generated at publication quality (300 DPI) in `figures/`:
 
 ---
 
-## 7. Repository Structure & Reproduction Guide
+## 7. Step-by-Step Reproduction Guide & Code Walkthrough
 
-### Repository Directory Tree
+### Repository File Structure
 ```
-├── README.md                      # Unified master document (provenance, audit, changelog, open items)
+├── README.md                      # Unified master document (data strategy, audit, changelog, defense)
 ├── results.json                   # Single empirical source of truth for all metrics
 ├── requirements.txt               # Python dependencies
 ├── docs/
@@ -363,7 +429,7 @@ All figures are generated at publication quality (300 DPI) in `figures/`:
     └── verify.py                  # Automated assertion test suite
 ```
 
-### Clean Reproduction Guide
+### Clean One-Command Reproduction Guide
 
 To execute the entire empirical pipeline from scratch in under two minutes:
 
@@ -384,3 +450,22 @@ python scripts/04_generate_visualizations.py
 # 4. Verify numerical consistency across all tables and outputs
 python scripts/verify.py
 ```
+
+### What Each Script Does:
+1. **`scripts/01_download_data.py`:**
+   - Queries Open-Meteo's scientific ERA5 mirror API to pull daily mean temperature and total precipitation for all 8 countries from 1960 to 2023.
+   - Queries World Bank WDI API v2 to retrieve GDP per capita growth, agriculture share of GDP, and the crop production index.
+   - Saves clean, uncompressed CSV files into `data/raw/`.
+2. **`scripts/02_process_data.py`:**
+   - Calculates the 1961–1990 calendar-month baseline climatologies and computes monthly temperature and precipitation anomalies.
+   - Aggregates monthly anomalies into meteorological seasons (accounting for Northern vs. Southern Hemisphere calendars).
+   - Generates annual country series, identifies detrended climate shocks ($> \pm 1.5\sigma$), and merges climate series with the World Bank economic indicators into `data/processed/merged_climate_economic_panel.csv`.
+3. **`scripts/03_run_econometrics.py`:**
+   - Generates Table 1 (Summary statistics, secular decadal changes, OLS trends with Newey-West HAC standard errors, detrended noise, and SNR).
+   - Estimates panel models: Pooled OLS, Country FE, Two-Way FE, Agricultural share TWFE, and Crop production growth TWFE, computing Cameron, Gelbach, and Miller (2008) small-sample cluster $t(7)$ inference, 95% confidence intervals, and within-$R^2$.
+   - Computes Table 3 (GDP per capita growth comparisons during detrended heat and drought shocks).
+   - Exports all tables to `paper/tables/` in both Markdown and CSV formats.
+4. **`scripts/04_generate_visualizations.py`:**
+   - Produces Figures 1 through 5 answering Steps 1 through 4 of the syllabus, alongside Supplementary Figures 6 through 9 for defense slides.
+5. **`scripts/verify.py`:**
+   - Asserts exact numerical equality between `results.json`, all CSV tables in `paper/tables/`, and textual figures cited across `paper/PAPER.md`, `README.md`, `presentation/SLIDES_STRUCTURE.md`, and `presentation/DEFENSE_NOTES.md`.
