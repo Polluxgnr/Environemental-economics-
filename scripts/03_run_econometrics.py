@@ -4,8 +4,8 @@ TRACK 1: TEMPERATURE AND PRECIPITATION RECORDS
 SCRIPT 03: ECONOMETRIC MODELING & EMPIRICAL ESTIMATION (scripts/03_run_econometrics.py)
 ================================================================================
 
-COURSE: Environmental Economics — BSc AIDAMS, T1 2026–2027
-INSTRUCTOR: Caterina Seghini · ESSEC Department of Economics
+COURSE: Environmental Economics, BSc AIDAMS, T1 2026-2027
+INSTRUCTOR: Caterina Seghini, ESSEC Department of Economics
 AUTHORS: Student Research Group 1
 
 PURPOSE:

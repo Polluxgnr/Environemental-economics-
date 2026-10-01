@@ -4,8 +4,8 @@ TRACK 1: TEMPERATURE AND PRECIPITATION RECORDS
 SCRIPT 04: PUBLICATION-GRADE VISUALIZATIONS (scripts/04_generate_visualizations.py)
 ================================================================================
 
-COURSE: Environmental Economics — BSc AIDAMS, T1 2026–2027
-INSTRUCTOR: Caterina Seghini · ESSEC Department of Economics
+COURSE: Environmental Economics, BSc AIDAMS, T1 2026-2027
+INSTRUCTOR: Caterina Seghini, ESSEC Department of Economics
 AUTHORS: Student Research Group 1
 
 PURPOSE & DIRECT MAPPING TO SYLLABUS:
@@ -16,23 +16,23 @@ the four specific numbered questions in the Track 1 syllabus:
 1. Figure 1 -> Answers Step (1):
    "Plot temperature and precipitation over the full available record for a set
    of countries chosen across different regions."
-   - Displays 64-year unbroken records (1960–2023) for all 8 countries.
+   - Displays 64-year unbroken records (1960-2023) for all 8 countries.
    - Temperature (°C, bold red line with 10-year rolling trend) and Precipitation
      (mm, soft blue bars with 10-year rolling trend).
 
 2. Figure 2 -> Answers Step (2):
    "Compute a monthly anomaly: for each calendar month, subtract the average of that
-   same month over a baseline period that you choose and state — 1961–1990 is a common one.
+   same month over a baseline period that you choose and state (1961-1990 is a common one).
    Without this step the seasonal cycle dominates everything and one month cannot be compared
    with another."
    - Panel A: Raw Monthly Temperature Series (showing the massive ~20°C annual solar cycle).
-   - Panel B: De-Seasonalized Monthly Anomalies (showing how subtracting the 1961–1990
+   - Panel B: De-Seasonalized Monthly Anomalies (showing how subtracting the 1961-1990
      baseline purges the seasonal cycle and reveals the secular post-1985 warming trend).
 
 3. Figure 3 -> Answers Step (3):
    "Describe each series: how much has the average changed between the start and the end
    of the record, and how large is the year-to-year variation compared with that change?
-   Then compare countries — where has temperature moved most, and does precipitation move
+   Then compare countries: where has temperature moved most, and does precipitation move
    in the same places or in different ones?"
    - Panel A: Secular Warming (Delta T) vs. YoY Volatility (sigma), annotating SNR.
    - Panel B: Cross-country Quadrant Plot: Secular Temperature Change (Delta T) vs.
@@ -49,7 +49,7 @@ the four specific numbered questions in the Track 1 syllabus:
 
 5. Figure 5 -> Answers Step (4, Direction B - Climate vs. Economy):
    "Either bring in an economic variable of your choice from the World Development Indicators
-   and put it next to your climate series — were the years that were unusually warm or
+   and put it next to your climate series: were the years that were unusually warm or
    unusually dry also unusual for the economy?"
    - Overlays Real GDP per capita growth (%) with extreme thermal shocks (> +1.5 SD) and
      severe droughts (< -1.2 SD) for France, Spain, India, and Kenya.
@@ -127,7 +127,7 @@ def plot_fig1_historical_trends(panel_df):
         
         name = df_c["country_name"].iloc[0]
         region = df_c["region"].iloc[0]
-        ax.set_title(f"{name} ({code}) — {region}", fontsize=10.5, fontweight="bold", pad=6)
+        ax.set_title(f"{name} ({code}): {region}", fontsize=10.5, fontweight="bold", pad=6)
         
     fig.suptitle("Figure 1: Observed Climate Records: Annual Temperature and Precipitation (1960–2023)\n"
                  "Source: ECMWF ERA5 Surface Reanalysis. Red lines show annual mean temperature (°C) with 10-year dashed trend; blue bars show annual precipitation (mm).",
@@ -155,7 +155,7 @@ def plot_fig2_warming_stripes(monthly_df):
     ax1.axhline(fra_df[fra_df["month"] == 7]["temp_baseline_climatology"].iloc[0], color="#d73027", ls=":", lw=1.2, label="July Baseline Norm (~19°C)")
     ax1.axhline(fra_df[fra_df["month"] == 1]["temp_baseline_climatology"].iloc[0], color="#4575b4", ls=":", lw=1.2, label="Jan Baseline Norm (~3°C)")
     ax1.set_ylabel("Raw Temperature (°C)", fontsize=11, fontweight="bold")
-    ax1.set_title("Panel A: Raw Monthly Temperature Series for France (1960–2023) — The Seasonal Cycle Dominates", fontsize=11.5, fontweight="bold")
+    ax1.set_title("Panel A: Raw Monthly Temperature Series for France (1960–2023): The Seasonal Cycle Dominates", fontsize=11.5, fontweight="bold")
     ax1.legend(loc="upper left", fontsize=9, frameon=True)
     
     # Text annotation explaining why raw series fails to show trend
@@ -178,7 +178,7 @@ def plot_fig2_warming_stripes(monthly_df):
     ax2.axhline(0, color="black", lw=0.8, ls="-")
     ax2.set_ylabel("Temp Anomaly (°C)", fontsize=11, fontweight="bold")
     ax2.set_xlabel("Year", fontsize=11, fontweight="bold")
-    ax2.set_title("Panel B: De-Seasonalized Monthly Anomalies (1961–1990 Baseline) — The Secular Warming Trend Emerges", fontsize=11.5, fontweight="bold")
+    ax2.set_title("Panel B: De-Seasonalized Monthly Anomalies (1961–1990 Baseline): The Secular Warming Trend Emerges", fontsize=11.5, fontweight="bold")
     ax2.legend(loc="upper left", fontsize=9, frameon=True)
     
     # Text annotation explaining the revealed signal

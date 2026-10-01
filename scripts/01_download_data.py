@@ -4,8 +4,8 @@ TRACK 1: TEMPERATURE AND PRECIPITATION RECORDS
 SCRIPT 01: DATA ACQUISITION PIPELINE (scripts/01_download_data.py)
 ================================================================================
 
-COURSE: Environmental Economics — BSc AIDAMS, T1 2026–2027
-INSTRUCTOR: Caterina Seghini · ESSEC Department of Economics
+COURSE: Environmental Economics, BSc AIDAMS, T1 2026-2027
+INSTRUCTOR: Caterina Seghini, ESSEC Department of Economics
 AUTHORS: Student Research Group 1
 
 PURPOSE & METHODOLOGICAL JUSTIFICATION:

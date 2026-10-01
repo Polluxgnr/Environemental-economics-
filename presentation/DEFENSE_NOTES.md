@@ -1,10 +1,10 @@
 # Master Oral Defense Guide: 10 Core Questions & Concise Responses
 ## Track 1: Temperature and Precipitation Records (1960–2023)
 
-**Course:** Environmental Economics — BSc AIDAMS, T1 2026–2027  
-**Instructor:** Caterina Seghini · ESSEC Department of Economics  
+**Course:** Environmental Economics, BSc AIDAMS, T1 2026-2027  
+**Instructor:** Caterina Seghini, ESSEC Department of Economics  
 **Format:** 3-Minute Examination Defense (Responders 3, 4, 5)  
-**Rule:** Each defense is strictly $\le 2$ sentences and anchored to at least 1 verified empirical number from `results.json`.
+**Rule:** Each defense is strictly $\le 2$ sentences and anchored to at least 1 verified empirical number from our data.
 
 ---
 

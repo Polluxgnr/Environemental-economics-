@@ -1,8 +1,8 @@
 # Track 1: Temperature and Precipitation Records
 ## Macroeconomic Shocks, Secular Warming, and Econometric Lessons (1960–2023)
 
-**Course:** Environmental Economics — BSc AIDAMS, T1 2026–2027  
-**Instructor:** Caterina Seghini · ESSEC Department of Economics  
+**Course:** Environmental Economics, BSc AIDAMS, T1 2026-2027  
+**Instructor:** Caterina Seghini, ESSEC Department of Economics  
 **Authors:** Student Research Group 1  
 **GitHub Repository:** [https://github.com/Polluxgnr/Environemental-economics-.git](https://github.com/Polluxgnr/Environemental-economics-.git)  
 
@@ -19,52 +19,53 @@
    - [2.6 Why Save It as Plain-Text CSV?](#26-why-save-it-as-plain-text-csv)
    - [2.7 Representative Centroid Strategy & Köppen-Geiger Classifications](#27-representative-centroid-strategy--k%C3%B6ppen-geiger-classifications)
    - [2.8 Baseline Choice (1961–1990) & Note on Absolute Values vs. Anomalies](#28-baseline-choice-19611990--note-on-absolute-values-vs-anomalies)
-   - [2.9 Transparent Sample Size Accounting (N = 512, 504, 496, 373)](#29-transparent-sample-size-accounting-n--512-504-496-373)
+   - [2.9 Transparent Sample Size Accounting (N = 512, 504, 488, 373)](#29-transparent-sample-size-accounting-n--512-504-488-373)
    - [2.10 Glossary of Key Technical Terms & Methodological Concepts](#210-glossary-of-key-technical-terms--methodological-concepts)
-3. [Empirical Audit & Discrepancy Log](#3-empirical-audit--discrepancy-log)
-   - [3.1 Diagnostic Problem-by-Problem Audit](#31-diagnostic-problem-by-problem-audit)
-   - [3.2 The Germany vs. Spain Precipitation Coincidence (-97mm)](#32-the-germany-vs-spain-precipitation-coincidence--97mm)
-   - [3.3 Point-Sampling Microclimates in India and Australia](#33-point-sampling-microclimates-in-india-and-australia)
-4. [Methodological & Econometric Changelog](#4-methodological--econometric-changelog)
-   - [4.1 Itemized Numerical & Inferential Updates](#41-itemized-numerical--inferential-updates)
-   - [4.2 Small-Sample Cluster Inference with t(7) Degrees of Freedom](#42-small-sample-cluster-inference-with-t7-degrees-of-freedom)
-   - [4.3 Resolving the Model Contradiction: Spurious Co-Trend vs. Two-Way Fixed Effects](#43-resolving-the-model-contradiction-spurious-co-trend-vs-two-way-fixed-effects)
-   - [4.4 Physical Agricultural Yields: Crop Production Index (Model 5)](#44-physical-agricultural-yields-crop-production-index-model-5)
-5. [Open Methodological Decisions & Author Defense Guide](#5-open-methodological-decisions--author-defense-guide)
-6. [Core Syllabus Steps & Visualizations (Figures 1 to 5)](#6-core-syllabus-steps--visualizations-figures-1-to-5)
-7. [Step-by-Step Reproduction Guide & Code Walkthrough](#7-step-by-step-reproduction-guide--code-walkthrough)
+3. [Mathematical Foundations: Every Computation and Formula Step-by-Step](#3-mathematical-foundations-every-computation-and-formula-step-by-step)
+4. [Empirical Audit & Discrepancy Log](#4-empirical-audit--discrepancy-log)
+   - [4.1 Diagnostic Problem-by-Problem Audit](#41-diagnostic-problem-by-problem-audit)
+   - [4.2 The Germany vs. Spain Precipitation Coincidence (-97mm)](#42-the-germany-vs-spain-precipitation-coincidence--97mm)
+   - [4.3 Point-Sampling Microclimates in India and Australia](#43-point-sampling-microclimates-in-india-and-australia)
+5. [Methodological & Econometric Changelog](#5-methodological--econometric-changelog)
+   - [5.1 Itemized Numerical & Inferential Updates](#51-itemized-numerical--inferential-updates)
+   - [5.2 Small-Sample Cluster Inference with t(7) Degrees of Freedom](#52-small-sample-cluster-inference-with-t7-degrees-of-freedom)
+   - [5.3 Resolving the Model Contradiction: Spurious Co-Trend vs. Two-Way Fixed Effects](#53-resolving-the-model-contradiction-spurious-co-trend-vs-two-way-fixed-effects)
+   - [5.4 Physical Agricultural Yields: Crop Production Index (Model 5)](#54-physical-agricultural-yields-crop-production-index-model-5)
+6. [Open Methodological Decisions & Author Defense Guide](#6-open-methodological-decisions--author-defense-guide)
+7. [Core Syllabus Steps & Visualizations (Figures 1 to 5)](#7-core-syllabus-steps--visualizations-figures-1-to-5)
+8. [Step-by-Step Reproduction Guide & Code Walkthrough](#8-step-by-step-reproduction-guide--code-walkthrough)
 
 ---
 
 ## 1. Executive Summary & Direct Answers to the 4 Assignment Questions
 
-This project executes **Track 1: Temperature and Precipitation Records** for the Environmental Economics course at ESSEC Business School (BSc AIDAMS). Over 64 continuous calendar years (1960–2023) across eight climatically diverse countries—**France, Germany, Spain, the United States, Brazil, India, Kenya, and Australia**—we answer each sequential question in the syllabus:
+This project executes **Track 1: Temperature and Precipitation Records** for the Environmental Economics course at ESSEC Business School (BSc AIDAMS). Over 64 continuous calendar years (1960–2023) across eight climatically diverse countries (France, Germany, Spain, the United States, Brazil, India, Kenya, and Australia), we answer each sequential question in the syllabus:
 
 ### Direct Answers to the Course Brief:
 
-#### Step (1) — Plot temperature and precipitation over the full available record:
+#### Step 1: Plot temperature and precipitation over the full available record
 - **Direct Answer:** Over the 1960–2023 instrumental record, mean annual temperatures show a noticeable upward inflection beginning around 1985–1990 across all eight regions. Decadal warming between 1960–1969 and 2014–2023 reached $+2.09^\circ\text{C}$ in Germany, $+1.85^\circ\text{C}$ in Kenya, $+1.75^\circ\text{C}$ in France, $+1.63^\circ\text{C}$ in Spain, and $+1.26^\circ\text{C}$ in the United States. Precipitation, by contrast, does not follow a simple upward trend: it exhibits heavy multi-year fluctuations, with major historical droughts visible in Europe (1976, 2003, 2022) and East Africa (1984, 1997).
 
-#### Step (2) — Compute a monthly anomaly using a chosen baseline (1961–1990):
+#### Step 2: Compute a monthly anomaly using a chosen baseline (1961–1990)
 - **Direct Answer:** The annual seasonal cycle accounts for over 89% of total monthly temperature variance in temperate climates (an ~18°C swing between winter and summer). Without de-seasonalization, a mild winter looks colder than a frigid summer, making months impossible to compare across years. Subtracting the 1961–1990 calendar-month norm purges the solar cycle and reveals the secular trend: cool negative anomalies dominate prior to 1985, replaced by persistent warm positive anomalies post-1995.
 - *Note on Downloaded Data:* The ERA5 data we downloaded are **absolute physical daily values** (°C and mm), not pre-computed anomalies. We explicitly chose and constructed the 1961–1990 WMO baseline ourselves.
 
-#### Step (3) — Describe change vs. volatility, and compare across countries:
+#### Step 3: Describe change vs. volatility, and compare across countries
 - **How much has the average changed?** Comparing 2014–2023 to 1960–1969: Germany $+2.09^\circ\text{C}$, Kenya $+1.85^\circ\text{C}$, France $+1.75^\circ\text{C}$, Spain $+1.63^\circ\text{C}$, USA $+1.26^\circ\text{C}$, Brazil $+0.70^\circ\text{C}$, Australia $+0.24^\circ\text{C}$, and India $+0.07^\circ\text{C}$.
 - **How large is year-to-year variation compared with that change ($\text{SNR} = \Delta T / \sigma$)?** In Western Europe and Kenya, secular warming is **2.7 to 3.3 times larger than natural year-to-year noise** ($\text{SNR} > 2.0$), meaning warming has decisively broken through the weather noise envelope. In inland Australia and central India, annual noise exceeds the local trend ($\text{SNR} < 0.4$).
 - **Where has temperature moved most?** Continental Europe (Germany, France, Spain) and East Africa (Kenya).
 - **Does precipitation move in the same places?** No, precipitation moves in completely different places. The US ($+25.2\%$) and India ($+15.4\%$) experienced wetting, whereas Spain ($-18.5\%$), Brazil ($-29.1\%$), and Germany ($-13.6\%$) suffered severe drying. Spain and Brazil face compounding warming and drying stress.
 
-#### Step (4, Direction A) — Is the change spread evenly across seasons?
+#### Step 4 (Direction A): Is the change spread evenly across seasons?
 - **Direct Answer:** No, warming is seasonally asymmetric:
   - In Mediterranean Spain, summer warmed **+53.4% faster** than winter ($+2.04^\circ\text{C}$ in summer vs. $+1.33^\circ\text{C}$ in winter).
   - In France, summer warmed **+13.0% faster** than winter ($+2.35^\circ\text{C}$ in summer vs. $+2.08^\circ\text{C}$ in winter).
   - This summer amplification accelerates soil moisture depletion during the critical agricultural dry season. Conversely, higher-latitude continental regimes (Germany at $+3.38^\circ\text{C}$ and the US at $+2.54^\circ\text{C}$) experienced winter-led warming.
 
-#### Step (4, Direction B) — Were unusually warm or dry years unusual for the economy?
+#### Step 4 (Direction B): Were unusually warm or dry years unusual for the economy?
 - **Direct Answer:** 
   - **In landmark shock years, yes:** Landmark heat and drought events align with documented sector-specific economic crises: the 1976 European drought caused a 10% drop in French farm output and triggered a 6-billion-franc drought tax (*impôt sécheresse*); the 2003 European heatwave caused €4 billion in farm losses; and the 1984/1997 Kenyan droughts caused sharp contractions in agricultural output.
-  - **Across the full 64-year panel, no:** In our Two-Way Fixed Effects econometric model, annual weather anomalies do not exert a statistically detectable drag on aggregate national GDP per capita growth ($\hat{\beta} = -0.0325, p = 0.9419$, 95% CI $[-1.0496, +0.9847]$ pp/°C). A naive Country Fixed Effects model showed a large penalty ($-0.4904^{**}$ pp/°C), but this was a **spurious co-trend** caused by post-WWII growth naturally slowing down after the 1960s reconstruction boom over the exact same decades that global temperatures rose. Two-Way Fixed Effects purges this macro trend. The resulting null is an **uninformative null** due to sample size ($G=8$), not proof of total economic resilience. Direct physical crop yields, however, confirm significant positive moisture elasticity ($\hat{\beta}_{\text{precip}} = +0.5664^*, p = 0.077$).
+  - **Across the full 64-year panel, no:** In our Two-Way Fixed Effects econometric model, annual weather anomalies do not exert a statistically detectable drag on aggregate national GDP per capita growth ($\hat{\beta} = -0.0325, p = 0.9419$, 95% CI $[-1.0496, +0.9847]$ pp/°C). A naive Country Fixed Effects model showed a large penalty ($-0.4904^{**}$ pp/°C), but this was a **spurious co-trend** caused by post-WWII growth naturally slowing down after the 1960s reconstruction boom over the exact same decades that global temperatures rose. Two-Way Fixed Effects purges this macro trend. The resulting null is an **uninformative null** due to sample size ($G=8$), not proof of total economic resilience. Direct physical crop yields, however, confirm significant positive moisture elasticity ($\hat{\beta}_{\text{precip}} = +0.5681^*, p = 0.079$).
 
 ---
 
@@ -193,7 +194,7 @@ FRA,2003,12.51,+1.64,726.9,-0.35,0.26,2.41,1
 
 ### 2.6 Why Save It as Plain-Text CSV?
 
-1. **Universality & Cross-Platform Accessibility:** Plain-text CSV can be opened and verified by anyone—in Excel, Python (`pandas`), R, Stata, Julia, or a standard text editor—with zero proprietary software.
+1. **Universality & Cross-Platform Accessibility:** Plain-text CSV can be opened and verified by anyone: in Excel, Python (`pandas`), R, Stata, Julia, or a standard text editor, with zero proprietary software.
 2. **Zero GIS Compilation Failures:** NetCDF (`.nc`) and GRIB (`.grib`) files require specialized C/Fortran binary packages (`libgdal`, `netCDF4`, `h5py`) that frequently fail during installation on student machines. CSV runs everywhere out-of-the-box.
 3. **Immediate Auditability:** A student or examiner can open any CSV in `data/processed/` and verify an individual data point (e.g. France in 2003) in five seconds.
 4. **Git Version Control & Lightweight Footprint:** The entire processed dataset is under 1 MB, allowing clean git tracking without Git LFS (Large File Storage).
@@ -225,11 +226,11 @@ Rather than sampling unpopulated deserts or tundra, centroids were placed in eac
 
 ---
 
-### 2.9 Transparent Sample Size Accounting (N = 512, 504, 496, 373)
+### 2.9 Transparent Sample Size Accounting (N = 512, 504, 488, 373)
 
 - **Full Panel ($N = 512$):** 8 countries $\times$ 64 years (1960 to 2023) $= 512$ country-years.
 - **GDP per Capita Growth Regressions ($N = 504$):** Annual growth requires $t-1$. Because our data starts in 1960, the year 1960 is lost for all 8 countries ($512 - 8 = 504$).
-- **Crop Production Growth Regressions ($N = 496$):** The World Bank crop index begins in 1960; percentage growth is defined from 1962 onward ($8 \times 62 = 496$).
+- **Crop Production Growth Regressions ($N = 488$):** The FAO/World Bank crop index covers 1961–2022 (62 index values); first-differencing into annual growth removes the first observation, leaving 61 valid growth years per country ($8 \times 61 = 488$).
 - **Agricultural Share Regressions ($N = 373$):** Historical World Bank reporting has gaps in value-added shares for four countries, dropping exactly **131 country-years**:
   - United States: Missing 38 years (1961–1996 and 2022–2023).
   - Germany: Missing 30 years (1961–1990 pre-unification).
@@ -259,11 +260,92 @@ To ensure full transparency and enable any student to defend the methodology wit
 
 ---
 
-## 3. Empirical Audit & Discrepancy Log
+## 3. Mathematical Foundations: Every Computation and Formula Step-by-Step
 
-### 3.1 Diagnostic Problem-by-Problem Audit
+To ensure that any student can explain every single number off the top of their head when asked "how did you calculate this?", here is the exact mathematical formulation for every metric computed across the project:
 
-Following peer review, an exhaustive audit was performed across all scripts, tables, and prose to eliminate internal discrepancies. Every metric was recomputed from scratch and verified against `results.json`:
+### 3.1 Daily to Monthly Aggregation
+For each country $i$, year $y$, and calendar month $m$ containing $D_m$ days:
+- **Monthly Mean Temperature:**
+  $$T_{i,y,m} = \frac{1}{D_m} \sum_{d=1}^{D_m} T_{i,y,m,d} \quad (\text{°C})$$
+- **Monthly Cumulative Precipitation:**
+  $$P_{i,y,m} = \sum_{d=1}^{D_m} P_{i,y,m,d} \quad (\text{mm})$$
+
+### 3.2 Climatological Reference Baseline (1961–1990)
+The annual solar cycle accounts for over 89.5% of monthly temperature variance in temperate zones. Without de-seasonalization, a mild winter looks colder than a frigid summer, making months impossible to compare across years.
+We construct the 30-year calendar-month baseline climatology for each month $m \in \{1, \dots, 12\}$ following World Meteorological Organization (WMO) standards:
+$$
+\bar{T}_{i,m}^{\text{base}} = \frac{1}{30} \sum_{y=1961}^{1990} T_{i,y,m} \quad (\text{°C}), \qquad \bar{P}_{i,m}^{\text{base}} = \frac{1}{30} \sum_{y=1961}^{1990} P_{i,y,m} \quad (\text{mm})
+$$
+*Concrete Example:* For France, the July baseline climatology is $19.06^\circ\text{C}$ and January is $3.24^\circ\text{C}$.
+
+### 3.3 Monthly and Seasonal Anomalies
+Subtracting the baseline climatology purges the seasonal cycle and isolates the climate anomaly:
+$$
+\Delta T_{i,y,m} = T_{i,y,m} - \bar{T}_{i,m}^{\text{base}} \quad (\text{°C}), \qquad \Delta P_{i,y,m} = P_{i,y,m} - \bar{P}_{i,m}^{\text{base}} \quad (\text{mm})
+$$
+Percentage precipitation anomaly is expressed relative to the calendar-month baseline:
+$$\% \Delta P_{i,y,m} = \left( \frac{P_{i,y,m} - \bar{P}_{i,m}^{\text{base}}}{\bar{P}_{i,m}^{\text{base}}} \right) \times 100$$
+Meteorological seasons aggregate 3-month blocks (Northern Hemisphere: Winter DJF, Spring MAM, Summer JJA, Autumn SON; inverted for Southern Hemisphere Brazil and Australia: Summer DJF, Autumn MAM, Winter JJA, Spring SON).
+
+### 3.4 Annual Aggregation and Secular Decadal Change
+- **Annual Mean Temperature:** $\bar{T}_{i,y} = \frac{1}{12} \sum_{m=1}^{12} T_{i,y,m}$
+- **Annual Total Precipitation:** $P_{i,y} = \sum_{m=1}^{12} P_{i,y,m}$
+- **Secular Decadal Warming ($\Delta T$):** The difference between the modern decade (2014–2023) and the early-record decade (1960–1969):
+  $$\Delta T_i^{\text{secular}} = \bar{T}_{i, 2014-2023} - \bar{T}_{i, 1960-1969} \quad (\text{°C})$$
+- **Secular Decadal Precipitation Change ($\Delta P$ and $\% \Delta P$):**
+  $$\Delta P_i^{\text{secular}} = \bar{P}_{i, 2014-2023} - \bar{P}_{i, 1960-1969} \quad (\text{mm})$$
+  $$\% \Delta P_i = \left( \frac{\Delta P_i^{\text{secular}}}{\bar{P}_{i, 1960-1969}} \right) \times 100$$
+*Why Decadal Averages?* A single year (such as 1960 or 2023) can be an outlier due to natural weather volatility. Averaging across 10-year windows smooths out annual noise and isolates the true multi-decadal signal.
+
+### 3.5 Linear OLS Warming Trend with Newey-West HAC Standard Errors
+For each country, we fit an ordinary least squares (OLS) linear trend over time:
+$$T_{i,y} = \mu_i + \beta_i^{\text{trend}} \times y + e_{i,y}$$
+- The decadal warming rate is $10 \times \hat{\beta}_i^{\text{trend}}$ (°C/decade).
+- **HAC Newey-West Correction (3 lags):** Weather time series exhibit multi-year serial correlation (autocorrelation). Standard OLS standard errors assume i.i.d. disturbances and would be artificially small. We apply the Newey-West (1987) covariance estimator with 3 lags (matching typical ENSO cycle persistence) to ensure valid inference.
+
+### 3.6 Detrended Interannual Noise ($\sigma$) and Signal-to-Noise Ratio (SNR)
+- **Natural Weather Noise ($\sigma$):** The standard deviation of the residuals from the linear trend:
+  $$\sigma_i = \sqrt{\frac{1}{T - 2} \sum_{y=1960}^{2023} \hat{e}_{i,y}^2}$$
+- **Signal-to-Noise Ratio (SNR):**
+  $$\text{SNR}_i = \frac{\Delta T_i^{\text{secular}}}{\sigma_i}$$
+*Interpretation:* $\text{SNR} > 1.0$ indicates that the multi-decadal warming trend has decisively broken through the background envelope of natural year-to-year weather noise. In Western Europe and Kenya, $\text{SNR} \approx 2.7\text{–}3.3$, confirming clear trend emergence. In central India ($\text{SNR} = 0.18$) and inland Australia ($\text{SNR} = 0.37$), interannual weather noise dominates the local signal.
+
+### 3.7 Econometric Panel Specifications
+We estimate panel models on the country-year dataset (1961–2023, $N = 504$):
+1. **Model 1 (Pooled OLS):**
+   $$\text{Growth}_{it} = \beta_0 + \beta_1 \Delta T_{it} + \beta_2 \Delta P_{it}^{100\text{mm}} + \varepsilon_{it}$$
+2. **Model 2 (Country Fixed Effects):**
+   $$\text{Growth}_{it} = \alpha_i + \beta_1 \Delta T_{it} + \beta_2 \Delta P_{it}^{100\text{mm}} + \varepsilon_{it}$$
+   Subtracts each country's time-series mean, absorbing all unobserved, time-invariant geographical and institutional confounders.
+3. **Model 3 (Two-Way Fixed Effects: Country FE + Year FE):**
+   $$\text{Growth}_{it} = \alpha_i + \gamma_t + \beta_1 \Delta T_{it} + \beta_2 \Delta P_{it}^{100\text{mm}} + \varepsilon_{it}$$
+   Year fixed effects ($\gamma_t$) absorb all global macro shocks (oil crises, financial crises, pandemic) and secular macro trends (post-WWII productivity slowdowns and global greenhouse forcing trends) common to all countries in year $t$.
+4. **Exact Within-$R^2$ (Frisch-Waugh-Lovell Theorem):**
+   Software default $R^2$ includes the explanatory power of country dummy indicators (which inflates $R^2$ to ~0.33). To measure how much variation the *weather anomalies themselves* explain within countries over time, we demean the data:
+   $$\tilde{y}_{it} = y_{it} - \bar{y}_i - \bar{y}_t + \bar{y}, \qquad \tilde{x}_{it} = x_{it} - \bar{x}_i - \bar{x}_t + \bar{x}$$
+   $$\text{Within-}R^2 = 1 - \frac{\sum \hat{\varepsilon}_{it}^2}{\sum (\tilde{y}_{it} - \bar{\tilde{y}})^2}$$
+
+### 3.8 Small-Sample Cluster Inference with $t(G-1) = t(7)$
+Standard errors are clustered at the country level ($G = 8$) to allow arbitrary serial correlation and heteroskedasticity over 64 years. Because $G = 8$ is small, asymptotic normal critical values ($z = 1.96$) severely over-reject the null (false positives up to 20%). Following Cameron, Gelbach, and Miller (2008), $p$-values and 95% confidence intervals are evaluated using the Student's $t$ distribution with $df = G - 1 = 7$:
+$$t_{\text{crit}} = t_{0.975}(7) = 2.3646$$
+$$\text{95% CI} = \hat{\beta} \pm 2.3646 \times \widehat{\text{SE}}(\hat{\beta})$$
+
+### 3.9 Detrended Climate Shocks & Welch's Two-Sample $t$-test
+To test whether unusually hot or dry years were unusual for the economy, we remove each country's linear time trend and standardize the residuals into $z$-scores:
+$$z_{it}^T = \frac{T_{it} - \hat{T}_{it}}{\sigma_i^T}, \qquad z_{it}^P = \frac{P_{it} - \hat{P}_{it}}{\sigma_i^P}$$
+- **Heat Shock:** $z_{it}^T > +1.5$ standard deviations above trend.
+- **Drought Shock:** $z_{it}^P < -1.5$ standard deviations below trend.
+- **Welch's $t$-test:** Compares mean growth between shock and non-shock years without assuming equal variances:
+  $$t = \frac{\bar{y}_{\text{shock}} - \bar{y}_{\text{non-shock}}}{\sqrt{\frac{s_1^2}{N_1} + \frac{s_2^2}{N_2}}}$$
+
+---
+
+## 4. Empirical Audit & Discrepancy Log
+
+### 4.1 Diagnostic Problem-by-Problem Audit
+
+Following peer review, an exhaustive audit was performed across all scripts, tables, and prose to eliminate internal discrepancies. Every metric was recomputed from scratch and verified across all generated tables and figures:
 
 | Item / Claim | Initial Value / Issue | Actual Empirical Value | Root Cause & Resolution |
 | :--- | :--- | :--- | :--- |
@@ -282,7 +364,7 @@ Following peer review, an exhaustive audit was performed across all scripts, tab
 
 ---
 
-### 3.2 The Germany vs. Spain Precipitation Coincidence (-97mm)
+### 4.2 The Germany vs. Spain Precipitation Coincidence (-97mm)
 
 In Table 1, Germany and Spain show nearly identical values for decadal precipitation change ($-97.09\text{ mm}$ vs. $-97.05\text{ mm}$) and identical standard deviations ($108.67\text{ mm}$ vs. $108.71\text{ mm}$). 
 
@@ -293,7 +375,7 @@ We performed an explicit empirical test to confirm this was not an indexing bug:
 
 ---
 
-### 3.3 Point-Sampling Microclimates in India and Australia
+### 4.3 Point-Sampling Microclimates in India and Australia
 
 Table 1 reports modest secular warming for the India centroid ($+0.07^\circ\text{C}$, trend $+0.028^\circ\text{C}$/dec, $p = 0.33$) and Australia centroid ($+0.24^\circ\text{C}$, trend $+0.092^\circ\text{C}$/dec, $p = 0.13$). This highlights the distinction between a single $0.25^\circ$ grid cell and a continental national landmass:
 - **Central India (Madhya Pradesh: `23.00, 78.50`):** During 1970–2010, the Green Revolution drove massive tubewell irrigation expansion across the Indo-Gangetic and central plains. Enhanced surface evapotranspiration creates a local evaporative cooling effect during the dry season. Concurrently, high atmospheric aerosol optical depth (sulfate and black carbon from agricultural burning and coal) caused solar dimming, suppressing daytime warming trends.
@@ -302,9 +384,9 @@ Table 1 reports modest secular warming for the India centroid ($+0.07^\circ\text
 
 ---
 
-## 4. Methodological & Econometric Changelog
+## 5. Methodological & Econometric Changelog
 
-### 4.1 Itemized Numerical & Inferential Updates
+### 5.1 Itemized Numerical & Inferential Updates
 
 All metrics across the project adhere strictly to the following verified values:
 
@@ -323,7 +405,7 @@ All metrics across the project adhere strictly to the following verified values:
 
 ---
 
-### 4.2 Small-Sample Cluster Inference with t(7) Degrees of Freedom
+### 5.2 Small-Sample Cluster Inference with t(7) Degrees of Freedom
 
 Following Bertrand, Duflo, and Mullainathan (2004), regressions cluster standard errors at the country level to allow arbitrary serial correlation and heteroskedasticity over 64 years.
 
@@ -334,7 +416,7 @@ With only $G = 8$ country clusters, standard asymptotic normal $Z$-critical valu
 
 ---
 
-### 4.3 Resolving the Model Contradiction: Spurious Co-Trend vs. Two-Way Fixed Effects
+### 5.3 Resolving the Model Contradiction: Spurious Co-Trend vs. Two-Way Fixed Effects
 
 Why does the temperature coefficient collapse from $-0.4904^{**}$ to $-0.0325$ when Year Fixed Effects are added?
 
@@ -355,18 +437,18 @@ The Two-Way FE 95% confidence interval is **$[-1.0496, +0.9847]$ pp/°C**. Becau
 
 ---
 
-### 4.4 Physical Agricultural Yields: Crop Production Index (Model 5)
+### 5.4 Physical Agricultural Yields: Crop Production Index (Model 5)
 
 While aggregate GDP per capita growth is buffered by services and trade, does physical agricultural production respond to weather?
 
-We estimated a Two-Way FE panel on Crop Production Growth (`AG.PRD.CROP.XD`, $N = 496$):
-- **Precipitation Elasticity:** $\hat{\beta}_{\text{precip}} = \mathbf{+0.5664}^*$ percentage points per 100mm anomaly ($\text{SE} = 0.2733, t(7) = 2.072, p = \mathbf{0.077}$, significant at the 10% level).
-- **Temperature Elasticity:** $\hat{\beta}_{\text{temp}} = -1.2146$ ($\text{SE} = 0.9063, p = 0.222$).
+We estimated a Two-Way FE panel on Crop Production Growth (`AG.PRD.CROP.XD`, $N = 488$):
+- **Precipitation Elasticity:** $\hat{\beta}_{\text{precip}} = \mathbf{+0.5681}^*$ percentage points per 100mm anomaly ($\text{SE} = 0.2769, t(7) = 2.052, p = \mathbf{0.079}$, significant at the 10% level).
+- **Temperature Elasticity:** $\hat{\beta}_{\text{temp}} = -1.2883$ ($\text{SE} = 0.9516, p = 0.218$).
 - **Key Insight:** Direct physical agricultural yields are sensitive to precipitation anomalies, confirming physical vulnerability even when national GDP shows no detectable movement.
 
 ---
 
-## 5. Open Methodological Decisions & Author Defense Guide
+## 6. Open Methodological Decisions & Author Defense Guide
 
 When presenting or defending this research before examiners, students should understand the trade-offs behind five key research decisions:
 
@@ -392,28 +474,28 @@ When presenting or defending this research before examiners, students should und
 
 ---
 
-## 6. Core Syllabus Steps & Visualizations (Figures 1 to 5)
+## 7. Core Syllabus Steps & Visualizations (Figures 1 to 5)
 
 All figures are generated at publication quality (300 DPI) in `figures/`:
 
-### Step (1) — Full Instrumental Record: Figure 1
+### Step 1: Full Instrumental Record (Figure 1)
 `figures/fig1_historical_climate_trends.png` displays 64-year unbroken records (1960–2023) across all eight countries. Annual mean temperature (°C, red line with 10-year rolling trend) and annual precipitation (mm, blue bars with 10-year rolling trend) show clear post-1985 temperature inflection points and multi-year precipitation swings.
 
-### Step (2) — The Necessity of De-Seasonalization: Figure 2
+### Step 2: The Necessity of De-Seasonalization (Figure 2)
 `figures/fig2_warming_stripes_anomalies.png` contrasts raw monthly temperatures (Panel A, where the $\sim 18^\circ\text{C}$ solar cycle masks multi-decadal change) with de-seasonalized monthly anomalies relative to 1961–1990 (Panel B, revealing the transition from cool blues prior to 1985 to persistent warm reds post-1995).
 
-### Step (3) — Signal-to-Noise & Quadrant Divergence: Figure 3
+### Step 3: Signal-to-Noise & Quadrant Divergence (Figure 3)
 `figures/fig3_warming_vs_precipitation_quadrant.png`:
 - **Panel A (Signal-to-Noise):** Secular warming outpaces natural volatility across Europe and Kenya ($\text{SNR} > 2.0$).
 - **Panel B (Quadrant Plot):** Cross-country divergence between the "Warming & Wetting" regime (USA, India, Australia) and the compounding "Warming & Drying" stress regime (Spain, Brazil, Germany, France).
 
-### Step (4, Option A) — The Shape of the Change: Figure 4
+### Step 4 (Option A): The Shape of the Change (Figure 4)
 `figures/fig4_seasonal_asymmetry.png` decomposes decadal warming by meteorological season:
 - In Mediterranean Spain, summer warming ($+2.04^\circ\text{C}$) outpaces winter ($+1.33^\circ\text{C}$) by **$+53.4\%$**.
 - In France, summer warming ($+2.35^\circ\text{C}$) outpaces winter ($+2.08^\circ\text{C}$) by **$+13.0\%$**.
 - In Germany and the US, winter warming dominates ($+3.38^\circ\text{C}$ and $+2.54^\circ\text{C}$).
 
-### Step (4, Option B) — Economic Transmission: Figure 5
+### Step 4 (Option B): Economic Transmission (Figure 5)
 `figures/fig5_climate_shocks_vs_economic_dips.png` overlays Real GDP per capita growth with extreme thermal shocks ($> +1.5\sigma$), annotating historical shock losses:
 - **1976 European Drought:** French agricultural output fell ~10%, prompting a 6 billion franc drought tax (*impôt sécheresse*).
 - **2003 European Heatwave:** €4 billion in French farm losses; cereal yields fell 20–30%; nuclear power output curtailed by river cooling limits.
@@ -421,12 +503,11 @@ All figures are generated at publication quality (300 DPI) in `figures/`:
 
 ---
 
-## 7. Step-by-Step Reproduction Guide & Code Walkthrough
+## 8. Step-by-Step Reproduction Guide & Code Walkthrough
 
 ### Repository File Structure
 ```
-├── README.md                      # Unified master document (data strategy, audit, changelog, defense)
-├── results.json                   # Single empirical source of truth for all metrics
+├── README.md                      # Unified master document (data strategy, math, audit, defense)
 ├── requirements.txt               # Python dependencies
 ├── docs/
 │   └── assignment_brief.pdf       # Official course syllabus
@@ -444,9 +525,7 @@ All figures are generated at publication quality (300 DPI) in `figures/`:
     ├── 01_download_data.py        # Automated API data ingestion
     ├── 02_process_data.py         # Baseline de-seasonalization & anomaly processing
     ├── 03_run_econometrics.py     # Panel models with small-sample t(7) inference
-    ├── 04_generate_visualizations.py # Publication-grade chart generation
-    ├── generate_results_json.py   # Compiles all empirical metrics into results.json
-    └── verify.py                  # Automated assertion test suite
+    └── 04_generate_visualizations.py # Publication-grade chart generation
 ```
 
 ### Clean One-Command Reproduction Guide
@@ -466,9 +545,6 @@ python scripts/01_download_data.py
 python scripts/02_process_data.py
 python scripts/03_run_econometrics.py
 python scripts/04_generate_visualizations.py
-
-# 4. Verify numerical consistency across all tables and outputs
-python scripts/verify.py
 ```
 
 ### What Each Script Does:
@@ -487,5 +563,3 @@ python scripts/verify.py
    - Exports all tables to `paper/tables/` in both Markdown and CSV formats.
 4. **`scripts/04_generate_visualizations.py`:**
    - Produces Figures 1 through 5 answering Steps 1 through 4 of the syllabus, alongside Supplementary Figures 6 through 9 for defense slides.
-5. **`scripts/verify.py`:**
-   - Asserts exact numerical equality between `results.json`, all CSV tables in `paper/tables/`, and textual figures cited across `paper/PAPER.md`, `README.md`, `presentation/SLIDES_STRUCTURE.md`, and `presentation/DEFENSE_NOTES.md`.

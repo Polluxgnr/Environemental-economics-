@@ -1,9 +1,9 @@
 # Atmospheric Signals, Secular Trends, and Macroeconomic Shocks: An Empirical Assessment of Climate Variability, Seasonal Asymmetry, and Growth (1960–2023)
 
-**Course:** Environmental Economics — BSc AIDAMS, T1 2026–2027  
-**Instructor:** Caterina Seghini · ESSEC Department of Economics  
-**Authors:** Student Research Group 1 (Track 1 — Temperature and Precipitation Records)  
-**Date:** September 2026 / Academic Year 2026–2027  
+**Course:** Environmental Economics, BSc AIDAMS, T1 2026-2027  
+**Instructor:** Caterina Seghini, ESSEC Department of Economics  
+**Authors:** Student Research Group 1 (Track 1: Temperature and Precipitation Records)  
+**Date:** September 2026 / Academic Year 2026-2027  
 **Repository:** [https://github.com/Polluxgnr/Environemental-economics-.git](https://github.com/Polluxgnr/Environemental-economics-.git)
 
 ---
@@ -82,8 +82,7 @@ Economic indicators were retrieved directly from the **World Bank World Developm
 Atmospheric and economic data were merged deterministically on `(country_code, year)`:
 - **Full panel size:** 8 countries $\times$ 64 years = 512 country-years.
 - **GDP per capita growth regressions ($N = 504$):** Annual growth requires $t-1$. The year 1960 is lost for all 8 countries ($512 - 8 = 504$).
-- **Agriculture share regressions ($N = 373$):** Historical value-added data begins later for four countries: USA (missing 38 years: 1961–1996 and 2022–2023), Germany (missing 30 years: 1961–1990 pre-unification), Spain (missing 34 years: 1961–1994), and Australia (missing 29 years: 1961–1989). France, Brazil, India, and Kenya have full reporting from 1961 onward ($504 - 131 = 373$).
-- **Crop production growth regressions ($N = 496$):** Available continuously for all 8 countries from 1961 to 2023 ($8 \times 62 = 496$).
+- **Crop production growth regressions ($N = 488$):** The FAO/World Bank crop production index covers 1961–2022 (62 index levels); first-differencing into annual growth yields 61 valid growth years across all 8 countries ($8 \times 61 = 488$).
 
 ### 2.5 Data Limitations
 1. **Single-Centroid Sampling:** Extracting a single $0.25^\circ \times 0.25^\circ$ grid cell captures agricultural heartland weather but does not represent continental national averages for large nations (USA, Brazil, Australia, India). Local factors (e.g. aerosol dimming in India) can cause centroid trends to diverge from country-wide averages.
@@ -175,7 +174,7 @@ This summer amplification accelerates soil evapotranspiration during the critica
 
 **Direct Answer:**
 - **In landmark shock years, yes:** Historical extreme heat and drought years caused documented agricultural crises (the 1976 drought prompted France's 6-billion-franc *impôt sécheresse*; the 2003 European heatwave caused €4 billion in farm losses; the 1984 and 1997 droughts severely depressed Kenyan agricultural GDP).
-- **Across the full 64-year panel, no:** In our Two-Way Fixed Effects econometric model, annual weather anomalies do not exert a statistically detectable drag on aggregate national GDP per capita growth ($\hat{\beta} = -0.0325, p = 0.9419$, 95% CI $[-1.0496, +0.9847]$ pp/°C). This is an uninformative null due to small sample cluster size ($G=8$), not proof of total economic resilience. Direct physical crop yields, however, confirm significant positive moisture elasticity ($\hat{\beta}_{\text{precip}} = +0.5664^*, p = 0.077$).
+- **Across the full 64-year panel, no:** In our Two-Way Fixed Effects econometric model, annual weather anomalies do not exert a statistically detectable drag on aggregate national GDP per capita growth ($\hat{\beta} = -0.0325, p = 0.9419$, 95% CI $[-1.0496, +0.9847]$ pp/°C). This is an uninformative null due to small sample cluster size ($G=8$), not proof of total economic resilience. Direct physical crop yields, however, confirm significant positive moisture elasticity ($\hat{\beta}_{\text{precip}} = +0.5681^*, p = 0.0793$).
 
 ![Figure 5: Climate Shocks vs Economic Dips](../figures/fig5_climate_shocks_vs_economic_dips.png)
 *Figure 5: Annual Real GDP per Capita Growth (%, blue line) alongside Annual Temperature Anomalies (°C, red dashed line). Red vertical bands mark positive thermal shocks exceeding 1.5 standard deviations above the country mean. Source: ECMWF ERA5 and World Bank WDI.*
@@ -214,7 +213,7 @@ $$
 \text{Growth}_{it} = \alpha_i + \beta_1 \Delta T_{it} + \beta_2 \Delta P_{it}^{100\text{mm}} + \varepsilon_{it}
 $$
 
-#### Model 3: Two-Way Fixed Effects (Country FE + Year FE) — Preferred Specification
+#### Model 3: Two-Way Fixed Effects (Country FE + Year FE) [Preferred Specification]
 $$
 \text{Growth}_{it} = \alpha_i + \gamma_t + \beta_1 \Delta T_{it} + \beta_2 \Delta P_{it}^{100\text{mm}} + \varepsilon_{it}
 $$
@@ -232,18 +231,18 @@ Across all models, standard errors are clustered at the country level ($G = 8$).
 | Variable | (1) Pooled OLS | (2) Country FE | (3) Two-Way FE (Preferred) | (4) Agri Share TWFE | (5) Crop Growth TWFE |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Dependent Variable** | *GDPpc Growth (%)* | *GDPpc Growth (%)* | *GDPpc Growth (%)* | *Agri Share (% GDP)* | *Crop Growth (%)* |
-| **Temperature Anomaly (°C)** | **-0.5009\*\*** | **-0.4904\*\*** | **-0.0325** | 0.7827 | -1.2146 |
-| *(Cluster-Robust SE)* | *(0.1780)* | *(0.1875)* | *(0.4301)* | *(1.0898)* | *(0.9063)* |
-| *[95% CI with t(7)]* | *[-0.9219, -0.0800]* | *[-0.9338, -0.0470]* | *[-1.0496, 0.9847]* | *[-1.7943, 3.3597]* | *[-3.3576, 0.9283]* |
-| *p-value (t(7))* | *0.0260* | *0.0346* | *0.9419* | *0.4959* | *0.2220* |
-| **Precipitation Anomaly (100mm)** | 0.0596 | 0.0347 | 0.0635 | -0.0766 | **0.5664\*** |
-| *(Cluster-Robust SE)* | *(0.0703)* | *(0.0634)* | *(0.0550)* | *(0.1121)* | *(0.2733)* |
-| *p-value (t(7))* | *0.4244* | *0.6012* | *0.2857* | *0.5164* | *0.0770* |
+| **Temperature Anomaly (°C)** | **-0.5009\*\*** | **-0.4904\*\*** | **-0.0325** | 0.7827 | -1.2883 |
+| *(Cluster-Robust SE)* | *(0.1780)* | *(0.1875)* | *(0.4301)* | *(1.0898)* | *(0.9516)* |
+| *[95% CI with t(7)]* | *[-0.9219, -0.0800]* | *[-0.9338, -0.0470]* | *[-1.0496, 0.9847]* | *[-1.7943, 3.3597]* | *[-3.5384, 0.9618]* |
+| *p-value (t(7))* | *0.0260* | *0.0346* | *0.9419* | *0.4959* | *0.2179* |
+| **Precipitation Anomaly (100mm)** | 0.0596 | 0.0347 | 0.0635 | -0.0766 | **0.5681\*** |
+| *(Cluster-Robust SE)* | *(0.0703)* | *(0.0634)* | *(0.0550)* | *(0.1121)* | *(0.2769)* |
+| *p-value (t(7))* | *0.4244* | *0.6012* | *0.2857* | *0.5164* | *0.0793* |
 | Country Fixed Effects | No | Yes | Yes | Yes | Yes |
 | Year Fixed Effects | No | No | Yes | Yes | Yes |
 | Clustered SEs (Country) | Yes (G=8) | Yes (G=8) | Yes (G=8) | Yes (G=8) | Yes (G=8) |
-| Observations ($N$) | 504 | 504 | 504 | 373 | 496 |
-| $R^2$ (overall) | 0.0210 | 0.0444 | 0.3300 | 0.9170 | 0.1656 |
+| Observations ($N$) | 504 | 504 | 504 | 373 | 488 |
+| $R^2$ (overall) | 0.0210 | 0.0444 | 0.3300 | 0.9170 | 0.1654 |
 | Within $R^2$ | - | 0.0176 | 0.0030 | - | - |
 
 *\* p < 0.10, \*\* p < 0.05, \*\*\* p < 0.01. Standard errors clustered by country in parentheses. Inference based on t(7). Dependent variables: Columns (1)–(3) Annual Real GDP per Capita Growth (%); Column (4) Agriculture Value Added (% of GDP); Column (5) Crop Production Index Annual Growth (%).*
@@ -264,7 +263,7 @@ Across all models, standard errors are clustered at the country level ($G = 8$).
 5. **Evaluating the Null: An Uninformative Confidence Interval:**
    The Two-Way FE 95% confidence interval is **$[-1.05, +0.98]$ percentage points per °C**. Because this interval includes the naive estimate of $-0.49$ as well as zero and $+0.50$, it represents an **uninformative null** rather than evidence of macroeconomic immunity. With 8 countries, statistical power is insufficient to rule out meaningful impacts.
 6. **Sectoral Yield Response (Model 5):**
-   In Column (5), annual crop production growth responds positively to precipitation: $+0.5664$ percentage points per 100mm ($p = 0.077$). Physical yield responses are detectable even when aggregate GDP shows no response.
+   In Column (5), annual crop production growth responds positively to precipitation: $+0.5681$ percentage points per 100mm ($p = 0.079$). Physical yield responses are detectable even when aggregate GDP shows no response.
 
 ---
 
@@ -321,5 +320,4 @@ python scripts/01_download_data.py
 python scripts/02_process_data.py
 python scripts/03_run_econometrics.py
 python scripts/04_generate_visualizations.py
-python scripts/verify.py
 ```

@@ -1,14 +1,13 @@
 # Presentation Blueprint: Temperature and Precipitation Records
 ## Macroeconomic Shocks, Secular Warming, and Econometric Lessons (1960–2023)
 
-**Course:** Environmental Economics — BSc AIDAMS, ESSEC Business School (T1 2026–2027)  
-**Instructor:** Caterina Seghini · ESSEC Department of Economics  
+**Course:** Environmental Economics, BSc AIDAMS, ESSEC Business School (T1 2026-2027)  
+**Instructor:** Caterina Seghini, ESSEC Department of Economics  
 **Format:** 10-Minute Presentation (8 Slides, $\le 3$ bullets each) + 3-Minute Q&A Defense  
 **Division of Roles:**  
 - **Speaker 1 (Climatology & Signals):** Slides 1–4 [00:00 – 05:00]  
 - **Speaker 2 (Econometrics & Resilience):** Slides 5–8 [05:00 – 10:00]  
 - **Responders 3, 4, 5 (Examination):** Defense Q&A [10:00 – 13:00]  
-**Verification:** All numbers strictly verified against `results.json` via `scripts/verify.py`
 
 ---
 
@@ -85,7 +84,7 @@
 - **Bullets (Max 3):**
   1. **Sectoral Insulation:** In modern economies, agriculture accounts for $<4\%$ of GDP (0.9% in DEU); indoor services and international trade buffer aggregate output against annual shocks.
   2. **Agricultural Share Resilience:** National agricultural GDP share does not respond significantly to annual anomalies ($\hat{\beta} = +0.78, p = 0.496, N = 373$).
-  3. **Direct Physical Yield Signal:** Estimating Two-Way FE on Crop Production Growth ($N = 496$) reveals a significant positive precipitation elasticity ($\hat{\beta}_{\text{precip}} = +0.5664^*, p = 0.077$).
+  3. **Direct Physical Yield Signal:** Estimating Two-Way FE on Crop Production Growth ($N = 488$) reveals a significant positive precipitation elasticity ($\hat{\beta}_{\text{precip}} = +0.5681^*, p = 0.079$).
 
 ---
 
@@ -114,7 +113,7 @@
 - **Bullets:**
   - **Country-Specific Linear Trends:** $\hat{\beta}_{\text{temp}} = +0.1848$ ($p = 0.431$). Controlling directly for time trends reverses the negative slope.
   - **Decade Fixed Effects:** $\hat{\beta}_{\text{temp}} = -0.2200$ ($p = 0.472$). Absorbing decadal shifts cuts the naive penalty by $>50\%$.
-  - **Crop Production Index Growth (Model 5):** $\hat{\beta}_{\text{precip}} = +0.5664^*$ ($p = 0.077$). Physical agricultural yields respond to moisture even when aggregate GDP is buffered.
+  - **Crop Production Index Growth (Model 5):** $\hat{\beta}_{\text{precip}} = +0.5681^*$ ($p = 0.079$). Physical agricultural yields respond to moisture even when aggregate GDP is buffered.
 
 ---
 
