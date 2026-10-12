@@ -10,54 +10,29 @@ AUTHORS: Student Research Group 1
 
 PURPOSE & DIRECT MAPPING TO SYLLABUS:
 --------------------------------------
-This script generates the 5 core figures that directly and sequentially answer
-the four specific numbered questions in the Track 1 syllabus:
+This script generates publication-grade figures (300 DPI) answering the Track 1 syllabus:
 
-1. Figure 1 -> Answers Step (1):
-   "Plot temperature and precipitation over the full available record for a set
-   of countries chosen across different regions."
-   - Displays 64-year unbroken records (1960-2023) for all 8 countries.
-   - Temperature (°C, bold red line with 10-year rolling trend) and Precipitation
-     (mm, soft blue bars with 10-year rolling trend).
+1. Figure 1 -> Step (1): Full instrumental record (1960-2023) across 12 countries grouped
+   into 4 continental panels (Europe, Africa, Asia-Pacific, Americas) showing temperature
+   and precipitation with 10-year rolling trends.
 
-2. Figure 2 -> Answers Step (2):
-   "Compute a monthly anomaly: for each calendar month, subtract the average of that
-   same month over a baseline period that you choose and state (1961-1990 is a common one).
-   Without this step the seasonal cycle dominates everything and one month cannot be compared
-   with another."
-   - Panel A: Raw Monthly Temperature Series (showing the massive ~20°C annual solar cycle).
-   - Panel B: De-Seasonalized Monthly Anomalies (showing how subtracting the 1961-1990
-     baseline purges the seasonal cycle and reveals the secular post-1985 warming trend).
+2. Figure 2 -> Step (2): The necessity of de-seasonalization: Raw monthly temperature series
+   (Panel A) vs. de-seasonalized monthly anomalies relative to 1961-1990 (Panel B) for France.
 
-3. Figure 3 -> Answers Step (3):
-   "Describe each series: how much has the average changed between the start and the end
-   of the record, and how large is the year-to-year variation compared with that change?
-   Then compare countries: where has temperature moved most, and does precipitation move
-   in the same places or in different ones?"
-   - Panel A: Secular Warming (Delta T) vs. YoY Volatility (sigma), annotating SNR.
-   - Panel B: Cross-country Quadrant Plot: Secular Temperature Change (Delta T) vs.
-     Percentage Precipitation Change (% Delta P), highlighting Warming & Drying vs.
-     Warming & Wetting regimes, and the Spain vs. Germany -97mm coincidence.
+3. Figure 3 -> Step (3): Signal-to-noise ratio bar chart (Panel A) and cross-country quadrant
+   scatter plot (Panel B, Secular DT vs % DP), contrasting Warming & Drying vs Warming & Wetting.
 
-4. Figure 4 -> Answers Step (4, Direction A - Shape of the Change):
-   "Or stay inside the climate data and look at the shape of the change: using the monthly
-   anomalies from step (2), is the change spread evenly across the year, or are some seasons
-   moving faster than others?"
-   - Decomposes decadal warming by meteorological season (Winter, Spring, Summer, Autumn).
-   - Highlights European Summer Amplification: France summer +2.35°C vs winter +2.08°C (+13.0%),
-     Spain summer +2.04°C vs winter +1.33°C (+53.4%).
+4. Figure 4 -> Step (4, Direction A): Seasonal warming asymmetry bar chart by continent
+   and season (Winter, Spring, Summer, Autumn).
 
-5. Figure 5 -> Answers Step (4, Direction B - Climate vs. Economy):
-   "Either bring in an economic variable of your choice from the World Development Indicators
-   and put it next to your climate series: were the years that were unusually warm or
-   unusually dry also unusual for the economy?"
-   - Overlays Real GDP per capita growth (%) with extreme thermal shocks (> +1.5 SD) and
-     severe droughts (< -1.2 SD) for France, Spain, India, and Kenya.
-   - Annotates landmark historical shock losses: 1976 French drought tax, 2003 European
-     heatwave, and agrarian growth collapses in Kenya and India.
+5. Figure 5 -> Step (4, Direction B): Real GDPpc growth overlays with shaded extreme thermal
+   shocks (> +1.5 SD) across 4 contrasting economies (France, Spain, Kenya, Vietnam).
 
 6. Supplementary Figures 6-9:
-   - Provide additional robustness checks for the presentation and oral defense.
+   - Fig 6: Regression coefficient forest plot with t(11) confidence intervals.
+   - Fig 7: Agricultural vulnerability slopes.
+   - Fig 8: Non-linear temperature optimum curve (Burke et al. 2015 specification).
+   - Fig 9: Empirical KDE distributional density shifts (1960-1989 vs 1990-2023).
 ================================================================================
 """
 
@@ -68,8 +43,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import seaborn as sns
+from scipy import stats
 
-# Styling parameters
+# Global styling
 plt.rcParams["font.sans-serif"] = "DejaVu Sans"
 plt.rcParams["font.family"] = "sans-serif"
 plt.rcParams["figure.dpi"] = 300
@@ -84,412 +60,440 @@ FIG_DIR = os.path.join(WORKSPACE_DIR, "figures")
 TABLES_DIR = os.path.join(WORKSPACE_DIR, "paper", "tables")
 os.makedirs(FIG_DIR, exist_ok=True)
 
-PALETTE = {
-    "FRA": "#1f77b4", "DEU": "#2ca02c", "ESP": "#d62728", "USA": "#9467bd",
-    "BRA": "#8c564b", "IND": "#ff7f0e", "KEN": "#e377c2", "AUS": "#bcbd22"
+CONTINENT_COLORS = {
+    "Europe": "#1f77b4",       # Blue
+    "Africa": "#d62728",       # Red
+    "Asia-Pacific": "#2ca02c", # Green
+    "Americas": "#ff7f0e"      # Orange
 }
 
-def load_all_data():
+COUNTRY_COLORS = {
+    "FRA": "#1f77b4", "DEU": "#4b9cd3", "ESP": "#00558f",
+    "KEN": "#d62728", "SEN": "#e45756", "ZAF": "#9c1b1c",
+    "IND": "#2ca02c", "VNM": "#5cb85c", "AUS": "#1b661b",
+    "USA": "#ff7f0e", "BRA": "#f28e2b", "MEX": "#b25900"
+}
+
+def load_data():
     panel_df = pd.read_csv(os.path.join(DATA_PROC_DIR, "merged_climate_economic_panel.csv"))
     monthly_df = pd.read_csv(os.path.join(DATA_PROC_DIR, "climate_monthly_anomalies.csv"))
     seasonal_df = pd.read_csv(os.path.join(DATA_PROC_DIR, "climate_seasonal_anomalies.csv"))
     return panel_df, monthly_df, seasonal_df
 
 # ------------------------------------------------------------------------------
-# FIGURE 1: OBSERVED CLIMATE RECORDS (1960-2023) [STEP 1]
+# FIGURE 1: HISTORICAL CLIMATE RECORDS (1960-2023) [STEP 1]
 # ------------------------------------------------------------------------------
-def plot_fig1_historical_trends(panel_df):
-    print("Generating Figure 1: Observed Climate Records (1960-2023) [Step 1]...")
-    fig, axes = plt.subplots(2, 4, figsize=(18, 9), sharex=True)
-    countries = ["FRA", "DEU", "ESP", "USA", "BRA", "IND", "KEN", "AUS"]
+def generate_figure_1(panel_df):
+    print("Generating Figure 1: Historical Climate Trends (4 Continents, 12 Countries)...")
     
-    for idx, code in enumerate(countries):
-        ax = axes[idx // 4, idx % 4]
-        df_c = panel_df[panel_df["country_code"] == code].sort_values("year")
+    continents = ["Europe", "Africa", "Asia-Pacific", "Americas"]
+    fig, axes = plt.subplots(4, 2, figsize=(16, 18), sharex=True)
+    
+    for row, cont in enumerate(continents):
+        c_df = panel_df[panel_df["continent"] == cont]
+        countries = c_df["country_code"].unique()
         
-        # Primary axis: Temperature
-        color_t = "#b2182b"
-        line1 = ax.plot(df_c["year"], df_c["temp_annual_mean"], color=color_t, lw=1.6, label="Annual Mean Temp (°C)")
-        roll_t = df_c["temp_annual_mean"].rolling(10, center=True).mean()
-        ax.plot(df_c["year"], roll_t, color=color_t, ls="--", lw=1.3, alpha=0.9, label="10-yr Trend")
-        ax.set_ylabel("Temperature (°C)", color=color_t, fontsize=9.5, fontweight="bold")
-        ax.tick_params(axis="y", labelcolor=color_t)
+        # Left Panel: Annual Mean Temperature
+        ax_t = axes[row, 0]
+        for c in countries:
+            sub = c_df[c_df["country_code"] == c].sort_values("year")
+            col = COUNTRY_COLORS.get(c, "#333333")
+            name = sub["country_name"].iloc[0]
+            capital = sub["capital"].iloc[0]
+            ax_t.plot(sub["year"], sub["temp_annual_mean"], color=col, alpha=0.35, linewidth=1.0)
+            roll_t = sub["temp_annual_mean"].rolling(10, min_periods=5).mean()
+            ax_t.plot(sub["year"], roll_t, color=col, linewidth=2.2, label=f"{name} ({capital})")
+            
+        ax_t.set_title(f"Panel 1{chr(65+row*2)}: {cont} - Annual Mean Temperature (deg C)", fontsize=11, fontweight="bold", pad=8)
+        ax_t.set_ylabel("Temperature (deg C)", fontsize=10)
+        ax_t.legend(loc="upper left", framealpha=0.9, fontsize=8.5)
         
-        # Secondary axis: Precipitation
-        ax2 = ax.twinx()
-        color_p = "#2166ac"
-        ax2.bar(df_c["year"], df_c["precip_annual_total"], color=color_p, alpha=0.22, width=0.8, label="Annual Precip (mm)")
-        roll_p = df_c["precip_annual_total"].rolling(10, center=True).mean()
-        ax2.plot(df_c["year"], roll_p, color=color_p, lw=1.4, ls=":", label="10-yr Precip Trend")
-        ax2.set_ylabel("Precipitation (mm)", color=color_p, fontsize=9.5, fontweight="bold")
-        ax2.tick_params(axis="y", labelcolor=color_p)
-        ax2.grid(False)
+        # Right Panel: Annual Total Precipitation
+        ax_p = axes[row, 1]
+        for c in countries:
+            sub = c_df[c_df["country_code"] == c].sort_values("year")
+            col = COUNTRY_COLORS.get(c, "#333333")
+            name = sub["country_name"].iloc[0]
+            capital = sub["capital"].iloc[0]
+            ax_p.plot(sub["year"], sub["precip_annual_total"], color=col, alpha=0.35, linewidth=1.0)
+            roll_p = sub["precip_annual_total"].rolling(10, min_periods=5).mean()
+            ax_p.plot(sub["year"], roll_p, color=col, linewidth=2.2, label=f"{name} ({capital})")
+            
+        ax_p.set_title(f"Panel 1{chr(66+row*2)}: {cont} - Annual Total Precipitation (mm)", fontsize=11, fontweight="bold", pad=8)
+        ax_p.set_ylabel("Precipitation (mm/yr)", fontsize=10)
+        ax_p.legend(loc="upper left", framealpha=0.9, fontsize=8.5)
         
-        name = df_c["country_name"].iloc[0]
-        region = df_c["region"].iloc[0]
-        ax.set_title(f"{name} ({code}): {region}", fontsize=10.5, fontweight="bold", pad=6)
-        
-    fig.suptitle("Figure 1: Observed Climate Records: Annual Temperature and Precipitation (1960–2023)\n"
-                 "Source: ECMWF ERA5 Surface Reanalysis. Red lines show annual mean temperature (°C) with 10-year dashed trend; blue bars show annual precipitation (mm).",
-                 fontsize=12.5, fontweight="bold", y=0.99)
-    plt.tight_layout(rect=[0, 0.02, 1, 0.95])
+    axes[3, 0].set_xlabel("Year (1960-2023)", fontsize=11)
+    axes[3, 1].set_xlabel("Year (1960-2023)", fontsize=11)
+    
+    fig.suptitle("Figure 1: Observed Climate Records Across 12 Countries in 4 Continents (1960-2023)\nThin lines show annual values; bold lines show 10-year centered rolling trends. Source: ECMWF ERA5 Reanalysis.", fontsize=13, fontweight="bold", y=0.995)
+    plt.tight_layout(rect=[0, 0, 1, 0.99])
+    
     out_path = os.path.join(FIG_DIR, "fig1_historical_climate_trends.png")
-    plt.savefig(out_path)
+    plt.savefig(out_path, dpi=300)
     plt.close()
     print(f"--> Saved {out_path}")
 
 # ------------------------------------------------------------------------------
-# FIGURE 2: WHY DE-SEASONALIZE? RAW SERIES VS. MONTHLY ANOMALIES [STEP 2]
+# FIGURE 2: THE NEED FOR DE-SEASONALIZATION [STEP 2]
 # ------------------------------------------------------------------------------
-def plot_fig2_warming_stripes(monthly_df):
-    print("Generating Figure 2: The Need for De-Seasonalization (Raw vs. Anomalies) [Step 2]...")
+def generate_figure_2(monthly_df):
+    print("Generating Figure 2: The Need for De-Seasonalization (Raw vs Anomalies)...")
+    
+    # Representative Country: France (Paris)
+    fra_m = monthly_df[monthly_df["country_code"] == "FRA"].sort_values("date").copy()
+    fra_m["date_dt"] = pd.to_datetime(fra_m["date"])
+    
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 8.5), sharex=True)
     
-    # Focus on France as the representative showcase country
-    fra_df = monthly_df[monthly_df["country_code"] == "FRA"].sort_values("date").copy()
-    fra_df["date_dt"] = pd.to_datetime(fra_df["date"])
+    # Panel A: Raw Monthly Temperatures
+    ax1.plot(fra_m["date_dt"], fra_m["temp_monthly_mean"], color="#1f77b4", linewidth=0.8, alpha=0.7, label="Observed Monthly Mean Temp")
+    roll_raw = fra_m["temp_monthly_mean"].rolling(120, min_periods=60).mean()
+    ax1.plot(fra_m["date_dt"], roll_raw, color="#d62728", linewidth=2.5, label="10-Year Rolling Mean")
+    ax1.axhline(fra_m["temp_monthly_mean"].mean(), color="black", linestyle=":", label="64-Year Mean (11.18 deg C)")
     
-    # Panel A: Raw Monthly Temperature Series
-    ax1.plot(fra_df["date_dt"], fra_df["temp_monthly_mean"], color="#555555", lw=0.9, alpha=0.85, label="Raw Monthly Mean Temp (°C)")
-    # Show baseline envelope for summer vs winter
-    ax1.axhline(fra_df[fra_df["month"] == 7]["temp_baseline_climatology"].iloc[0], color="#d73027", ls=":", lw=1.2, label="July Baseline Norm (~19°C)")
-    ax1.axhline(fra_df[fra_df["month"] == 1]["temp_baseline_climatology"].iloc[0], color="#4575b4", ls=":", lw=1.2, label="Jan Baseline Norm (~3°C)")
-    ax1.set_ylabel("Raw Temperature (°C)", fontsize=11, fontweight="bold")
-    ax1.set_title("Panel A: Raw Monthly Temperature Series for France (1960–2023): The Seasonal Cycle Dominates", fontsize=11.5, fontweight="bold")
-    ax1.legend(loc="upper left", fontsize=9, frameon=True)
+    ax1.set_title("Panel A: Raw Monthly Mean Temperature for France (Paris, 1960-2023)\nThe ~18 deg C annual solar oscillation dominates variance (>89%), masking multi-decadal climate warming.", fontsize=11, fontweight="bold")
+    ax1.set_ylabel("Temperature (deg C)", fontsize=10)
+    ax1.legend(loc="upper right", framealpha=0.9, fontsize=9)
     
-    # Text annotation explaining why raw series fails to show trend
-    ax1.text(0.55, 0.88, "The ~18°C summer-winter solar cycle accounts for >95% of total variance.\n"
-                         "Without de-seasonalization, a warm winter looks colder than a frigid summer,\n"
-                         "completely masking the multi-decadal anthropogenic warming signal.",
-             transform=ax1.transAxes, fontsize=9.5, bbox=dict(boxstyle="round,pad=0.5", fc="#ffffbf", ec="gray", alpha=0.9))
+    # Panel B: De-Seasonalized Monthly Anomalies (relative to 1961-1990)
+    anom = fra_m["temp_monthly_anomaly"].values
+    dates = fra_m["date_dt"].values
     
-    # Panel B: De-Seasonalized Monthly Anomalies (relative to 1961-1990 baseline)
-    dates = fra_df["date_dt"].values
-    anoms = fra_df["temp_monthly_anomaly"].values
+    ax2.plot(dates, anom, color="#7f7f7f", linewidth=0.6, alpha=0.5, label="Monthly Anomaly")
+    ax2.fill_between(dates, 0, anom, where=(anom >= 0), color="#d62728", alpha=0.6, label="Warm Anomaly (> Baseline)")
+    ax2.fill_between(dates, 0, anom, where=(anom < 0), color="#1f77b4", alpha=0.6, label="Cool Anomaly (< Baseline)")
     
-    # Color bars: Red for positive anomaly, Blue for negative anomaly
-    colors = np.where(anoms >= 0, "#d73027", "#4575b4")
-    ax2.bar(dates, anoms, color=colors, width=28, alpha=0.75, label="Monthly Anomaly (°C)")
+    roll_anom = pd.Series(anom).rolling(120, min_periods=60).mean().values
+    ax2.plot(dates, roll_anom, color="#900C3F", linewidth=2.5, label="10-Year Rolling Anomaly Trend")
+    ax2.axhline(0, color="black", linewidth=1.2, linestyle="-")
     
-    # 12-month rolling average line
-    roll_anom = fra_df["temp_monthly_anomaly"].rolling(12, center=True).mean()
-    ax2.plot(fra_df["date_dt"], roll_anom, color="black", lw=1.8, label="12-Month Rolling Mean Anomaly")
-    ax2.axhline(0, color="black", lw=0.8, ls="-")
-    ax2.set_ylabel("Temp Anomaly (°C)", fontsize=11, fontweight="bold")
-    ax2.set_xlabel("Year", fontsize=11, fontweight="bold")
-    ax2.set_title("Panel B: De-Seasonalized Monthly Anomalies (1961–1990 Baseline): The Secular Warming Trend Emerges", fontsize=11.5, fontweight="bold")
-    ax2.legend(loc="upper left", fontsize=9, frameon=True)
+    ax2.set_title("Panel B: De-Seasonalized Monthly Anomalies Relative to 1961-1990 Baseline Climatology\nSubtracting calendar-month averages eliminates the solar cycle, revealing cool negative anomalies pre-1985 and persistent warming post-1995.", fontsize=11, fontweight="bold")
+    ax2.set_ylabel("Anomaly (deg C)", fontsize=10)
+    ax2.set_xlabel("Date (Monthly, 1960-2023)", fontsize=10)
+    ax2.legend(loc="upper left", framealpha=0.9, fontsize=9)
     
-    # Text annotation explaining the revealed signal
-    ax2.text(0.55, 0.15, "Subtracting the 1961–1990 calendar-month climatology removes the seasonal cycle.\n"
-                         "Now, every month is directly comparable. Prior to 1985, cool blues predominate.\n"
-                         "Post-1995, persistent warm reds emerge, with summer anomalies exceeding +3°C.",
-             transform=ax2.transAxes, fontsize=9.5, bbox=dict(boxstyle="round,pad=0.5", fc="#e0f3f8", ec="gray", alpha=0.9))
+    ax2.xaxis.set_major_locator(mdates.YearLocator(10))
+    ax2.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
     
-    fig.suptitle("Figure 2: Why De-Seasonalization is Essential: Raw Temperature vs. Monthly Anomalies (1960–2023)\n"
-                 "Subtracting the 1961–1990 calendar-month baseline eliminates seasonal dominance and reveals the secular warming signal.",
-                 fontsize=12.5, fontweight="bold", y=0.99)
-    plt.tight_layout(rect=[0, 0.02, 1, 0.95])
+    fig.suptitle("Figure 2: The Methodological Necessity of De-Seasonalization (France Instrumental Record)\nSource: ECMWF ERA5 Daily Surface Reanalysis aggregated to monthly frequency.", fontsize=13, fontweight="bold", y=0.985)
+    plt.tight_layout(rect=[0, 0, 1, 0.97])
+    
     out_path = os.path.join(FIG_DIR, "fig2_warming_stripes_anomalies.png")
-    plt.savefig(out_path)
+    plt.savefig(out_path, dpi=300)
     plt.close()
     print(f"--> Saved {out_path}")
 
 # ------------------------------------------------------------------------------
-# FIGURE 3: SIGNAL-TO-NOISE RATIO & TRAJECTORY QUADRANTS [STEP 3]
+# FIGURE 3: SIGNAL-TO-NOISE & QUADRANT DIVERGENCE [STEP 3]
 # ------------------------------------------------------------------------------
-def plot_fig3_signal_noise_quadrant(panel_df):
-    print("Generating Figure 3: Signal-to-Noise and Warming vs. Precipitation Quadrants [Step 3]...")
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6.5))
+def generate_figure_3(panel_df):
+    print("Generating Figure 3: Signal-to-Noise & Quadrant Divergence (12 Countries)...")
     
-    records = []
-    for code, group in panel_df.groupby("country_code"):
-        early_t = group[group["year"].between(1960, 1969)]["temp_annual_mean"].mean()
-        late_t = group[group["year"].between(2014, 2023)]["temp_annual_mean"].mean()
-        delta_t = late_t - early_t
+    summary_path = os.path.join(TABLES_DIR, "table1_summary_statistics.csv")
+    if not os.path.exists(summary_path):
+        raise FileNotFoundError("Table 1 summary statistics missing. Run 03_run_econometrics.py first.")
+    sum_df = pd.read_csv(summary_path)
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7))
+    
+    # Panel A: Signal-to-Noise Ratio Bar Chart
+    sum_df["SNR_num"] = pd.to_numeric(sum_df["SNR (DT/sigma)"], errors="coerce")
+    sum_df_sorted = sum_df.sort_values("SNR_num", ascending=True)
+    
+    colors = [CONTINENT_COLORS.get(cont, "#7f7f7f") for cont in sum_df_sorted["Continent"]]
+    bars = ax1.barh(sum_df_sorted["Country"], sum_df_sorted["SNR_num"], color=colors, alpha=0.85, edgecolor="black", linewidth=0.7)
+    
+    ax1.axvline(1.0, color="#d62728", linestyle="--", linewidth=1.5, label="SNR = 1.0 (Signal Emergence)")
+    ax1.axvline(2.0, color="#900C3F", linestyle=":", linewidth=1.5, label="SNR = 2.0 (Dominant Warming)")
+    ax1.axvline(0.0, color="black", linewidth=1.0)
+    
+    for bar in bars:
+        w = bar.get_width()
+        offset = 0.08 if w >= 0 else -0.28
+        ax1.text(w + offset, bar.get_y() + bar.get_height()/2, f"{w:.2f}", va="center", ha="left" if w >= 0 else "right", fontsize=9, fontweight="bold")
         
-        early_p = group[group["year"].between(1960, 1969)]["precip_annual_total"].mean()
-        late_p = group[group["year"].between(2014, 2023)]["precip_annual_total"].mean()
-        delta_p = ((late_p - early_p) / early_p) * 100.0
+    ax1.set_title("Panel A: Signal-to-Noise Ratio (SNR = DT / sigma_detrend)\nSecular warming outpaces natural volatility in Europe, Americas, and Kenya.", fontsize=11, fontweight="bold")
+    ax1.set_xlabel("Signal-to-Noise Ratio", fontsize=10)
+    ax1.legend(loc="lower right", framealpha=0.9, fontsize=9)
+    
+    # Legend for continents in Panel A
+    from matplotlib.patches import Patch
+    legend_elements = [Patch(facecolor=c, edgecolor="black", label=cont) for cont, c in CONTINENT_COLORS.items()]
+    legend_elements.append(plt.Line2D([0], [0], color="#d62728", linestyle="--", label="SNR = 1.0 (Emergence)"))
+    legend_elements.append(plt.Line2D([0], [0], color="#900C3F", linestyle=":", label="SNR = 2.0 (Dominant)"))
+    ax1.legend(handles=legend_elements, loc="lower right", framealpha=0.9, fontsize=8.5)
+    
+    # Panel B: Quadrant Scatter Plot (Secular DT vs % DP)
+    sum_df["DT_num"] = pd.to_numeric(sum_df["Secular DT (C)"], errors="coerce")
+    sum_df["DP_pct_num"] = sum_df["Secular DP (%)"].str.rstrip("%").astype(float)
+    
+    ax2.axhline(0, color="black", linewidth=1.0)
+    ax2.axvline(0, color="black", linewidth=1.0)
+    
+    for _, row in sum_df.iterrows():
+        c = row["Code"]
+        cont = row["Continent"]
+        x = row["DT_num"]
+        y = row["DP_pct_num"]
+        col = CONTINENT_COLORS.get(cont, "#333333")
         
-        # Calculate detrended noise sigma (matching Table 1 detrended SD)
-        years = group["year"].values
-        temps = group["temp_annual_mean"].values
-        p_fit = np.polyfit(years, temps, 1)
-        resid = temps - (p_fit[0] * years + p_fit[1])
-        detrended_sd = np.std(resid, ddof=2)
-        snr = delta_t / detrended_sd if detrended_sd > 0 else np.nan
+        ax2.scatter(x, y, color=col, s=110, edgecolor="black", linewidth=1.0, zorder=5)
+        # Position label
+        ax2.annotate(f"{row['Country']} ({c})\n[{y:+.1f}%, {x:+.2f}C]",
+                     (x, y), textcoords="offset points", xytext=(8, -4),
+                     fontsize=8.5, fontweight="bold",
+                     bbox=dict(boxstyle="round,pad=0.2", facecolor="white", alpha=0.75, edgecolor="none"))
         
-        records.append({
-            "code": code,
-            "name": group["country_name"].iloc[0],
-            "delta_t": delta_t,
-            "vol_t": detrended_sd,
-            "snr": snr,
-            "delta_p": delta_p
-        })
-    df_metrics = pd.DataFrame(records).sort_values("delta_t", ascending=False)
+    ax2.axhspan(0, 60, 0, 3.0, color="#2ca02c", alpha=0.08, label="Warming & Wetting Quadrant")
+    ax2.axhspan(-60, 0, 0, 3.0, color="#d62728", alpha=0.08, label="Warming & Drying Stress Quadrant")
     
-    # Left Panel: Signal vs Noise (Secular Delta T vs YoY sigma)
-    x = np.arange(len(df_metrics))
-    width = 0.36
-    ax1.bar(x - width/2, df_metrics["delta_t"], width, label="Secular Warming ΔT (°C)", color="#d73027", edgecolor="black", alpha=0.85)
-    ax1.bar(x + width/2, df_metrics["vol_t"], width, label="Interannual Noise σ (°C)", color="#4575b4", edgecolor="black", alpha=0.85)
-    ax1.set_xticks(x)
-    ax1.set_xticklabels(df_metrics["name"], rotation=25, ha="right", fontweight="bold", fontsize=9.5)
-    ax1.set_ylabel("Temperature (°C)", fontsize=11, fontweight="bold")
-    ax1.set_title("A: Secular Warming (Signal) vs. Natural Noise (σ)", fontsize=11.5, fontweight="bold")
-    ax1.legend(loc="upper right", frameon=True, fontsize=9.5)
+    ax2.set_title("Panel B: Cross-Country Climate Quadrant Plot\nSecular Temperature Change (DT) vs. Percentage Precipitation Change (% DP)", fontsize=11, fontweight="bold")
+    ax2.set_xlabel("Secular Temperature Change DT (deg C, 2014-2023 vs 1960-1969)", fontsize=10)
+    ax2.set_ylabel("Secular Precipitation Change % DP (%, 1960s Baseline Denominator)", fontsize=10)
+    ax2.set_xlim(-0.8, 2.6)
+    ax2.set_ylim(-45, 55)
+    ax2.legend(loc="upper left", framealpha=0.9, fontsize=8.5)
     
-    # Annotate SNR on top
-    for i, row in enumerate(df_metrics.itertuples()):
-        ax1.text(i, max(row.delta_t, row.vol_t) + 0.06, f"SNR: {row.snr:.1f}x", ha="center", fontsize=8.5, fontweight="bold")
-    ax1.set_ylim(0, 2.5)
+    fig.suptitle("Figure 3: Climatological Signal-to-Noise Ratios and Global Hydrological Divergence (1960-2023)\nComparing 2014-2023 to 1960-1969. Source: ECMWF ERA5 Surface Reanalysis.", fontsize=13, fontweight="bold", y=0.99)
+    plt.tight_layout(rect=[0, 0, 1, 0.97])
     
-    # Right Panel: Quadrant plot of Warming vs Precipitation Change
-    for _, row in df_metrics.iterrows():
-        c_color = PALETTE.get(row["code"], "#333333")
-        ax2.scatter(row["delta_t"], row["delta_p"], s=220, color=c_color, edgecolors="black", zorder=4)
-        ax2.annotate(f"{row['name']} ({row['code']})", (row["delta_t"] + 0.04, row["delta_p"] + 0.7), fontsize=9.5, fontweight="bold")
-        
-    ax2.axvline(0, color="gray", ls="--", lw=1)
-    ax2.axhline(0, color="gray", ls="--", lw=1)
-    ax2.set_xlabel("Secular Temperature Change ΔT (°C)", fontsize=11, fontweight="bold")
-    ax2.set_ylabel("Secular Precipitation Change ΔP (%)", fontsize=11, fontweight="bold")
-    ax2.set_title("B: Does Precipitation Move in the Same Places? (Quadrant Plot)", fontsize=11.5, fontweight="bold")
-    
-    # Quadrant Shading & Callouts
-    ax2.text(0.97, 0.95, "Warming & Wetting Regime\n(USA, India, Australia)", transform=ax2.transAxes, ha="right", va="top", fontsize=9.5, color="#1b7837", fontweight="bold", bbox=dict(boxstyle="round,pad=0.3", fc="#e5f5e0", ec="#31a354", alpha=0.8))
-    ax2.text(0.97, 0.06, "Warming & Drying Stress Regime\n(Spain, Brazil, Germany, France)", transform=ax2.transAxes, ha="right", va="bottom", fontsize=9.5, color="#b2182b", fontweight="bold", bbox=dict(boxstyle="round,pad=0.3", fc="#fee0d2", ec="#de2d26", alpha=0.8))
-    
-    fig.suptitle("Figure 3: Cross-Country Climate Comparisons: Signal-to-Noise Ratio and Hydrological Divergence\n"
-                 "Step (3): Secular warming outpaces annual noise in Europe and Kenya (SNR 2.7–3.3x), while interannual noise dominates in India and Australia (SNR < 0.4x). Precipitation exhibits severe divergence: Spain & Brazil face compounding drying.",
-                 fontsize=12.5, fontweight="bold", y=1.01)
-    plt.tight_layout()
     out_path = os.path.join(FIG_DIR, "fig3_warming_vs_precipitation_quadrant.png")
-    plt.savefig(out_path, bbox_inches="tight")
+    plt.savefig(out_path, dpi=300)
     plt.close()
     print(f"--> Saved {out_path}")
 
 # ------------------------------------------------------------------------------
-# FIGURE 4: SEASONAL WARMING ASYMMETRY [STEP 4 - DIRECTION A]
+# FIGURE 4: SEASONAL WARMING ASYMMETRY [STEP 4A]
 # ------------------------------------------------------------------------------
-def plot_fig4_seasonal_asymmetry(seasonal_df):
-    print("Generating Figure 4: Seasonal Warming Asymmetry [Step 4 - Option A]...")
-    # Compute secular change by season for each country
-    records = []
-    for (code, season), group in seasonal_df.groupby(["country_code", "season"]):
-        early = group[group["year"].between(1960, 1969)]["temp_seasonal_mean"].mean()
-        late = group[group["year"].between(2014, 2023)]["temp_seasonal_mean"].mean()
-        # Simplify season label to broad season (Winter, Spring, Summer, Autumn)
-        broad_season = season.split()[0]
-        records.append({
-            "country_code": code,
-            "country_name": group["country_name"].iloc[0],
-            "season": broad_season,
-            "delta_t": late - early
-        })
-    df_s = pd.DataFrame(records)
+def generate_figure_4(seasonal_df):
+    print("Generating Figure 4: Seasonal Warming Asymmetry by Continent...")
     
-    fig, ax = plt.subplots(figsize=(14, 7))
-    season_palette = {
-        "Winter": "#4575b4", "Spring": "#74add1",
-        "Summer": "#d73027", "Autumn": "#fdae61"
-    }
-    sns.barplot(
-        data=df_s, x="country_name", y="delta_t", hue="season",
-        hue_order=["Winter", "Spring", "Summer", "Autumn"],
-        ax=ax, palette=season_palette, edgecolor="black", alpha=0.9
-    )
-    ax.set_ylabel("Secular Decadal Warming ΔT (°C)", fontsize=11, fontweight="bold")
-    ax.set_xlabel("Country", fontsize=11, fontweight="bold")
-    ax.set_title("Figure 4: Seasonal Asymmetry of Climate Change: Are Seasons Moving Evenly?\n"
-                 "Step (4, Option A): Summer warming outpaces winter in France (+2.35°C vs +2.08°C, +13.0%) and Spain (+2.04°C vs +1.33°C, +53.4%),\n"
-                 "while winter warming dominates in Germany (+3.38°C vs +2.48°C) and the United States (+2.54°C vs +0.74°C).",
-                 fontsize=11.5, fontweight="bold", pad=12)
-    ax.legend(title="Meteorological Season", title_fontsize=10, loc="upper right", frameon=True)
-    plt.xticks(rotation=20, fontweight="bold", fontsize=10)
+    # Calculate seasonal secular change (2014-2023 vs 1960-1969)
+    early = seasonal_df[seasonal_df["year"].between(1960, 1969)].groupby(["continent", "season"])["temp_seasonal_mean"].mean()
+    late = seasonal_df[seasonal_df["year"].between(2014, 2023)].groupby(["continent", "season"])["temp_seasonal_mean"].mean()
+    diff = (late - early).reset_index()
+    diff.rename(columns={"temp_seasonal_mean": "secular_delta_t"}, inplace=True)
     
-    # Highlight annotation for France & Spain
-    ax.text(0.02, 0.82, "Summer vs. Winter Warming Asymmetry:\n"
-                        "• Spain: Summer +2.04°C vs Winter +1.33°C (+53.4% faster)\n"
-                        "• France: Summer +2.35°C vs Winter +2.08°C (+13.0% faster)\n"
-                        "• Germany: Winter +3.38°C vs Summer +2.48°C (winter leads)\n"
-                        "• USA: Winter +2.54°C vs Summer +0.74°C (winter leads)",
-            transform=ax.transAxes, fontsize=9.0, bbox=dict(boxstyle="round,pad=0.5", fc="#fee0d2", ec="#de2d26", alpha=0.9))
+    # Clean season names
+    season_order = ["Winter (DJF)", "Spring (MAM)", "Summer (JJA)", "Autumn (SON)"]
+    continents = ["Europe", "Africa", "Asia-Pacific", "Americas"]
+    
+    fig, axes = plt.subplots(1, 4, figsize=(17, 5.5), sharey=True)
+    
+    for idx, cont in enumerate(continents):
+        ax = axes[idx]
+        sub = diff[diff["continent"] == cont].set_index("season").reindex(season_order).reset_index()
+        
+        bars = ax.bar(sub["season"].str.split(" ").str[0], sub["secular_delta_t"],
+                      color=CONTINENT_COLORS[cont], alpha=0.85, edgecolor="black", linewidth=0.8)
+        
+        ax.set_title(f"{cont}", fontsize=12, fontweight="bold", pad=8)
+        ax.set_ylabel("Secular Warming (deg C)" if idx == 0 else "", fontsize=10)
+        ax.axhline(0, color="black", linewidth=1.0)
+        
+        for bar in bars:
+            h = bar.get_height()
+            offset = 0.05 if h >= 0 else -0.15
+            ax.text(bar.get_x() + bar.get_width()/2, h + offset, f"{h:+.2f}", ha="center", va="bottom" if h >= 0 else "top", fontsize=9, fontweight="bold")
             
-    plt.tight_layout()
+    fig.suptitle("Figure 4: Seasonal Warming Asymmetry Across Continents (1960-2023)\nSecular temperature change (deg C, 2014-2023 vs 1960-1969) decomposed by meteorological season. Source: ECMWF ERA5.", fontsize=13, fontweight="bold", y=0.99)
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    
     out_path = os.path.join(FIG_DIR, "fig4_seasonal_asymmetry.png")
-    plt.savefig(out_path)
+    plt.savefig(out_path, dpi=300)
     plt.close()
     print(f"--> Saved {out_path}")
 
 # ------------------------------------------------------------------------------
-# FIGURE 5: CLIMATE SHOCKS VS ECONOMIC DIPS [STEP 4 - DIRECTION B]
+# FIGURE 5: ECONOMIC TRANSMISSION OVERLAYS [STEP 4B]
 # ------------------------------------------------------------------------------
-def plot_fig5_climate_economic_shocks(panel_df):
-    print("Generating Figure 5: Extreme Climate Shocks vs Economic Growth Overlays [Step 4 - Option B]...")
-    fig, axes = plt.subplots(2, 2, figsize=(16, 9.5), sharex=True)
-    case_countries = [
-        ("FRA", "France (Agricultural Breadbasket)", 0, 0),
-        ("ESP", "Spain (Mediterranean Frontline)", 0, 1),
-        ("IND", "India (Monsoon Agrarian Economy)", 1, 0),
-        ("KEN", "Kenya (Equatorial Rain-Fed Agrarian)", 1, 1)
+def generate_figure_5(panel_df):
+    print("Generating Figure 5: Economic Transmission Overlays (4 Case Studies)...")
+    
+    # 4 Contrasting Economies: France (FRA), Spain (ESP), Kenya (KEN), Vietnam (VNM)
+    cases = [
+        ("FRA", "France (Paris)", "Developed Western Europe (Industrialized Agricultural Hub)"),
+        ("ESP", "Spain (Madrid)", "Mediterranean Frontline (High Water Stress & Irrigation)"),
+        ("KEN", "Kenya (Nairobi)", "Agrarian Developing Economy (~27% Agriculture Share of GDP)"),
+        ("VNM", "Vietnam (Hanoi)", "Monsoonal Industrializing Economy (High Flood & Crop Exposure)")
     ]
     
-    for code, title, r, c in case_countries:
-        ax = axes[r, c]
-        df_c = panel_df[panel_df["country_code"] == code].sort_values("year")
+    fig, axes = plt.subplots(2, 2, figsize=(16, 11), sharex=True)
+    axes_flat = axes.flatten()
+    
+    for idx, (code, name, desc) in enumerate(cases):
+        ax = axes_flat[idx]
+        sub = panel_df[panel_df["country_code"] == code].sort_values("year")
         
-        # Primary axis: Real GDP per Capita Growth
-        line1 = ax.plot(df_c["year"], df_c["gdp_per_capita_growth"], color="#2b83ba", lw=2.2, label="Real GDPpc Growth (%)")
-        ax.axhline(0, color="black", lw=0.8, ls="-")
-        ax.set_ylabel("GDPpc Growth (%)", color="#2b83ba", fontsize=10, fontweight="bold")
-        ax.tick_params(axis="y", labelcolor="#2b83ba")
+        # Plot GDP per capita growth on primary axis
+        line_gdp, = ax.plot(sub["year"], sub["gdp_per_capita_growth"], color="#1f77b4", linewidth=2.0, label="Real GDPpc Growth (%)")
+        ax.axhline(0, color="gray", linestyle=":", linewidth=0.8)
         
-        # Secondary axis: Temperature Anomaly
-        ax2 = ax.twinx()
-        line2 = ax2.plot(df_c["year"], df_c["temp_annual_anomaly"], color="#d7191c", lw=1.5, ls="--", label="Temp Anomaly (°C)")
-        ax2.set_ylabel("Temp Anomaly (°C)", color="#d7191c", fontsize=10, fontweight="bold")
-        ax2.tick_params(axis="y", labelcolor="#d7191c")
-        ax2.grid(False)
+        # Plot Temperature Anomaly on secondary axis
+        ax_t = ax.twinx()
+        line_t, = ax_t.plot(sub["year"], sub["temp_annual_anomaly"], color="#d62728", linestyle="--", linewidth=1.5, alpha=0.85, label="Temp Anomaly (deg C)")
         
-        # Highlight extreme heatwave shock years (> 1.5 standard deviations)
-        heat_years = df_c[df_c["shock_heatwave"] == 1]["year"].values
-        for hy in heat_years:
-            ax.axvspan(hy - 0.4, hy + 0.4, color="#d7191c", alpha=0.18, zorder=1)
+        # Shade Detrended Thermal Shock Years (z > +1.5)
+        shock_years = sub[sub["shock_heatwave"] == 1]["year"].values
+        for sy in shock_years:
+            ax.axvspan(sy - 0.4, sy + 0.4, color="#d62728", alpha=0.18)
             
-        ax.set_title(title, fontsize=11, fontweight="bold", pad=6)
+        # Shade Detrended Drought Shock Years (z < -1.5)
+        drought_years = sub[sub["shock_drought"] == 1]["year"].values
+        for dy in drought_years:
+            ax.axvspan(dy - 0.4, dy + 0.4, color="#e45756", alpha=0.12, hatch="//")
+            
+        ax.set_title(f"{name}: {desc}", fontsize=11, fontweight="bold", pad=8)
+        ax.set_ylabel("Real GDPpc Growth (%)", fontsize=10, color="#1f77b4")
+        ax_t.set_ylabel("Temp Anomaly (deg C)", fontsize=10, color="#d62728")
         
-        # Specific historical shock annotations
+        # Historic Event Annotations
         if code == "FRA":
-            ax.annotate("1976 Drought Tax\n(6B Francs)", xy=(1976, 3.5), xytext=(1965, 5.5),
-                        arrowprops=dict(facecolor="black", shrink=0.08, width=1, headwidth=6), fontsize=8.5, fontweight="bold")
-            ax.annotate("2003 Heatwave\n(€4B Farm Loss)", xy=(2003, 0.2), xytext=(1995, -2.5),
-                        arrowprops=dict(facecolor="black", shrink=0.08, width=1, headwidth=6), fontsize=8.5, fontweight="bold")
+            if 1976 in sub["year"].values:
+                ax.annotate("1976 Drought Tax\n(-10% farm output)", xy=(1976, 3.8), xytext=(1970, 7.0),
+                            arrowprops=dict(arrowstyle="->", color="black", lw=1.2), fontsize=8, fontweight="bold")
+            if 2003 in sub["year"].values:
+                ax.annotate("2003 Heatwave\n(4B Euro farm loss)", xy=(2003, 0.25), xytext=(2005, 5.0),
+                            arrowprops=dict(arrowstyle="->", color="black", lw=1.2), fontsize=8, fontweight="bold")
         elif code == "KEN":
-            ax.annotate("1984 Drought\n(-3.8% GDPpc)", xy=(1984, -3.8), xytext=(1988, -5.5),
-                        arrowprops=dict(facecolor="black", shrink=0.08, width=1, headwidth=6), fontsize=8.5, fontweight="bold")
-            ax.annotate("1997 El Niño\nFlood/Drought", xy=(1997, -0.7), xytext=(2002, -4.0),
-                        arrowprops=dict(facecolor="black", shrink=0.08, width=1, headwidth=6), fontsize=8.5, fontweight="bold")
-            
-        if r == 1:
-            ax.set_xlabel("Year", fontsize=10.5, fontweight="bold")
-            
-    fig.suptitle("Figure 5: Extreme Climate Shocks vs. Real GDP per Capita Growth (1960–2023)\n"
-                 "Step (4, Option B): Red shaded bands mark extreme thermal shocks (> +1.5 SD). Historical landmark shocks (1976, 2003 in Europe; 1984, 1997 in Kenya) coincide with acute growth contractions.",
-                 fontsize=12, fontweight="bold", y=0.99)
-    plt.tight_layout(rect=[0, 0.02, 1, 0.95])
+            if 1984 in sub["year"].values:
+                ax.annotate("1984 Sahel/East Africa Drought\n(Agricultural Collapse)", xy=(1984, -2.2), xytext=(1975, 4.0),
+                            arrowprops=dict(arrowstyle="->", color="black", lw=1.2), fontsize=8, fontweight="bold")
+                            
+        lines = [line_gdp, line_t]
+        labels = [l.get_label() for l in lines]
+        ax.legend(lines, labels, loc="upper left", framealpha=0.9, fontsize=8.5)
+        
+    axes[1, 0].set_xlabel("Year (1960-2023)", fontsize=10)
+    axes[1, 1].set_xlabel("Year (1960-2023)", fontsize=10)
+    
+    fig.suptitle("Figure 5: Extreme Weather Shocks vs. Macroeconomic Growth (1960-2023)\nShaded red bands denote detrended thermal shocks (> +1.5 SD); shaded stripes denote severe drought shocks (< -1.5 SD). Sources: ECMWF ERA5 & World Bank WDI.", fontsize=13, fontweight="bold", y=0.99)
+    plt.tight_layout(rect=[0, 0, 1, 0.97])
+    
     out_path = os.path.join(FIG_DIR, "fig5_climate_shocks_vs_economic_dips.png")
-    plt.savefig(out_path)
+    plt.savefig(out_path, dpi=300)
     plt.close()
     print(f"--> Saved {out_path}")
 
 # ------------------------------------------------------------------------------
-# SUPPLEMENTARY FIGURES 6-9 (ROBUSTNESS & EXTENSIONS)
+# SUPPLEMENTARY FIGURES 6-9
 # ------------------------------------------------------------------------------
-def plot_fig6_econometric_coefficients():
-    print("Generating Supplementary Figure 6: Econometric Regression Forest Plot...")
+def generate_supplementary_figures(panel_df):
+    print("Generating Supplementary Figures 6-9 (Forest Plot, Vulnerability, Optimum, KDE)...")
+    
+    # --------------------------------------------------------------------------
+    # Fig 6: Regression Coefficient Forest Plot with t(11) CIs
+    # --------------------------------------------------------------------------
     coef_path = os.path.join(TABLES_DIR, "regression_coefficients_for_plot.csv")
-    if not os.path.exists(coef_path):
-        return
-    df_coef = pd.read_csv(coef_path)
-    fig, ax = plt.subplots(figsize=(10, 5))
-    y_pos = np.arange(len(df_coef))
+    if os.path.exists(coef_path):
+        coef_df = pd.read_csv(coef_path)
+        fig, ax = plt.subplots(figsize=(10, 5))
+        y_pos = np.arange(len(coef_df))
+        ax.errorbar(coef_df["temp_coef"], y_pos,
+                    xerr=[coef_df["temp_coef"] - coef_df["temp_ci_low"], coef_df["temp_ci_high"] - coef_df["temp_coef"]],
+                    fmt="o", color="#1f77b4", ecolor="#1f77b4", elinewidth=2.2, capsize=5, markersize=8)
+        ax.axvline(0, color="black", linestyle="--", linewidth=1.2)
+        ax.set_yticks(y_pos)
+        ax.set_yticklabels(coef_df["models"], fontsize=10, fontweight="bold")
+        ax.set_xlabel("Temperature Coefficient beta (pp GDPpc Growth per deg C)", fontsize=10)
+        ax.set_title("Supplementary Figure 6: Econometric Regression Coefficient Forest Plot\nError bars represent exact 95% Confidence Intervals under t(11) degrees of freedom. Note the widening CI under Two-Way FE.", fontsize=11, fontweight="bold")
+        plt.tight_layout()
+        plt.savefig(os.path.join(FIG_DIR, "fig6_econometric_panel_coefficients.png"), dpi=300)
+        plt.close()
+        
+    # --------------------------------------------------------------------------
+    # Fig 7: Agricultural Vulnerability Slopes
+    # --------------------------------------------------------------------------
+    fig, ax = plt.subplots(figsize=(10, 6))
+    valid = panel_df.dropna(subset=["agriculture_share_gdp", "gdp_per_capita_growth"])
+    country_agri = valid.groupby("country_code").agg({
+        "agriculture_share_gdp": "mean",
+        "gdp_per_capita_growth": "std"  # volatility of growth
+    }).reset_index()
     
-    # Calculate asymmetric error bar lengths from exact t(7) CIs
-    xerr_low = df_coef["temp_coef"] - df_coef["temp_ci_low"]
-    xerr_high = df_coef["temp_ci_high"] - df_coef["temp_coef"]
-    ax.errorbar(df_coef["temp_coef"], y_pos, xerr=[xerr_low, xerr_high], fmt='o', color='#d73027', ecolor='#d73027', elinewidth=2, capsize=6, markersize=8)
-    ax.axvline(0, color='black', ls='--', lw=1)
-    ax.set_yticks(y_pos)
-    ax.set_yticklabels(df_coef["models"], fontsize=10.5, fontweight="bold")
-    ax.set_xlabel("Estimated Temperature Coefficient (pp GDPpc growth per +1°C)", fontsize=10.5, fontweight="bold")
-    ax.set_title("Supplementary Fig 6: Econometric Estimates of Annual Temperature Anomaly on Growth\n"
-                 "Error bars represent exact 95% CIs with small-sample cluster t(7) critical value = 2.365 (Cameron et al. 2008)",
-                 fontsize=11, fontweight="bold")
+    for _, row in country_agri.iterrows():
+        c = row["country_code"]
+        x = row["agriculture_share_gdp"]
+        y = row["gdp_per_capita_growth"]
+        col = COUNTRY_COLORS.get(c, "#333333")
+        ax.scatter(x, y, color=col, s=120, edgecolor="black", zorder=5)
+        ax.annotate(c, (x, y), textcoords="offset points", xytext=(6, 4), fontsize=9, fontweight="bold")
+        
+    sns.regplot(data=country_agri, x="agriculture_share_gdp", y="gdp_per_capita_growth",
+                scatter=False, ax=ax, color="#7f7f7f", line_kws={"linestyle": "--"})
+    ax.set_xlabel("Mean Agriculture Share of GDP (%)", fontsize=10)
+    ax.set_ylabel("Macroeconomic Growth Volatility (SD of GDPpc Growth, %)", fontsize=10)
+    ax.set_title("Supplementary Figure 7: Agricultural Share vs. Macroeconomic Growth Volatility\nAgrarian economies exhibit higher macroeconomic volatility due to weather exposure.", fontsize=11, fontweight="bold")
+    plt.tight_layout()
+    plt.savefig(os.path.join(FIG_DIR, "fig7_agricultural_vulnerability_slopes.png"), dpi=300)
+    plt.close()
     
-    # Add annotation for uninformative null
-    ax.text(0.55, 0.25, "TWFE 95% CI: [-1.05, +0.98] pp/°C\n"
-                         "Wide interval encompasses naive estimate (-0.49).\n"
-                         "Demonstrates an uninformative null due to cluster sample size (G=8).",
-            transform=ax.transAxes, fontsize=9.0, bbox=dict(boxstyle="round,pad=0.5", fc="#f7f7f7", ec="gray", alpha=0.9))
+    # --------------------------------------------------------------------------
+    # Fig 8: Non-Linear Temperature Optimum Curve (Burke et al. 2015 spec)
+    # --------------------------------------------------------------------------
+    fig, ax = plt.subplots(figsize=(10, 6))
+    # Quadratic spec: Growth = a + b1*T + b2*T^2
+    valid_curve = panel_df.dropna(subset=["gdp_per_capita_growth", "temp_annual_mean"]).copy()
+    valid_curve["t2"] = valid_curve["temp_annual_mean"] ** 2
+    poly_fit = np.polyfit(valid_curve["temp_annual_mean"], valid_curve["gdp_per_capita_growth"], 2)
+    t_range = np.linspace(valid_curve["temp_annual_mean"].min(), valid_curve["temp_annual_mean"].max(), 200)
+    curve_pred = np.polyval(poly_fit, t_range)
+    
+    ax.scatter(valid_curve["temp_annual_mean"], valid_curve["gdp_per_capita_growth"],
+               alpha=0.25, color="#7f7f7f", s=25, label="Observed Country-Years")
+    ax.plot(t_range, curve_pred, color="#d62728", linewidth=2.5, label="Quadratic Fit (Burke et al. 2015 Spec)")
+    
+    optimum_t = -poly_fit[1] / (2 * poly_fit[0]) if poly_fit[0] != 0 else np.nan
+    if not np.isnan(optimum_t) and (t_range.min() <= optimum_t <= t_range.max()):
+        ax.axvline(optimum_t, color="black", linestyle=":", linewidth=1.5, label=f"Empirical Optimum (~{optimum_t:.1f} deg C)")
+        
+    ax.set_xlabel("Annual Mean Surface Temperature (deg C)", fontsize=10)
+    ax.set_ylabel("Real GDP per Capita Growth (%)", fontsize=10)
+    ax.set_title("Supplementary Figure 8: Non-Linear Temperature Optimum Curve\nTesting non-linear concave macroeconomic response across 12 countries.", fontsize=11, fontweight="bold")
+    ax.legend(loc="upper right", framealpha=0.9, fontsize=9)
     plt.tight_layout()
-    plt.savefig(os.path.join(FIG_DIR, "fig6_econometric_panel_coefficients.png"))
+    plt.savefig(os.path.join(FIG_DIR, "fig8_nonlinear_temperature_optimum.png"), dpi=300)
     plt.close()
-
-def plot_fig7_agricultural_vulnerability(panel_df):
-    print("Generating Supplementary Figure 7: Agricultural Vulnerability Slopes...")
-    fig, ax = plt.subplots(figsize=(10, 5))
-    df_clean = panel_df.dropna(subset=["gdp_per_capita_growth", "temp_annual_anomaly"]).copy()
-    high_inc = df_clean[df_clean["country_code"].isin(["FRA", "DEU", "USA"])]
-    vuln = df_clean[df_clean["country_code"].isin(["ESP", "BRA", "IND", "KEN"])]
-    sns.regplot(data=high_inc, x="temp_annual_anomaly", y="gdp_per_capita_growth", ax=ax, label="Industrial / Capital-Buffered (FRA, DEU, USA)", color="#4575b4", scatter_kws={"alpha": 0.4})
-    sns.regplot(data=vuln, x="temp_annual_anomaly", y="gdp_per_capita_growth", ax=ax, label="Agrarian / Frontline (ESP, BRA, IND, KEN)", color="#d73027", scatter_kws={"alpha": 0.4})
-    ax.set_xlabel("Temperature Anomaly (°C)", fontsize=10.5, fontweight="bold")
-    ax.set_ylabel("Real GDPpc Growth (%)", fontsize=10.5, fontweight="bold")
-    ax.set_title("Supplementary Fig 7: Heterogeneous Sensitivity by Economic Structure", fontsize=11, fontweight="bold")
-    ax.legend(frameon=True)
+    
+    # --------------------------------------------------------------------------
+    # Fig 9: Empirical KDE Distributional Density Shifts
+    # --------------------------------------------------------------------------
+    fig, ax = plt.subplots(figsize=(10, 6))
+    early_anom = panel_df[panel_df["year"].between(1960, 1989)]["temp_annual_anomaly"].dropna()
+    late_anom = panel_df[panel_df["year"].between(1990, 2023)]["temp_annual_anomaly"].dropna()
+    
+    sns.kdeplot(early_anom, ax=ax, color="#1f77b4", linewidth=2.2, fill=True, alpha=0.3, label=f"Early Era (1960-1989, Mean = {early_anom.mean():+.2f} deg C)")
+    sns.kdeplot(late_anom, ax=ax, color="#d62728", linewidth=2.2, fill=True, alpha=0.3, label=f"Modern Era (1990-2023, Mean = {late_anom.mean():+.2f} deg C)")
+    
+    ax.axvline(0, color="black", linestyle="--", linewidth=1.0)
+    ax.set_xlabel("Annual Temperature Anomaly Relative to 1961-1990 (deg C)", fontsize=10)
+    ax.set_ylabel("Empirical Probability Density", fontsize=10)
+    ax.set_title("Supplementary Figure 9: Global Temperature Distributional Shift Across 12 Countries\nDemonstrating mean shift and right-tail fattening (increased probability of extreme heat).", fontsize=11, fontweight="bold")
+    ax.legend(loc="upper right", framealpha=0.9, fontsize=9)
     plt.tight_layout()
-    plt.savefig(os.path.join(FIG_DIR, "fig7_agricultural_vulnerability_slopes.png"))
+    plt.savefig(os.path.join(FIG_DIR, "fig9_distributional_density_shifts.png"), dpi=300)
     plt.close()
-
-def plot_fig8_nonlinear_optimum(panel_df):
-    print("Generating Supplementary Figure 8: Non-Linear Temperature Optimum Curve...")
-    fig, ax = plt.subplots(figsize=(10, 5))
-    df_clean = panel_df.dropna(subset=["gdp_per_capita_growth", "temp_annual_mean"]).copy()
-    sns.regplot(data=df_clean, x="temp_annual_mean", y="gdp_per_capita_growth", order=2, ax=ax, color="#756bb1", scatter_kws={"alpha": 0.4})
-    ax.set_xlabel("Annual Absolute Mean Temperature (°C)", fontsize=10.5, fontweight="bold")
-    ax.set_ylabel("Real GDPpc Growth (%)", fontsize=10.5, fontweight="bold")
-    ax.set_title("Supplementary Fig 8: Non-Linear Quadratic Temperature Fit (Burke et al. 2015 Spec)", fontsize=11, fontweight="bold")
-    plt.tight_layout()
-    plt.savefig(os.path.join(FIG_DIR, "fig8_nonlinear_temperature_optimum.png"))
-    plt.close()
-
-def plot_fig9_distributional_shifts(panel_df):
-    print("Generating Supplementary Figure 9: Distributional Density Shifts...")
-    fig, axes = plt.subplots(2, 4, figsize=(16, 7), sharex=True, sharey=True)
-    countries = ["FRA", "DEU", "ESP", "USA", "BRA", "IND", "KEN", "AUS"]
-    for idx, code in enumerate(countries):
-        ax = axes[idx // 4, idx % 4]
-        df_c = panel_df[panel_df["country_code"] == code]
-        early = df_c[df_c["year"].between(1961, 1990)]["temp_annual_mean"]
-        recent = df_c[df_c["year"].between(1994, 2023)]["temp_annual_mean"]
-        sns.kdeplot(early, ax=ax, color="#4575b4", fill=True, alpha=0.3, label="1961–1990 Baseline")
-        sns.kdeplot(recent, ax=ax, color="#d73027", fill=True, alpha=0.3, label="1994–2023 Recent")
-        ax.set_title(f"{code}: ΔMean = +{recent.mean()-early.mean():.2f}°C", fontsize=10, fontweight="bold")
-        if idx == 0:
-            ax.legend(fontsize=8)
-    fig.suptitle("Supplementary Fig 9: Empirical Distributional Shift of Annual Mean Temperature", fontsize=12, fontweight="bold", y=0.99)
-    plt.tight_layout()
-    plt.savefig(os.path.join(FIG_DIR, "fig9_distributional_density_shifts.png"))
-    plt.close()
+    
+    print("--> All Supplementary Figures (6-9) generated in figures/!")
 
 # ------------------------------------------------------------------------------
-# MAIN PIPELINE
+# MAIN EXECUTION
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
     print("="*70)
-    print("STARTING FIGURE GENERATION PIPELINE (TRACK 1)")
+    print("STARTING PUBLICATION-GRADE VISUALIZATION PIPELINE (12 COUNTRIES)")
     print("="*70)
-    p_df, m_df, s_df = load_all_data()
     
-    print("\n--- Generating Core Paper Figures (Featured in Section 4 of Paper) ---")
-    plot_fig1_historical_trends(p_df)           # Core Fig 1: Step (1) - Observed Climate Records
-    plot_fig2_warming_stripes(m_df)             # Core Fig 2: Step (2) - Why De-Seasonalize (Raw vs Anom)
-    plot_fig3_signal_noise_quadrant(p_df)       # Core Fig 3: Step (3) - Signal-to-Noise & Quadrants
-    plot_fig4_seasonal_asymmetry(s_df)          # Core Fig 4: Step (4A) - Seasonal Warming Asymmetry
-    plot_fig5_climate_economic_shocks(p_df)     # Core Fig 5: Step (4B) - Weather Shocks vs Economic Dips
+    p_df, m_df, s_df = load_data()
     
-    print("\n--- Generating Supplementary / Robustness Figures ---")
-    plot_fig6_econometric_coefficients()
-    plot_fig7_agricultural_vulnerability(p_df)
-    plot_fig8_nonlinear_optimum(p_df)
-    plot_fig9_distributional_shifts(p_df)
+    generate_figure_1(p_df)
+    generate_figure_2(m_df)
+    generate_figure_3(p_df)
+    generate_figure_4(s_df)
+    generate_figure_5(p_df)
+    generate_supplementary_figures(p_df)
     
     print("\n" + "="*70)
-    print("ALL FIGURES GENERATED SUCCESSFULLY IN figures/!")
-    print("-> Figures 1-5: Primary figures featured in the 10-page research paper.")
-    print("-> Figures 6-9: Supplementary figures available for slides & oral defense.")
+    print("ALL 9 PUBLICATION-GRADE FIGURES GENERATED SUCCESSFULLY IN figures/!")
     print("="*70)

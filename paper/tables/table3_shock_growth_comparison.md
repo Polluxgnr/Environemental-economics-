@@ -1,8 +1,14 @@
-# Table 3: Macroeconomic Growth in Detrended Climate Shock vs. Non-Shock Years (1960–2023)
+# Table 3: Macroeconomic Growth During Detrended Climate Shocks (1960-2023)
 
-*Notes: Climate shocks are defined strictly on detrended residuals (standardized z-scores relative to country linear time trends). Heat shock defined as detrended temperature z > +1.5; Drought shock defined as detrended precipitation z < -1.5. Welch's two-sample t-test p-values reported.*
+*Notes: Climate shocks are identified from standardized residuals (z-scores) of country-specific linear trends fitted over 1960-2023. Linear detrending ensures that shocks represent unexpected annual weather surprises rather than the secular multi-decadal trend. Welch's two-sample t-test accounts for unequal variances between shock and non-shock regimes. Dependent variable is Annual Real GDP per Capita Growth (%).*
 
-| Atmospheric Event                   |   Shock Years (N) | Mean Growth in Shock (%)   |   Non-Shock Years (N) | Mean Growth in Non-Shock (%)   |   Growth Difference (pp) |   Two-Sample t-test p-value |
-|:------------------------------------|------------------:|:---------------------------|----------------------:|:-------------------------------|-------------------------:|----------------------------:|
-| Detrended Heat Shock (> +1.5 SD)    |                30 | 1.47% (±4.03)              |                   474 | 2.19% (±2.92)                  |                    -0.72 |                       0.343 |
-| Detrended Drought Shock (< -1.5 SD) |                28 | 2.45% (±2.49)              |                   476 | 2.13% (±3.03)                  |                     0.31 |                       0.525 |
+| Sample                    | Shock Regime               |   Shock Years (N) | Mean Growth in Shock (%)   |   Non-Shock Years (N) | Mean Growth in Non-Shock (%)   |   Growth Difference (pp) |   Welch t-stat |   p-value |
+|:--------------------------|:---------------------------|------------------:|:---------------------------|----------------------:|:-------------------------------|-------------------------:|---------------:|----------:|
+| Full Panel (12 Countries) | Severe Heatwave (z > +1.5) |                48 | 0.98%                      |                   684 | 2.03%                          |                    -1.05 |          -1.59 |    0.1183 |
+| Full Panel (12 Countries) | Severe Drought (z < -1.5)  |                35 | 1.36%                      |                   697 | 1.99%                          |                    -0.63 |          -1.11 |    0.2736 |
+| Full Panel (12 Countries) | Severe Wet (z > +1.5)      |                47 | 2.02%                      |                   685 | 1.95%                          |                     0.06 |           0.12 |    0.9074 |
+| Full Panel (12 Countries) | Compound Hot & Dry         |                40 | 1.32%                      |                   692 | 2.00%                          |                    -0.68 |          -1.12 |    0.2689 |
+| Continent: Europe         | Severe Heatwave (z > +1.5) |                 9 | 2.45%                      |                   180 | 2.20%                          |                     0.25 |           0.15 |    0.8822 |
+| Continent: Africa         | Severe Heatwave (z > +1.5) |                15 | -0.83%                     |                   174 | 0.96%                          |                    -1.79 |          -1.35 |    0.1954 |
+| Continent: Asia-Pacific   | Severe Heatwave (z > +1.5) |                10 | 3.82%                      |                   155 | 3.03%                          |                     0.79 |           0.9  |    0.3878 |
+| Continent: Americas       | Severe Heatwave (z > +1.5) |                14 | -0.07%                     |                   175 | 2.03%                          |                    -2.1  |          -2.06 |    0.0578 |
