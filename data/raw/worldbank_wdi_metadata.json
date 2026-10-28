@@ -1,0 +1,12 @@
+{
+  "producer": "World Bank",
+  "dataset": "World Development Indicators",
+  "release_lastupdated": "2026-10-08",
+  "accessed": "2026-10-28",
+  "indicators": {
+    "NY.GDP.PCAP.KD.ZG": "gdp_per_capita_growth",
+    "NV.AGR.TOTL.ZS": "agriculture_share_gdp",
+    "AG.PRD.CROP.XD": "crop_production_index",
+    "NY.GDP.MKTP.KD.ZG": "gdp_growth"
+  }
+}
