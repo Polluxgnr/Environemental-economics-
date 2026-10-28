@@ -1,0 +1,28 @@
+Table 5. The most extreme hot-season and dry year in each country (detrended z-score, 1961-2025) and the deviation of growth that year from what the country and the year would predict (two-way demeaned, pp). WDI data; Copernicus Atlas ERA5.
+
+| Country       | Shock                |   Year |     z |   Growth vs normal (pp) |   Crop growth vs normal (pp) |
+|:--------------|:---------------------|-------:|------:|------------------------:|-----------------------------:|
+| France        | Hottest (hot season) |   2003 |  3.45 |                    -1.5 |                        -20.6 |
+| France        | Driest               |   1989 | -2.18 |                     1.3 |                         -3.6 |
+| Germany       | Hottest (hot season) |   2003 |  2.73 |                    -2.2 |                        -17.7 |
+| Germany       | Driest               |   2003 | -2.31 |                    -2.2 |                        -17.7 |
+| Spain         | Hottest (hot season) |   1962 |  2.16 |                     5.3 |                         -8.9 |
+| Spain         | Driest               |   2005 | -1.93 |                    -1.3 |                        -14.5 |
+| Kenya         | Hottest (hot season) |   1973 |  2.46 |                    -0.5 |                         -0.4 |
+| Kenya         | Driest               |   1969 | -1.82 |                     1   |                          5.2 |
+| Senegal       | Hottest (hot season) |   1998 |  2.85 |                     2.4 |                         -5.1 |
+| Senegal       | Driest               |   1983 | -2.09 |                    -5.2 |                        -34.6 |
+| South Africa  | Hottest (hot season) |   2016 |  2.74 |                    -0.5 |                        -11.4 |
+| South Africa  | Driest               |   1965 | -1.9  |                     2.3 |                         -1   |
+| India         | Hottest (hot season) |   2010 |  2.23 |                     2.5 |                          5.5 |
+| India         | Driest               |   1987 | -2.3  |                    -1.4 |                         -4.5 |
+| Vietnam       | Hottest (hot season) |   2020 |  1.96 |                     3.4 |                         -9.9 |
+| Vietnam       | Driest               |   2004 | -2.29 |                     0.2 |                          0.6 |
+| Australia     | Hottest (hot season) |   2019 |  2.32 |                    -0.5 |                        -11.1 |
+| Australia     | Driest               |   2019 | -2.58 |                    -0.5 |                        -11.1 |
+| United States | Hottest (hot season) |   1988 |  1.73 |                     1.1 |                        -13.7 |
+| United States | Driest               |   2012 | -1.95 |                     0.2 |                         -2.5 |
+| Brazil        | Hottest (hot season) |   1963 |  4.07 |                    -5.9 |                         -5.4 |
+| Brazil        | Driest               |   1969 | -2.78 |                     3.3 |                          4.2 |
+| Mexico        | Hottest (hot season) |   1980 |  2.56 |                     3.9 |                         11.9 |
+| Mexico        | Driest               |   2023 | -2.36 |                     0.7 |                          1.4 |

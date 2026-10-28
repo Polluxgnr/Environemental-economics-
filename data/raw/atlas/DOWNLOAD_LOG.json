@@ -1,0 +1,20 @@
+{
+  "producer": "Copernicus Climate Change Service (C3S) / ECMWF",
+  "product": "Copernicus Interactive Climate Atlas, dataset ERA5, variables t and pr",
+  "endpoints": {
+    "predefined": "https://atlas.climate.copernicus.eu/temporal/serie",
+    "user_defined": "https://atlas.climate.copernicus.eu/job/temporal/serie"
+  },
+  "european_country_ids": {
+    "ESP": 0,
+    "FRA": 2,
+    "DEU": 15
+  },
+  "user_defined_regions": "Natural Earth 1:50m admin-0, simplified 0.05 deg; USA = contiguous 48 states",
+  "accessed": "2026-10-28",
+  "years": [
+    1940,
+    2025
+  ],
+  "n_series": 288
+}

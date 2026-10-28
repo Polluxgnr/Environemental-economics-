@@ -1,9 +1,0 @@
-Sample,Shock Regime,Shock Years (N),Mean Growth in Shock (%),Non-Shock Years (N),Mean Growth in Non-Shock (%),Growth Difference (pp),Welch t-stat,p-value
-Full Panel (12 Countries),Severe Heatwave (z > +1.5),48,0.98%,684,2.03%,-1.05,-1.59,0.1183
-Full Panel (12 Countries),Severe Drought (z < -1.5),35,1.36%,697,1.99%,-0.63,-1.11,0.2736
-Full Panel (12 Countries),Severe Wet (z > +1.5),47,2.02%,685,1.95%,+0.06,0.12,0.9074
-Full Panel (12 Countries),Compound Hot & Dry,40,1.32%,692,2.00%,-0.68,-1.12,0.2689
-Continent: Europe,Severe Heatwave (z > +1.5),9,2.45%,180,2.20%,+0.25,0.15,0.8822
-Continent: Africa,Severe Heatwave (z > +1.5),15,-0.83%,174,0.96%,-1.79,-1.35,0.1954
-Continent: Asia-Pacific,Severe Heatwave (z > +1.5),10,3.82%,155,3.03%,+0.79,0.90,0.3878
-Continent: Americas,Severe Heatwave (z > +1.5),14,-0.07%,175,2.03%,-2.10,-2.06,0.0578

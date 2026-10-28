@@ -85,12 +85,11 @@ def fig1_stripes(a):
         cb.ax.tick_params(labelsize=7)
     axes[0].set_yticks(range(len(ORDER)))
     axes[0].set_yticklabels([f"{NAMES[c]}  ({base.loc[c, 'temp']:.1f} °C, {base.loc[c, 'precip']:.0f} mm)" for c in ORDER])
-    axes[0].text(1976, -0.9, "baseline 1961-1990", fontsize=7, ha="center", color=INK)
-    axes[0].text(1945, -0.9, "pre-1950: fewer observations", fontsize=7, ha="center", color=MUTED)
     fig.suptitle("Figure 1. Every country is warmer than its 1961-1990 normal in almost every recent year; rainfall shows no such pattern",
                  x=0.01, ha="left", fontsize=10.5, fontweight="bold", y=1.02)
-    source(fig, "Each cell is one year, 1940-2025. Labels give the 1961-1990 mean annual temperature and rainfall. "
-                "Anomalies relative to 1961-1990 (our baseline; the Atlas returns absolute values). " + SRC_ATLAS, y=0.0)
+    source(fig, "Each cell is one year, 1940-2025. Dashed box: the 1961-1990 baseline (our choice; the Atlas returns absolute values). "
+                "Faded 1940-1949: ERA5 rests on fewer observations. Labels give the 1961-1990 mean annual temperature and rainfall. "
+                + SRC_ATLAS, y=0.0)
     fig.savefig(os.path.join(FIG, "fig1_climate_stripes.png"))
     plt.close(fig)
 
@@ -125,7 +124,9 @@ def fig2_signal_noise(a):
     axes[0].set_yticks(range(len(t)))
     axes[0].set_yticklabels([NAMES[c] for c in t.c])
     axes[0].set_ylim(-0.7, len(t) - 0.3)
-    fig.suptitle("Figure 2. Warming stands far outside normal year-to-year variation everywhere; rainfall change mostly does not",
+    nT, nP = int((t.dT > 2 * t.sT).sum()), int((t.dP.abs() > 2 * t.sP).sum())
+    fig.suptitle(f"Figure 2. Warming exceeds twice the normal year-to-year variation in {nT} of 12 countries; "
+                 f"rainfall change does so in {nP}",
                  x=0.01, ha="left", fontsize=10.5, fontweight="bold", y=1.0)
     source(fig, "Dots: change in the 10-year mean. Dark band: ±1σ, light band: ±2σ, where σ is the SD of the detrended annual "
                 "anomaly 1961-2025 (one ordinary year's deviation). Filled dot = change larger than 2σ; open dot = within 2σ. "
@@ -162,8 +163,10 @@ def fig3_seasons(s, a):
     for y in [2.5, 5.5, 8.5]:
         ax.axhline(y, color="white", lw=2.5)
     fig.colorbar(im, ax=ax, fraction=0.04, pad=0.02, label="Warming (°C)")
-    ax.set_title("Figure 3. Some seasons warm faster than others,\nbut in only a few countries is the gap larger than the noise",
-                 loc="left", fontsize=10, pad=28)
+    sig_c = [NAMES[ORDER[i]] for i in range(len(ORDER))
+             if M[i].max() - M[i].min() > 2 * np.hypot(SE[i, M[i].argmax()], SE[i, M[i].argmin()])]
+    ax.set_title(f"Figure 3. Warming is spread fairly evenly over the year: only in\n{' and '.join(sig_c)} "
+                 f"does one season clearly outpace another", loc="left", fontsize=10, pad=28)
     source(fig, "Cells: mean anomaly 2016-2025 minus 1961-1990 (°C) ± 2 SE. Box and bold: the fastest season is warming\n"
                 "significantly faster than the slowest (gap > 2 SE). (S) southern hemisphere: Jun-Aug is winter.\n" + SRC_ATLAS, y=0.02)
     fig.savefig(os.path.join(FIG, "fig3_seasonal_heatmap.png"))
@@ -171,43 +174,51 @@ def fig3_seasons(s, a):
 
 
 # ------------------------------------------------------------------------------
-def twoway_resid(d, col):
-    """Residual after country FE, year FE and the precipitation anomaly (Frisch-Waugh-Lovell),
+def twoway_resid(d, col, control):
+    """Residual after country FE, year FE and the other climate variable (Frisch-Waugh-Lovell),
     so the slope of the residual scatter equals the regression coefficient in Table 3."""
     X = pd.concat([pd.get_dummies(d.country_code, dtype=float), pd.get_dummies(d.year, dtype=float),
-                   d[["precip_anom_pct"]].astype(float)], axis=1).values
+                   d[[control]].astype(float)], axis=1).values
     return d[col].values - X @ np.linalg.lstsq(X, d[col].values, rcond=None)[0]
 
 
 def fig4_economy(p, raw):
+    p = p.copy()
+    p["precip_10"] = p.precip_anom_pct / 10.0
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.2), gridspec_kw={"wspace": 0.25})
-    for ax, y, x, lab, mod, ylab in [
-        (axes[0], "gdp_per_capita_growth", "temp_anom", "annual temperature", "(3) Two-way FE", "GDP per capita growth (pp)"),
-        (axes[1], "crop_growth", "hot_temp_anom", "hot-season temperature", "(8) Crop growth, hot-season T", "Crop production growth (pp)")]:
-        d = p.dropna(subset=[y, x, "precip_anom_pct"]).copy()
-        d["ry"], d["rx"] = twoway_resid(d, y), twoway_resid(d, x)
+    panels = [
+        # ax, outcome, regressor, control, model, shock column/rule, x label, y label, unit, colour
+        (axes[0], "gdp_per_capita_growth", "temp_anom", "precip_10", "(3) Two-way FE",
+         ("temp_z", 1.5), "Unusually warm year (°C)", "GDP per capita growth (pp)", "pp per °C", WARM,
+         "hot year (z > 1.5)"),
+        (axes[1], "crop_growth", "precip_10", "temp_anom", "(7) Crop growth, two-way FE",
+         ("precip_z", -1.5), "Unusually wet year (+10% of normal rainfall)", "Crop production growth (pp)",
+         "pp per +10% rain", WET, "dry year (z < -1.5)")]
+    for ax, y, x, ctrl, mod, (zc, thr), xlab, ylab, unit, color, slab in panels:
+        d = p.dropna(subset=[y, x, ctrl]).copy()
+        d["ry"], d["rx"] = twoway_resid(d, y, ctrl), twoway_resid(d, x, ctrl)
         ax.scatter(d.rx, d.ry, s=8, color="#8c959f", alpha=0.45, lw=0)
-        zcol = "temp_z" if x == "temp_anom" else "hot_temp_z"
-        hot = d[d[zcol] > 1.5]
-        ax.scatter(hot.rx, hot.ry, s=18, color=WARM, alpha=0.9, lw=0, label="shock year (z > 1.5)")
-        bins = pd.qcut(d.rx, 10)
-        bm = d.groupby(bins, observed=True)[["rx", "ry"]].mean()
+        shock = d[d[zc] > thr] if thr > 0 else d[d[zc] < thr]
+        ax.scatter(shock.rx, shock.ry, s=18, color=WARM if thr > 0 else DRY, alpha=0.9, lw=0, label=slab)
+        bm = d.groupby(pd.qcut(d.rx, 10), observed=True)[["rx", "ry"]].mean()
         ax.plot(bm.rx, bm.ry, "s", color=INK, ms=5, label="decile means")
         r = raw[raw.Model == mod].iloc[0]
         xs = np.linspace(d.rx.quantile(0.01), d.rx.quantile(0.99), 50)
-        ax.plot(xs, r[f"b_{x}"] * xs, color=WARM, lw=2)
-        ax.fill_between(xs, r[f"ci_lo_{x}"] * xs, r[f"ci_hi_{x}"] * xs, color=WARM, alpha=0.12, lw=0)
+        ax.plot(xs, r[f"b_{x}"] * xs, color=color, lw=2)
+        ax.fill_between(xs, r[f"ci_lo_{x}"] * xs, r[f"ci_hi_{x}"] * xs, color=color, alpha=0.15, lw=0)
         ax.axhline(0, color=MUTED, lw=0.6); ax.axvline(0, color=MUTED, lw=0.6)
         ax.set_ylim(np.percentile(d.ry, [0.5, 99.5]) * 1.25)
-        ax.set_xlabel(f"Unusually warm {lab} (°C)\nvs the country's and the year's average")
+        ax.set_xlabel(xlab + "\nvs the country's and the year's average")
         ax.set_ylabel(ylab)
-        ax.set_title(f"slope {r[f'b_{x}']:+.2f} pp/°C, 95% CI [{r[f'ci_lo_{x}']:+.2f}, {r[f'ci_hi_{x}']:+.2f}]",
+        ax.set_title(f"slope {r[f'b_{x}']:+.2f} {unit}, 95% CI [{r[f'ci_lo_{x}']:+.2f}, {r[f'ci_hi_{x}']:+.2f}]",
                      loc="left", fontsize=9, fontweight="normal")
         ax.legend(frameon=False, fontsize=7, loc="lower left")
-    fig.suptitle("Figure 4. Unusually warm years go with slightly lower growth, but the relationship is weak and imprecise",
+    fig.suptitle("Figure 4. Warm years: slightly lower GDP growth, not distinguishable from zero. "
+                 "Wet years: clearly higher crop output",
                  x=0.01, ha="left", fontsize=10.5, fontweight="bold", y=1.03)
-    source(fig, "Each dot is a country-year, 1961-2025, after removing country and year averages (two-way fixed effects). "
-                "Line: regression slope with 95% CI (clustered by country, t(11)).\n" + SRC_ATLAS + " " + SRC_WDI, y=-0.04)
+    source(fig, "Each dot is a country-year, 1961-2025, after removing country averages, year averages and the other climate "
+                "variable (two-way fixed effects). Line: regression slope with 95% CI (clustered by country, t(11)); the "
+                "slopes are those of Table 3, columns 3 and 7.\n" + SRC_ATLAS + " " + SRC_WDI, y=-0.04)
     fig.savefig(os.path.join(FIG, "fig4_climate_vs_growth.png"))
     plt.close(fig)
 
@@ -227,9 +238,10 @@ def fig5_coefficients(raw):
     ax.axvline(0, color=INK, lw=0.8)
     ax.set_yticks(range(len(raw))); ax.set_yticklabels(raw.Model)
     ax.set_xlabel("Effect of a +1 °C anomaly on annual growth (percentage points), 95% CI")
-    ax.text(1.02, len(raw) - 0.3, "p: t(11) / wild\nbootstrap", transform=ax.get_yaxis_transform(), fontsize=7, color=MUTED, va="bottom")
-    ax.set_title("Figure 5. Only the naive models give a precise penalty;\nwith year effects every interval includes zero or almost does",
-                 loc="left", fontsize=10)
+    ax.text(1.02, -0.9, "p: t(11) / wild bootstrap", transform=ax.get_yaxis_transform(), fontsize=7, color=MUTED, va="center")
+    ax.set_title("Figure 5. Without year effects warm years look costly; with them the estimate loses\n"
+                 "precision, and it vanishes once country-specific trends are added",
+                 loc="left", fontsize=10, pad=8)
     source(fig, "GDP per capita growth (black, preferred specification in red) and crop production growth (purple), 12 countries, "
                 "1961-2025.\nCluster-robust 95% CI with t(11). " + SRC_ATLAS + " " + SRC_WDI, y=-0.02)
     fig.savefig(os.path.join(FIG, "fig5_coefficients.png"))
@@ -253,11 +265,12 @@ def fig6_route():
         ax.set_xlabel(f"Mean 2014-2023 minus 1961-1990 ({unit})")
         ax.set_title(title, loc="left")
     axes[0].set_yticks(range(len(ORDER))); axes[0].set_yticklabels([NAMES[c] for c in ORDER]); axes[0].invert_yaxis()
-    axes[0].legend(frameon=False, fontsize=7.5, loc="lower right")
+    fig.legend(*axes[0].get_legend_handles_labels(), frameon=False, fontsize=8, loc="lower center",
+               ncol=3, bbox_to_anchor=(0.5, -0.06))
     fig.suptitle("Figure 6. A single grid point is not a country: rainfall changes, and even the sign, depend on the data route",
                  x=0.01, ha="left", fontsize=10.5, fontweight="bold", y=1.0)
     source(fig, "Same definitions for all three routes, common period 1961-2023. Open-Meteo Historical Weather API (best_match "
-                "and models=era5), accessed Oct 2026; " + SRC_ATLAS.replace("Source: ", ""), y=-0.01)
+                "and models=era5), accessed Oct 2026; " + SRC_ATLAS.replace("Source: ", ""), y=-0.09)
     fig.savefig(os.path.join(FIG, "fig6_data_route.png"))
     plt.close(fig)
 

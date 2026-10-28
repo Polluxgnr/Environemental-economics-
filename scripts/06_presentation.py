@@ -46,11 +46,12 @@ def detrended_sd(d, col):
 
 
 def footer(fig, text):
-    fig.text(0.015, 0.012, text, fontsize=10, color=MUTED)
+    import textwrap
+    fig.text(0.015, -0.05, textwrap.fill(text, 175), fontsize=10, color=MUTED, va="top")
 
 
 def save(fig, name):
-    fig.savefig(os.path.join(OUT, name))
+    fig.savefig(os.path.join(OUT, name), bbox_inches="tight", pad_inches=0.3)
     plt.close(fig)
     return os.path.join(OUT, name)
 
@@ -77,6 +78,8 @@ def slide_map(ch):
     world = world[world.ADM0_A3 != "ATA"]
     # metropolitan France only (Natural Earth includes French Guiana in the same feature)
     world.loc[world.ADM0_A3 == "FRA", "geometry"] = world.loc[world.ADM0_A3 == "FRA", "geometry"].intersection(box(-6, 41, 10, 52))
+    # contiguous USA, as in the Atlas region we used
+    world.loc[world.ADM0_A3 == "USA", "geometry"] = world.loc[world.ADM0_A3 == "USA", "geometry"].intersection(box(-125, 24, -66, 50))
     world["dT"] = world.ADM0_A3.map(ch.dT)
     fig, ax = plt.subplots(figsize=(W, H))
     fig.subplots_adjust(left=0.01, right=0.99, top=0.88, bottom=0.08)
@@ -87,7 +90,7 @@ def slide_map(ch):
                           "label": "Warming, 2016-2025 vs 1961-1990 (°C)"})
     # label anchor (lon, lat), placed in the ocean so labels never overlap
     label_pos = {"FRA": (-40, 50), "DEU": (30, 62), "ESP": (-40, 33), "KEN": (58, -8), "SEN": (-42, 14),
-                 "ZAF": (45, -38), "IND": (80, 2), "VNM": (125, 12), "AUS": (160, -40),
+                 "ZAF": (45, -38), "IND": (80, 2), "VNM": (128, 14), "AUS": (118, -45),
                  "USA": (-140, 40), "BRA": (-20, -15), "MEX": (-135, 14)}
     for _, r in sel.iterrows():
         p = r.geometry.representative_point()
@@ -95,10 +98,10 @@ def slide_map(ch):
                     ha="center", va="center", fontsize=12, fontweight="bold", color=INK,
                     arrowprops=dict(arrowstyle="-", color=MUTED, lw=0.8),
                     bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="#d0d7de"))
-    ax.set_xlim(-165, 175); ax.set_ylim(-50, 72)
+    ax.set_xlim(-160, 170); ax.set_ylim(-52, 72)
     ax.set_axis_off()
     fig.suptitle("12 countries, 4 continents: every one is warmer than in 1961-1990",
-                 x=0.015, ha="left", fontsize=22, fontweight="bold")
+                 x=0.015, ha="left", fontsize=20, fontweight="bold")
     footer(fig, "Country-average temperature. " + SRC)
     return save(fig, "slide_01_map.png")
 
@@ -118,10 +121,10 @@ def slide_route():
         ax.set_xlabel(f"2014-2023 vs 1961-1990 ({unit})")
         ax.set_title(title, loc="left", fontsize=17, fontweight="bold")
     axes[0].set_yticks(range(12)); axes[0].set_yticklabels([NAMES[c] for c in ORDER]); axes[0].invert_yaxis()
-    axes[1].legend(frameon=False, fontsize=12, loc="lower right")
+    fig.legend(*axes[0].get_legend_handles_labels(), frameon=False, fontsize=13, loc="lower center", ncol=2, bbox_to_anchor=(0.5, -0.04))
     n_flip = int(((np.sign(t.dP_atlas) != np.sign(t.dP_blend_point)) & (t.dP_atlas.abs() > 3)).sum())
     fig.suptitle(f"A capital is not a country: rainfall change flips sign in {n_flip} of 12 countries",
-                 x=0.015, ha="left", fontsize=22, fontweight="bold")
+                 x=0.015, ha="left", fontsize=20, fontweight="bold")
     footer(fig, "Same definitions for both routes, 1961-2023. Open-Meteo API (default model) vs " + SRC)
     return save(fig, "slide_02_data_route.png")
 
@@ -141,7 +144,7 @@ def slide_stripes(a):
         fig.colorbar(im, ax=ax, orientation="horizontal", fraction=0.045, pad=0.07, aspect=35)
     axes[0].set_yticks(range(12)); axes[0].set_yticklabels([NAMES[c] for c in ORDER])
     fig.suptitle("Every recent year is red. Rainfall has no colour trend: it is noise around the normal",
-                 x=0.015, ha="left", fontsize=22, fontweight="bold")
+                 x=0.015, ha="left", fontsize=20, fontweight="bold")
     footer(fig, "One cell = one year, 1940-2025, anomaly vs 1961-1990 (our baseline). " + SRC)
     return save(fig, "slide_03_stripes.png")
 
@@ -166,8 +169,8 @@ def slide_signal(ch):
     axes[1].set_xlim(-lim, lim)
     axes[0].set_yticks(range(12)); axes[0].set_yticklabels([NAMES[c] for c in t.index])
     nT = int((t.dT > 2 * t.sT).sum()); nP = int((t.dP.abs() > 2 * t.sP).sum())
-    fig.suptitle(f"Signal vs noise: warming exceeds 2σ in {nT}/12 countries, rainfall change in {nP}/12",
-                 x=0.015, ha="left", fontsize=22, fontweight="bold")
+    fig.suptitle(f"Warming is outside normal variability in {nT} of 12 countries; rainfall change in {nP}",
+                 x=0.015, ha="left", fontsize=20, fontweight="bold")
     footer(fig, "Grey bands: ±1σ and ±2σ of ordinary year-to-year variation (detrended SD, 1961-2025). Filled = beyond 2σ. " + SRC)
     return save(fig, "slide_04_signal_noise.png")
 
@@ -198,7 +201,7 @@ def slide_seasons(s):
         ax.axvline(x, color="white", lw=4)
     fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02, label="°C")
     fig.suptitle(f"Seasons: the fastest season is significantly ahead of the slowest in {nsig} of 12 countries",
-                 x=0.015, ha="left", fontsize=22, fontweight="bold")
+                 x=0.015, ha="left", fontsize=20, fontweight="bold")
     footer(fig, "Warming 2016-2025 vs 1961-1990 by calendar season. Box = gap fastest-slowest > 2 SE. Brazil, South Africa, Australia: Jun-Aug is winter. " + SRC)
     return save(fig, "slide_05_seasons.png")
 
@@ -215,8 +218,8 @@ def slide_events():
     ax.set_xlabel("Deviation from what the country and the year would predict (percentage points)")
     ax.legend(frameon=False, fontsize=13, loc="lower left")
     ax.invert_yaxis()
-    fig.suptitle("Each country's hottest season on record: crops often drop, GDP barely moves",
-                 x=0.015, ha="left", fontsize=22, fontweight="bold")
+    fig.suptitle("In each country's hottest season on record, crops often drop; GDP barely moves",
+                 x=0.015, ha="left", fontsize=20, fontweight="bold")
     footer(fig, "Hottest = largest detrended hot-season temperature z-score 1961-2025. Growth two-way demeaned. "
                 "World Bank WDI; " + SRC)
     return save(fig, "slide_06_hottest_years.png")
@@ -234,7 +237,7 @@ def slide_coefs():
     ax.set_yticks(range(len(raw))); ax.set_yticklabels(raw.Model)
     ax.set_xlabel("Effect of a +1 °C warmer year on growth (percentage points), 95% CI")
     fig.suptitle("Once common shocks are removed, the effect of a warm year is small and imprecise",
-                 x=0.015, ha="left", fontsize=22, fontweight="bold")
+                 x=0.015, ha="left", fontsize=20, fontweight="bold")
     footer(fig, "Panel regressions, 12 countries 1961-2025, SE clustered by country, t(11). Black: GDP per capita; red: preferred; purple: crops.")
     return save(fig, "slide_07_coefficients.png")
 
@@ -275,8 +278,12 @@ def build_deck(imgs, ch):
         return s
 
     def image_slide(img, notes):
+        from PIL import Image
         s = prs.slides.add_slide(blank)
-        s.shapes.add_picture(img, 0, 0, width=prs.slide_width, height=prs.slide_height)
+        w, h = Image.open(img).size
+        scale = min(prs.slide_width / w, prs.slide_height / h)
+        pw, ph = int(w * scale), int(h * scale)
+        s.shapes.add_picture(img, (prs.slide_width - pw) // 2, (prs.slide_height - ph) // 2, width=pw, height=ph)
         s.notes_slide.notes_text_frame.text = notes
         return s
 
