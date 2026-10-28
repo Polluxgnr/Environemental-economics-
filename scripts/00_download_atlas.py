@@ -184,7 +184,7 @@ if __name__ == "__main__":
     regions = build_user_defined_regions()
     tasks = [(c, v, m) for c in list(EU_IDS) + USER_DEFINED for v in VARIABLES for m in MONTHS]
     print(f"{len(tasks)} Atlas series (12 countries x 2 variables x 12 months)")
-    done = 0
+    done, fetched = 0, 0
     # A few jobs in parallel: the Atlas processes user-defined jobs server side (~30-60 s each)
     with ThreadPoolExecutor(max_workers=6) as pool:
         futures = {pool.submit(download_one, c, v, m, regions): (c, v, m) for c, v, m in tasks}
@@ -193,11 +193,17 @@ if __name__ == "__main__":
             try:
                 _, how = fut.result()
                 done += 1
+                fetched += how == "downloaded"
                 print(f"  [{done:3d}/{len(tasks)}] {c} {v:2s} {m}: {how}", flush=True)
             except Exception as e:
                 print(f"  FAILED {c} {v} {m}: {e}", flush=True)
 
     df = tidy()
+    log_path = os.path.join(ATLAS_DIR, "DOWNLOAD_LOG.json")
+    if fetched == 0 and os.path.exists(log_path):
+        # everything came from the cache: keep the original access date
+        print("All series cached; DOWNLOAD_LOG.json unchanged.")
+        raise SystemExit(0)
     log = {
         "producer": "Copernicus Climate Change Service (C3S) / ECMWF",
         "product": "Copernicus Interactive Climate Atlas, dataset ERA5, variables t and pr",
@@ -208,5 +214,5 @@ if __name__ == "__main__":
         "years": [int(df.year.min()), int(df.year.max())],
         "n_series": int(df.groupby(["country_code", "variable", "month"]).ngroups),
     }
-    json.dump(log, open(os.path.join(ATLAS_DIR, "DOWNLOAD_LOG.json"), "w"), indent=2)
+    json.dump(log, open(log_path, "w"), indent=2)
     print(json.dumps(log, indent=2))

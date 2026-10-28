@@ -1,77 +1,67 @@
-# Master Oral Defense Guide: 10 Core Questions & Concise Responses
-## Track 1: Temperature and Precipitation Records (1960–2023)
+# Q&A preparation: likely questions and short answers
 
-**Course:** Environmental Economics, BSc AIDAMS, T1 2026-2027  
-**Instructor:** Caterina Seghini, ESSEC Department of Economics  
-**Format:** 3-Minute Examination Defense (Responders 3, 4, 5)  
-**Rule:** Each defense is strictly $\le 2$ sentences and anchored to at least 1 verified empirical number from our 12-country data.
+Each answer is two or three sentences and quotes a number we can trace to a table in `paper/tables/`. Everyone should be able to give every answer: the brief says any member may be asked about any choice.
 
 ---
 
-### Q1: "Country FE shows a -0.82 pp growth penalty, but Two-Way FE is statistically insignificant. Which is right?"
-- **Assigned Responder:** Responder 4 (Econometrics & Identification)
-- **Concise Response:**
-  > "The Country Fixed Effects estimate of $-0.8239$ percentage points per degree Celsius is largely a spurious co-trend driven by the post-WWII productivity slowdown coinciding with secular global warming over 1960–2023. When Year Fixed Effects absorb shared macro cycles, standard errors triple from $0.098$ to $0.299$, yielding a Two-Way FE estimate of $-0.6547$ whose 95% confidence interval encompasses zero ($[-1.31, +0.004]$) under small-sample cluster inference with $t(11)$."
+### Data
 
----
+**Q1. Why the Copernicus Atlas and not the API you first used?**
+The brief asks about *countries*, and the Atlas gives country area averages; our API route gave one grid cell at the capital. For temperature the two agree reasonably (median correlation 0.91), but for rainfall they differ by 9 pp on median and even flip sign (Kenya: −13 % country vs +11 % at Nairobi). We kept the API data as a comparison (Figure 6).
 
-### Q2: "If Two-Way FE is insignificant, are you claiming climate change does not harm the economy?"
-- **Assigned Responder:** Responder 5 (Economic Transmission & Policy)
-- **Concise Response:**
-  > "No, because our Two-Way FE 95% confidence interval of $[-1.31, +0.004]$ pp per degree Celsius is an uninformative null that cannot rule out substantial economic penalties up to $-1.31$ pp per degree. Furthermore, as Dell, Jones, and Olken (2014) demonstrate, annual weather noise captures short-run financial buffering and trade arbitrage, whereas long-run climate damages operate through irreversible ecological degradation and capital scarring."
+**Q2. The Atlas has no country masks outside Europe. How did you get Kenya or Brazil?**
+We used the Atlas's own *user-defined region* tool and uploaded Natural Earth country borders. To check it, we ran France both ways: the polygon reproduces the Atlas's France mask to 0.004 °C.
 
----
+**Q3. Are the Atlas series anomalies?**
+No. They are absolute values (°C, mm/day), so the 1961–1990 baseline is our choice. We picked it because it is the WMO reference period and the first 30 years for which we also have economic data.
 
-### Q3: "Why did you expand the panel from 8 to 12 countries across 4 continents?"
-- **Assigned Responder:** Responder 3 (Physical Climatology & Data)
-- **Concise Response:**
-  > "Expanding to a balanced panel of 12 countries (3 per continent across Europe, Africa, Asia-Pacific, and the Americas) provides representative geographical coverage across global climatic and development regimes. This increases our cluster count to $G = 12$ ($N = 768$ country-years), improving small-sample statistical degrees of freedom from $t(7)$ to $t(11)$."
+**Q4. Why do you start the change at 1961 if the record starts in 1940?**
+ERA5 is less constrained by observations before ~1950, especially for rainfall. We show 1940–2025 but measure change and noise from 1961.
 
----
+**Q5. What exactly is ERA5?**
+A reanalysis: a weather model corrected by every available observation (stations, balloons, satellites since 1979), which gives a complete grid. Temperature is well constrained; rainfall less so, because it comes from the model's physics.
 
-### Q4: "Why do you have 768 rows in the panel, 732 in growth regressions, and 602 in agriculture share?"
-- **Assigned Responder:** Responder 4 (Econometrics & Identification)
-- **Concise Response:**
-  > "Our balanced panel contains exactly 768 rows ($12 \times 64$), but growth requires first-differencing which drops 1960 (12 observations), and Vietnam's GDP per capita series begins in 1985 (24 missing years), yielding exactly $768 - 12 - 24 = 732$ country-years. The agricultural share model drops further to 602 rows because early historical value-added records are missing in the World Bank database for the US, Germany, Spain, Australia, and Vietnam."
+**Q6. How did you merge climate and economy, and what did you lose?**
+Exactly on country code and year, so no climate year is lost. The losses are on the WDI side: Vietnam's growth series starts in 1985 (756 instead of 780 observations), the crop index stops in 2023, and the agriculture share starts in the 1990s for Germany, Spain and the USA.
 
----
+### Description
 
-### Q5: "Why sample climate at national capital coordinates rather than country-wide spatial averages?"
-- **Assigned Responder:** Responder 3 (Physical Climatology & Data)
-- **Concise Response:**
-  > "Sampling at national capital coordinates establishes a standardized, objective spatial anchor reflecting core administrative, demographic, and labor centers where thermal stress directly affects human productivity. While single-point sampling is a recognized limitation for continental landmasses like the US and Brazil, it eliminates arbitrary regional centroid boundaries and is fully auditable."
+**Q7. Why compare the change with σ?**
+A change only matters for people if it exceeds what they already experience as normal variation. Mexico's +1.4 °C is 5.2σ, far outside anything seen in 1961–1990. Australia's +0.7 °C is 1.7σ, still within a run of ordinary years.
 
----
+**Q8. Some precipitation trends are significant. Why do you say rainfall didn't change?**
+Kenya (−3.4 %/decade), Senegal (−4.1 %) and Spain (−1.8 %) have significant linear trends. But in every country the last decade is within one σ of normal. In the Sahel the trend depends on the window: the wet 1960s are at the start of the sample. We say the evidence for a rainfall change is weak and window-dependent, not that nothing changed.
 
-### Q6: "How did you acquire the data? Did you use the Copernicus Climate Data Store or Atlas GUI?"
-- **Assigned Responder:** Responder 3 (Physical Climatology & Data)
-- **Concise Response:**
-  > "We queried Open-Meteo's scientific REST API, which mirrors the exact ECMWF ERA5 $0.25^\circ \times 0.25^\circ$ surface reanalysis archive underpinning the Copernicus Climate Data Store. This programmatic route bypassed personal authentication barriers, multi-hour supercomputing batch queues, and Atlas GUI browser timeouts, allowing our entire 280,512 nation-day pipeline to run reproducibly in seconds."
+**Q9. Is the seasonal pattern significant?**
+Only in France and Spain, where summer warmed about 1 °C more than autumn (gap > 2 SE). Germany's winter warmed most (+2.5 °C), but German winters vary so much that the gap is not significant.
 
----
+### Economy and econometrics
 
-### Q7: "Why did you choose the 1961–1990 baseline over the more recent 1991–2020 period?"
-- **Assigned Responder:** Responder 3 (Physical Climatology & Data)
-- **Concise Response:**
-  > "The 1961–1990 window is the World Meteorological Organization's official reference benchmark for evaluating long-term anthropogenic climate warming. Adopting a recent baseline like 1991–2020 introduces shifting baseline syndrome by absorbing recent greenhouse warming into the normal, making severe modern heatwaves appear artificially benign."
+**Q10. Country FE gives −0.75 and is significant, two-way FE −0.67 and is not. Which is right?**
+Two-way FE. Without year effects, the joint drift of warming and the post-1970s growth slowdown leaks into the estimate. With year effects we only compare countries in the same year. The point estimate barely changes, but the SE rises, the CI becomes [−1.49, +0.16], and adding country trends brings it to −0.04.
 
----
+**Q11. So warm years don't hurt growth?**
+We can't say that. The interval includes zero *and* a loss of 1.5 pp per °C; 12 countries are too few to tell them apart. A typical warm year (0.38 °C above normal) would cost about 0.25 pp if the point estimate were right.
 
-### Q8: "Why does New Delhi show a slightly negative trend in Table 1 while Europe warms rapidly?"
-- **Assigned Responder:** Responder 3 (Physical Climatology & Data)
-- **Concise Response:**
-  > "In New Delhi, the local trend of $-0.037^\circ\text{C}$ per decade ($p = 0.24$) reflects documented aerosol dimming from heavy Indo-Gangetic Plain particulate smog reflecting solar radiation, alongside intensive urban-fringe agricultural irrigation cooling. In contrast, European capitals (Madrid at $+0.383^\circ\text{C}$/dec, Berlin at $+0.364^\circ\text{C}$/dec, Paris at $+0.326^\circ\text{C}$/dec) experienced rapid warming amplified by atmospheric clean-air aerosol reductions."
+**Q12. Why a wild cluster bootstrap?**
+Clustered SEs need many clusters, and we have 12. The wild cluster bootstrap gives reliable p-values with few clusters, and ours are close to the t(11) ones (0.12 vs 0.10 for the preferred model).
 
----
+**Q13. Why a "hot season" temperature?**
+An annual mean dilutes a summer heatwave: France 2003 is 1.2σ as a year but 3.5σ as a summer. The hot season is each country's three warmest calendar months in 1961–1990.
 
-### Q9: "Why is seasonal asymmetry important, and how does it manifest in the data?"
-- **Assigned Responder:** Responder 5 (Economic Transmission & Policy)
-- **Concise Response:**
-  > "Seasonal decomposition reveals that summer warming outpaces winter in Mediterranean Europe and France, intensifying crop evapotranspiration during the dry season when agricultural water demand is highest. Conversely, in higher-latitude continental regimes like Germany and the US, winter warming dominates due to polar amplification and reduced snow albedo."
+**Q14. Why do crops react but GDP not?**
+Exposure. Agriculture is 1–3 % of GDP in France, Germany, Spain, the USA, Australia and South Africa. A 20 % harvest loss there is a fraction of a percentage point of GDP. Crops respond most clearly to rain: +2.2 pp per +10 % of normal (p = 0.002), and −7.6 pp in dry years.
 
----
+**Q15. Is your result causal?**
+The descriptions are descriptions. The economic result is a conditional correlation: weather shocks are plausibly random, but our estimate is too imprecise and fragile to call it a causal effect. Making it causal would take many more units (all countries, or regions), exposure-weighted weather and a pre-specified channel.
 
-### Q10: "Does physical agricultural production respond to climate shocks even if aggregate GDP is buffered?"
-- **Assigned Responder:** Responder 4 (Econometrics & Identification)
-- **Concise Response:**
-  > "Yes, estimating Two-Way Fixed Effects on direct Crop Production Growth ($N = 744$) reveals an acute temperature contraction of $-1.90$ percentage points per $+1^\circ\text{C}$ ($p = 0.0501$) and positive moisture elasticity of $+0.70$ pp per 100mm. This demonstrates that physical agronomic vulnerability is severe, but modern economies buffer aggregate GDP through large indoor service sectors and international food imports."
+**Q16. Does this tell us the cost of climate change?**
+No. One unusual year allows neither adaptation (irrigation, crop choice) nor the build-up of damage. The long-run effect is a different question (Burke et al., 2015; Kahn et al., 2021).
+
+### On the process
+
+**Q17. How did you use AI?**
+[Group to answer consistently with the AI statement in the paper: which tools, for what, and that every number was produced by our code from the raw data.]
+
+**Q18. What would you do with one more month?**
+Extend to every country the Atlas and WDI cover, which multiplies the clusters; weight the climate grid by cropland; and look at sub-national crop data.
