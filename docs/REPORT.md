@@ -22,7 +22,7 @@ The climate record covers 1940–2025. The economic panel covers 1961–2025.
 |---|---|---|
 | 1 | Every country is warmer than in 1961–1990, by **+0.7 °C (India, Australia) to +1.85 °C (Germany)**. All 120 country-years of 2016–2025 were above their 1961–1990 normal. | Table 1, Fig. 1–2 |
 | 2 | In **11 of 12** countries the warming is more than twice the normal year-to-year variation. Australia (1.7σ) is the exception: its climate is very variable. | Fig. 2 |
-| 3 | **Rainfall change exceeds 2σ in none of the 12.** It does not happen where warming is largest (rank correlation 0.04). | Fig. 2, Table 1 |
+| 3 | **Rainfall change exceeds 2σ in none of the 12.** It does not happen where warming is largest (rank correlation 0.06). | Fig. 2, Table 1 |
 | 4 | Warming is spread evenly over the year, except in **France and Spain**, where summer leads (+2.3/+2.4 °C vs +1.3/+1.4 °C in autumn). | Fig. 3, Table 2 |
 | 5 | Warm years go with **slightly lower GDP growth**: −0.67 pp per °C, about −0.25 pp for a typical warm year. But the 95 % CI [−1.49, +0.16] includes zero, and the estimate disappears with country trends. | Table 3, Fig. 4–5 |
 | 6 | **Crops react to water.** +10 % rainfall goes with +2.2 pp crop growth (p = 0.002). Dry years see crop growth 7.6 pp below normal, while GDP is only −0.27 pp below (not significant). | Table 3–4, Fig. 4 |
@@ -44,7 +44,7 @@ The first version (audited in `docs/AUDIT_first_version.md`) had good structure 
 | Precipitation changes (±30–45 %) presented as signal. | Added precipitation signal-to-noise: none exceeds 2σ. |
 | Seasonal claims contradicted the numbers ("Europe: summer > winter", false for Germany). | Country × season table with standard errors. Only France and Spain are significant. |
 | "1976 / 2003 / 1984 caused crises", with untraceable figures (6 bn francs, €4 bn). | Replaced with a systematic table of each country's most extreme year, computed from our data, plus one peer-reviewed citation (Ciais et al., 2005). |
-| Annual means hid summer heatwaves (France 2003 was not flagged). | Added a **hot-season** temperature (warmest 3 months): France 2003 = 3.5σ. |
+| Annual means hid summer heatwaves (France 2003 was not flagged). | Added a **hot-season** temperature (warmest 3 months): France 2003 = 3.4σ. |
 | Shock-vs-normal comparison driven by COVID-2020 and by mixing fast- and slow-growing countries. | Within-country and within-year comparisons, with and without 2020–21, and cluster p-values. |
 | Cited a bootstrap paper without using the method. | Implemented the **wild cluster bootstrap**, the right tool for 12 clusters. |
 | Several numbers inconsistent between sections; causal wording. | Single pipeline, all text numbers read from the generated tables; descriptive and correlational wording. |
@@ -99,7 +99,7 @@ Open-Meteo's Historical Weather API serves ECMWF reanalyses at a point. Our firs
 
 | | Temperature | Precipitation |
 |---|---|---|
-| Correlation of annual anomalies, capital point vs country | median 0.91 | median 0.73 (0.39 USA, 0.40 Australia, 0.43 Brazil) |
+| Correlation of annual anomalies, ERA5 capital point vs country | median 0.91 | median 0.73 (0.39 USA, 0.40 Australia, 0.43 Brazil) |
 | Median absolute gap in the change, blend point vs country | 0.19 °C | 9.2 percentage points |
 | Worst cases | India: −0.20 °C (point) vs +0.65 °C (country); Senegal: +0.24 vs +1.08 | USA: +32 % vs +4 %; Mexico: +28 % vs +1 %; Kenya: +11 % vs −13 % |
 
@@ -151,7 +151,7 @@ flowchart LR
   - Jan–Mar: Kenya;
   - Sep–Nov: Brazil.
   
-  **Why:** a two-week heatwave barely moves an annual mean. France 2003 is only 1.2σ as a year but 3.5σ as a summer.
+  **Why:** a two-week heatwave barely moves an annual mean. France 2003 is only 1.2σ as a year but 3.4σ as a summer.
 - **Change, Δ.** The mean anomaly over 2016–2025, i.e. the last 10 years compared with the 1961–1990 baseline.
 - **Noise, σ.** The standard deviation of the annual anomaly around a linear trend over 1961–2025: how far a normal year strays.
 - **Signal-to-noise, Δ/σ.** Above 2, the recent decade is clearly outside what ordinary variability produces.

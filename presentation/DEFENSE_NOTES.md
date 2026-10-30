@@ -7,7 +7,7 @@ Each answer is two or three sentences and quotes a number we can trace to a tabl
 ### Data
 
 **Q1. Why the Copernicus Atlas and not the API you first used?**
-The brief asks about *countries*, and the Atlas gives country area averages; our API route gave one grid cell at the capital. For temperature the two agree reasonably (median correlation 0.91), but for rainfall they differ by 9 pp on median and even flip sign (Kenya: −13 % country vs +11 % at Nairobi). We kept the API data as a comparison (Figure 6).
+The brief asks about *countries*, and the Atlas gives country area averages; our API route gave one grid cell at the capital. For temperature the two agree reasonably (median correlation 0.85–0.91 depending on the point product), but for rainfall they differ by 9 pp on median and even flip sign (Kenya: −13 % country vs +11 % at Nairobi). We kept the API data as a comparison (Figure 6).
 
 **Q2. The Atlas has no country masks outside Europe. How did you get Kenya or Brazil?**
 We used the Atlas's own *user-defined region* tool and uploaded Natural Earth country borders. To check it, we ran France both ways: the polygon reproduces the Atlas's France mask to 0.004 °C.
@@ -47,7 +47,7 @@ We can't say that. The interval includes zero *and* a loss of 1.5 pp per °C; 12
 Clustered SEs need many clusters, and we have 12. The wild cluster bootstrap gives reliable p-values with few clusters, and ours are close to the t(11) ones (0.12 vs 0.10 for the preferred model).
 
 **Q13. Why a "hot season" temperature?**
-An annual mean dilutes a summer heatwave: France 2003 is 1.2σ as a year but 3.5σ as a summer. The hot season is each country's three warmest calendar months in 1961–1990.
+An annual mean dilutes a summer heatwave: France 2003 is 1.2σ as a year but 3.4σ as a summer. The hot season is each country's three warmest calendar months in 1961–1990.
 
 **Q14. Why do crops react but GDP not?**
 Exposure. Agriculture is 1–3 % of GDP in France, Germany, Spain, the USA, Australia and South Africa. A 20 % harvest loss there is a fraction of a percentage point of GDP. Crops respond most clearly to rain: +2.2 pp per +10 % of normal (p = 0.002), and −7.6 pp in dry years.

@@ -49,7 +49,7 @@ The two sources are matched on ISO country code and calendar year, and the match
 - **National averages.** A country mean hides regional contrasts, for example the US Southwest against the Northeast.
 
 **How much the data route matters.** Our first version used the Open-Meteo API at one grid point per capital, and it did not specify the model, so it silently received a blend that is essentially ERA5-Land. Putting all three routes through identical definitions (Figure 6, Table A1 in the repository) gives a clear result:
-- **Temperature** is robust. The capital point and the country mean correlate at 0.91 (median), and the change in the mean differs by 0.19 °C (median). Two places differ a lot: Dakar is cooled by the ocean, and New Delhi showed no warming at all in the blend.
+- **Temperature** is robust. Annual anomalies at the capital point correlate with the country mean at 0.91 (ERA5 point) and 0.85 (our first version's blend), with a median gap in the change of 0.19 °C. Two places differ a lot: Dakar, on the Atlantic coast, warmed much less than Senegal, and New Delhi showed no warming at all in the blend.
 - **Precipitation** is not. The median gap in the change is 9 percentage points. Kenya's change flips sign: −13 % for the country, +11 % at the Nairobi point. The US capital point shows +32 % where the country shows +4 %.
 
 Rainfall at one 10–30 km cell is not a country's rainfall. Everything below uses the Atlas country means.
@@ -92,7 +92,7 @@ Across countries, real GDP per capita grew 0.6–5.0 % a year on average, with a
 
 **Figure 2** answers steps 3a and 3b. Warming since 1961–1990 ranges from +0.7 °C (India, Australia) to +1.85 °C (Germany). In 11 of 12 countries it is more than twice the year-to-year noise. Mexico's +1.4 °C is 5.2σ, because its temperature barely varies from year to year. Australia, at 1.7σ, is the one exception: its climate is so variable that +0.7 °C remains within the range of ordinary years. **Rainfall change exceeds 2σ in none of the 12 countries.** Linear trends say the same thing more weakly: three countries show significant drying (Kenya −3.4 %/decade, Senegal −4.1 %, Spain −1.8 %). Even there, the last decade lies within one σ of normal, so the answer depends on which years are compared. For the Sahel, the wet 1960s sit inside the baseline.
 
-**Does rainfall move where temperature moves?** No. Across the 12 countries, the rank correlation between warming and rainfall change is 0.04. The fastest warmers, Germany, Spain and France, show almost no rainfall change. The largest rainfall changes are in Kenya (−14 %) and Senegal (−12 %), which warmed less.
+**Does rainfall move where temperature moves?** No. Across the 12 countries, the rank correlation between warming and rainfall change is 0.06. The fastest warmers, Germany, Spain and France, show almost no rainfall change. The largest rainfall changes are in Kenya (−14 %) and Senegal (−12 %), which warmed less.
 
 ![Figure 3](../figures/fig3_seasonal_heatmap.png)
 
@@ -118,7 +118,7 @@ A summer-heavy warming in southern Europe matters economically: it falls when cr
 **Figure 6** shows why we use country means (Section 2).
 
 **The most extreme years** (Table 5 in the repository) make the same point concretely:
-- **France's hottest summer, 2003** (3.5σ for the season, but only 1.2σ as an annual mean): crop growth was 21 pp below what the country and year would predict, GDP growth 1.5 pp below (Ciais et al., 2005, document the 2003 harvest collapse).
+- **France's hottest summer, 2003** (3.4σ for the season, but only 1.2σ as an annual mean): crop growth was 21 pp below what the country and year would predict, GDP growth 1.5 pp below (Ciais et al., 2005, document the Europe-wide drop in crop and plant productivity that summer).
 - **Germany 2003:** −18 pp crops, −2.2 pp GDP.
 - **United States 1988:** −14 pp crops, +1.1 pp GDP.
 - **Senegal's driest year, 1983:** −35 pp crops, −5.2 pp GDP.
