@@ -92,10 +92,10 @@ Agriculture is about 1 % of GDP in Germany and the USA, but 15–23 % in Kenya, 
 |---|---|---|
 | 🌡️ **+0.7 to +1.85 °C** | Warming of 2016–2025 compared with 1961–1990, from India and Australia (+0.7) to Germany (+1.85). **All 120** country-years since 2016 were warmer than their 1961–1990 normal. | description |
 | 📏 **11 / 12** | Countries where that warming is more than **twice the normal year-to-year variation**. Mexico: 5.2 times. Australia is the exception (1.7), because its climate swings a lot. | description |
-| 🌧️ **0 / 12** | Countries where the **rainfall** change exceeds twice the normal variation. And rainfall does not change where warming is largest. | description |
+| 🌧️ **0 / 12** | Countries where the **rainfall** change exceeds one ordinary year's swing (2σ): rain has changed far less than temperature. As a 10-year average it is still measurable in 4 countries (Brazil, India, Kenya, Senegal), and it is not where warming is largest. | description |
 | 🗓️ **2 / 12** | Countries where one season clearly warms faster: **France and Spain**, where summer leads by about 1 °C. | description |
 | 🌾 **+2.2 points** | Crop growth in a year with 10 % more rain than normal. Dry years: crops −7.6 points. In 9 of the 12 hottest summers on record, crops fell by more than 5 points (France 2003: −21). | correlation |
-| 📉 **−0.67 points per °C** | GDP-per-capita growth in a warmer-than-usual year. But the uncertainty range (−1.49 to +0.16) includes zero, and the effect vanishes in a stricter model. | correlation, **not** causal |
+| 📉 **−0.04 points per °C** | GDP-per-capita growth in a warmer-than-usual year, in our preferred model (country and year effects + country trends). Its range (−0.76 to +0.69) rules out losses larger than about 0.8 points per °C. Simpler models show −0.67, but that comes from countries' diverging trends. | correlation, **not** causal |
 
 **In one sentence:** the warming is unmistakable and far outside normal variability; rainfall change is local and noisy; climate shocks show up in harvests long before they show up in GDP.
 
@@ -188,7 +188,7 @@ We use three sources: one primary climate source, one economic source, and one c
 | Gap | Effect |
 |---|---|
 | Vietnam's GDP growth starts in 1985 | **756** growth observations instead of 780 |
-| The crop index ends in 2023 | 756 crop-growth observations |
+| The crop index ends in 2024 | crop growth covers 1962–2024 (756 observations) |
 | The agriculture share starts late (Germany 1991, Spain 1995, USA 1997, Australia 1990) | used for description only |
 | Germany before 1991 | the World Bank's reconstruction of unified Germany |
 
@@ -204,7 +204,7 @@ We kept version 1's files (`data/raw/openmeteo/best_match/`) and downloaded the 
 
 **Why rain is so sensitive.** A warm year is warm over hundreds of kilometres. Rain depends on storm tracks, mountains and coasts, and a capital is not a random point: Dakar is on the ocean, Mexico City in a high valley. **This is the project's first lesson: check what the data measure before using them.**
 
-<p align="center"><img src="figures/fig6_data_route.png" width="85%" alt="Country average vs capital grid point for every country"></p>
+<p align="center"><img src="figures/fig5_data_route.png" width="85%" alt="Country average vs capital grid point for every country"></p>
 
 ## 7. Every choice we made, and why
 
@@ -314,12 +314,13 @@ The notebook `notebooks/track1_climate_economics.ipynb` runs the same scripts an
 
 **Figure 5: why the GDP answer depends on the model.**
 - **Without year effects:** the effect looks significant (−0.75, p = 0.01). That is partly because the world warmed while growth slowed after the 1960s.
-- **With year effects (preferred, red):** −0.67, but the interval crosses zero (bootstrap p = 0.12).
+- **With year effects:** −0.67, but the interval crosses zero (bootstrap p = 0.12), and the countries that warmed fastest also slowed most (correlation of the two trends −0.57).
+- **With country trends (preferred, red):** −0.04, interval [−0.76, +0.69].
 - **With country trends:** about 0.
 
-![Figure 5](figures/fig5_coefficients.png)
+![Figure 5](figures/figA2_coefficients.png)
 
-**Figure 6: the data route** (§6.3). Country average vs one grid point at the capital: close for temperature, very different for rain.
+**Figure 5: the data route** (§6.3). Country average vs one grid point at the capital: close for temperature, very different for rain.
 
 **Extreme years** (`paper/tables/table5_landmark_years.md`):
 - **France, summer 2003:** crops −21 points against normal, GDP −1.5.
@@ -334,7 +335,7 @@ All tables are in [`paper/tables/`](paper/tables/), each as `.csv` (for computin
 
 - **Descriptions (solid):**
   - every country has warmed, beyond normal variability in 11 of 12;
-  - rainfall change is within the noise;
+  - rainfall has changed far less than temperature (measurably only in Brazil, India, Kenya and Senegal);
   - southern Europe's warming is summer-heavy.
 - **Correlations (clear for crops, weak for GDP):**
   - wet years go with higher harvests and dry years with lower ones;
@@ -376,6 +377,7 @@ Environemental-economics-/
 │       ├── table3_regressions            the 8 regression models
 │       ├── table4_shock_years            growth in shock vs normal years
 │       ├── table5_landmark_years         each country's most extreme year
+│       ├── table6_robustness             checks behind the interpretation (trends, leave-one-out, lags)
 │       └── table_A1_source_comparison    country average vs capital point
 │
 ├── scripts/                        ← THE CODE, run 00 → 07 in order (see §8)
@@ -389,7 +391,7 @@ Environemental-economics-/
 │   │   └── maps/                   ← world borders for the map
 │   └── processed/                  ← outputs of 02–04 (anomalies, panel, regression results)
 │
-├── figures/                        ← the paper's figures (fig1–fig6, figA1)
+├── figures/                        ← the paper's figures (fig1–fig5) and appendix figures (figA1, figA2)
 │
 ├── presentation/                   ← THE TALK (9 November)
 │   ├── deck_source/                ← the designed 15-slide deck (one HTML file per slide)

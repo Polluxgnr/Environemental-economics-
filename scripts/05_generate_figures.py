@@ -11,8 +11,8 @@ period and source, so it can be read without the text (brief, section 3.4).
   fig2_signal_vs_noise.png        change 2016-25 vs year-to-year noise, T and P
   fig3_seasonal_heatmap.png       warming by season and country
   fig4_climate_vs_growth.png      warm years vs growth and crop output (within-country, within-year)
-  fig5_coefficients.png           temperature coefficient across specifications
-  fig6_data_route.png             Atlas country mean vs capital grid point (our first route)
+  fig5_data_route.png             Atlas country mean vs capital grid point (our first route)
+  figA2_coefficients.png          temperature coefficient across specifications (appendix; repeats Table 3)
   figA1_levels.png                annual levels, full record (appendix)
 """
 
@@ -91,7 +91,7 @@ def fig1_stripes(a):
         cb.set_label(words, fontsize=7.5, color=INK)
     axes[0].set_yticks(range(len(ORDER)))
     axes[0].set_yticklabels([f"{NAMES[c]}  ({base.loc[c, 'temp']:.1f} °C, {base.loc[c, 'precip']:.0f} mm)" for c in ORDER])
-    fig.suptitle("Figure 1. Every country is warmer than its 1961-1990 normal in almost every recent year; rainfall shows no such pattern",
+    fig.suptitle("Figure 1. Every country has been warmer than its 1961-1990 normal in every year since 2016; rainfall shows no such pattern",
                  x=0.01, ha="left", fontsize=10.5, fontweight="bold", y=1.02)
     source(fig, "Each cell is one year, 1940-2025. Dashed box: the 1961-1990 baseline (our choice; the Atlas returns absolute values). "
                 "Faded 1940-1949: ERA5 rests on fewer observations. Labels give the 1961-1990 mean annual temperature and rainfall. "
@@ -132,7 +132,7 @@ def fig2_signal_noise(a):
     axes[0].set_ylim(-0.7, len(t) - 0.3)
     nT, nP = int((t.dT > 2 * t.sT).sum()), int((t.dP.abs() > 2 * t.sP).sum())
     fig.suptitle(f"Figure 2. Warming exceeds twice the normal year-to-year variation in {nT} of 12 countries; "
-                 f"rainfall change does so in {nP}",
+                 f"rainfall change does so in {'none' if nP == 0 else nP}",
                  x=0.01, ha="left", fontsize=10.5, fontweight="bold", y=1.0)
     source(fig, "Dots: change in the 10-year mean. Dark band: ±1σ, light band: ±2σ, where σ is the SD of the detrended annual "
                 "anomaly 1961-2025 (one ordinary year's deviation). Filled dot = change larger than 2σ; open dot = within 2σ. "
@@ -174,7 +174,7 @@ def fig3_seasons(s, a):
     ax.set_title(f"Figure 3. Warming is spread fairly evenly over the year: only in\n{' and '.join(sig_c)} "
                  f"does one season clearly outpace another", loc="left", fontsize=10, pad=28)
     source(fig, "Cells: mean anomaly 2016-2025 minus 1961-1990 (°C) ± 2 SE. Box and bold: the fastest season is warming\n"
-                "significantly faster than the slowest (gap > 2 SE). (S) southern hemisphere: Jun-Aug is winter.\n" + SRC_ATLAS, y=0.02)
+                "significantly faster than the slowest (gap > 2 SE). (S) southern hemisphere: Jun-Aug is winter. (eq.) on the equator: no summer or winter.\n" + SRC_ATLAS, y=0.02)
     fig.savefig(os.path.join(FIG, "fig3_seasonal_heatmap.png"))
     plt.close(fig)
 
@@ -230,13 +230,13 @@ def fig4_economy(p, raw):
 
 
 # ------------------------------------------------------------------------------
-def fig5_coefficients(raw):
+def figA2_coefficients(raw):
     fig, ax = plt.subplots(figsize=(7.4, 3.8))
     raw = raw.iloc[::-1].reset_index(drop=True)
     for i, r in raw.iterrows():
         x = r.temp_var
         crop = r.Dependent == "crop_growth"
-        col = "#7a5195" if crop else (WARM if r.Model.startswith("(3)") else INK)
+        col = "#7a5195" if crop else (WARM if r.Model.startswith("(4)") else INK)
         ax.plot([r[f"ci_lo_{x}"], r[f"ci_hi_{x}"]], [i, i], color=col, lw=2)
         ax.plot(r[f"b_{x}"], i, "o", color=col, ms=6)
         pw = r.get(f"pwild_{x}", np.nan)
@@ -245,17 +245,17 @@ def fig5_coefficients(raw):
     ax.set_yticks(range(len(raw))); ax.set_yticklabels(raw.Model)
     ax.set_xlabel("Effect of a +1 °C anomaly on annual growth (percentage points), 95% CI")
     ax.text(1.02, -0.9, "p: t(11) / wild bootstrap", transform=ax.get_yaxis_transform(), fontsize=7, color=MUTED, va="center")
-    ax.set_title("Figure 5. Without year effects warm years look costly; with them the estimate loses\n"
-                 "precision, and it vanishes once country-specific trends are added",
+    ax.set_title("Figure A2. Without year effects warm years look costly; with year effects and\n"
+                 "country trends (preferred, red) the estimate is close to zero",
                  loc="left", fontsize=10, pad=8)
-    source(fig, "GDP per capita growth (black, preferred specification in red) and crop production growth (purple), 12 countries, "
-                "1961-2025.\nCluster-robust 95% CI with t(11). " + SRC_ATLAS + " " + SRC_WDI, y=-0.02)
-    fig.savefig(os.path.join(FIG, "fig5_coefficients.png"))
+    source(fig, "GDP per capita growth (black; preferred specification, model 4, in red) and crop production growth (purple), "
+                "12 countries, 1961-2025.\nCluster-robust 95% CI with t(11). " + SRC_ATLAS + " " + SRC_WDI, y=-0.02)
+    fig.savefig(os.path.join(FIG, "figA2_coefficients.png"))
     plt.close(fig)
 
 
 # ------------------------------------------------------------------------------
-def fig6_route():
+def fig5_route():
     t = pd.read_csv(os.path.join(TABLES, "table_A1_source_comparison.csv")).set_index("country").reindex(ORDER)
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.3), sharey=True, gridspec_kw={"wspace": 0.08})
     styles = [("atlas", "Atlas: country average (now used)", "o", INK, 7),
@@ -273,11 +273,11 @@ def fig6_route():
     axes[0].set_yticks(range(len(ORDER))); axes[0].set_yticklabels([NAMES[c] for c in ORDER]); axes[0].invert_yaxis()
     fig.legend(*axes[0].get_legend_handles_labels(), frameon=False, fontsize=8, loc="lower center",
                ncol=3, bbox_to_anchor=(0.5, -0.06))
-    fig.suptitle("Figure 6. A single grid point is not a country: rainfall changes, and even the sign, depend on the data route",
+    fig.suptitle("Figure 5. A single grid point is not a country: rainfall changes, and even the sign, depend on the data route",
                  x=0.01, ha="left", fontsize=10.5, fontweight="bold", y=1.0)
     source(fig, "Same definitions for all three routes, common period 1961-2023. Open-Meteo Historical Weather API (best_match "
                 "and models=era5), accessed Oct 2026; " + SRC_ATLAS.replace("Source: ", ""), y=-0.09)
-    fig.savefig(os.path.join(FIG, "fig6_data_route.png"))
+    fig.savefig(os.path.join(FIG, "fig5_data_route.png"))
     plt.close(fig)
 
 
@@ -306,5 +306,5 @@ if __name__ == "__main__":
     p = pd.read_csv(os.path.join(PROC, "panel.csv"))
     raw = pd.read_csv(os.path.join(PROC, "regression_results_raw.csv"))
     fig1_stripes(a); fig2_signal_noise(a); fig3_seasons(s, a)
-    fig4_economy(p, raw); fig5_coefficients(raw); fig6_route(); figA1_levels(a)
+    fig4_economy(p, raw); figA2_coefficients(raw); fig5_route(); figA1_levels(a)
     print("Figures written to", FIG)

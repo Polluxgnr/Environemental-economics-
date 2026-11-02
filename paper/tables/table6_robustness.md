@@ -1,0 +1,12 @@
+Table 6. Robustness checks used to interpret Tables 1 and 3. Regressions as in Table 3 (country and year fixed effects, SE clustered by country, t(11)); country trends = one linear trend per country.
+
+| Check                                                                            | Result                                                                                              | Sample                                 |
+|:---------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------|:---------------------------------------|
+| Correlation across countries: warming trend vs trend in GDP growth               | -0.57                                                                                               | 12 countries, 1961-2025                |
+| Model 3 (GDP), leave one country out: range of the temperature coefficient       | -0.76 to -0.38 (without India: -0.38)                                                               | 11 countries each                      |
+| Model 5 (hot-season T) with country-specific trends                              | -0.02 (0.15), p = 0.91                                                                              | N = 756                                |
+| Model 7 (crops), rain coefficient, leave one country out                         | +1.88 to +2.43                                                                                      | 11 countries each                      |
+| Model 7 (crops) with country-specific trends, rain coefficient                   | +2.44 (0.60)                                                                                        | N = 756                                |
+| Model 7 (crops) with last year's rain: this year's rain / last year's rain       | +2.68 (0.61) / -2.39 (0.85)                                                                         | N = 756                                |
+| Rainfall change 2016-2025 vs 1961-1990 larger than 2 SE of a 10-year mean        | Kenya -14.2% (z = -2.2); Senegal -11.9% (z = -2.3); India +8.1% (z = +2.4); Brazil -7.6% (z = -2.8) | SE ignores autocorrelation             |
+| Rank correlation across countries: warming vs rainfall change / vs its size |ΔP| | +0.06 / -0.42                                                                                       | 12 countries (95% interval about ±0.6) |

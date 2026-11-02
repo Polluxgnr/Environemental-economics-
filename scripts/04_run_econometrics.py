@@ -252,6 +252,8 @@ def table3(p):
         data = p[~p.year.isin([2020, 2021])] if "excl. 2020" in label else p
         r = regress(data, y, xs, label, **kw)
         r["temp_var"] = xs[0]
+        used = data.dropna(subset=[y] + xs)
+        r["years"] = f"{used.year.min()}-{used.year.max()}"
         res.append(r)
         print(f"  {label:34s} b={r['b_' + xs[0]]:+.3f} se={r['se_' + xs[0]]:.3f} "
               f"p_t11={r['p_' + xs[0]]:.3f} p_wild={r.get('pwild_' + xs[0], np.nan):.3f} N={r['N']}")
@@ -279,11 +281,13 @@ def table3(p):
             "Precip (+10% of normal)": f"{r['b_precip_10']:+.2f}{stars(r['p_precip_10'])} ({r['se_precip_10']:.2f})",
             "Within R²": round(r["within_R2"], 3) if "within_R2" in r else "-",
             "N": r["N"],
+            "Years": r["years"],
         })
     t = pd.DataFrame(rows)
     save(t, "table3_regressions",
          "Table 3. Annual growth on annual climate anomalies, 12 countries, 1961-2025. Dependent variable: real GDP "
-         "per capita growth (%) in (1)-(6), crop production growth (%) in (7)-(8). Temperature: annual anomaly "
+         "per capita growth (%) in (1)-(6) (Vietnam from 1985), crop production growth (%) in (7)-(8) (1962-2023). "
+         "Temperature: annual anomaly "
          "relative to 1961-1990 (°C), or the hot-season anomaly (warmest three calendar months) in (5) and (8). "
          "Precipitation: annual anomaly in units of 10% of normal rainfall. Standard errors clustered by country "
          f"(G = 12) in parentheses; stars and CIs use t(11). Wild bootstrap: restricted wild cluster bootstrap-t, "
@@ -363,6 +367,78 @@ def table5(p):
     return t
 
 
+# ------------------------------------------------------------------------------
+# Table 6: robustness checks behind the interpretation in the paper
+# ------------------------------------------------------------------------------
+def table6(p, a):
+    from scipy import stats as st
+    p = p.copy().sort_values(["country_code", "year"])
+    p["precip_10"] = p.precip_anom_pct / 10.0
+    p["precip_10_lag"] = p.groupby("country_code").precip_10.shift()
+    g = "gdp_per_capita_growth"
+    rows = []
+
+    # 1. Do countries that warmed faster also slow down more? (what year effects cannot remove)
+    tr = []
+    for c, d in p.groupby("country_code"):
+        dg = d.dropna(subset=[g])
+        tr.append((np.polyfit(d.year, d.temp_anom, 1)[0] * 10, np.polyfit(dg.year, dg[g], 1)[0] * 10))
+    tr = np.array(tr)
+    rows.append({"Check": "Correlation across countries: warming trend vs trend in GDP growth",
+                 "Result": f"{np.corrcoef(tr[:, 0], tr[:, 1])[0, 1]:+.2f}", "Sample": "12 countries, 1961-2025"})
+
+    # 2. Leave-one-country-out, model 3
+    loo = {c: regress(p[p.country_code != c], g, ["temp_anom", "precip_10"], c, boot=False)["b_temp_anom"]
+           for c in ORDER}
+    rows.append({"Check": "Model 3 (GDP), leave one country out: range of the temperature coefficient",
+                 "Result": f"{min(loo.values()):+.2f} to {max(loo.values()):+.2f} (without India: {loo['IND']:+.2f})",
+                 "Sample": "11 countries each"})
+
+    # 3. Hot-season temperature with country trends (model 5 + trends)
+    r = regress(p, g, ["hot_temp_anom", "precip_10"], "5+trends", trends=True, boot=False)
+    rows.append({"Check": "Model 5 (hot-season T) with country-specific trends",
+                 "Result": f"{r['b_hot_temp_anom']:+.2f} ({r['se_hot_temp_anom']:.2f}), p = {r['p_hot_temp_anom']:.2f}",
+                 "Sample": f"N = {r['N']}"})
+
+    # 4. Crops and rain: robustness and persistence
+    loo_c = [regress(p[p.country_code != c], "crop_growth", ["temp_anom", "precip_10"], c, boot=False)["b_precip_10"]
+             for c in ORDER]
+    rows.append({"Check": "Model 7 (crops), rain coefficient, leave one country out",
+                 "Result": f"{min(loo_c):+.2f} to {max(loo_c):+.2f}", "Sample": "11 countries each"})
+    r = regress(p, "crop_growth", ["temp_anom", "precip_10"], "7+trends", trends=True, boot=False)
+    rows.append({"Check": "Model 7 (crops) with country-specific trends, rain coefficient",
+                 "Result": f"{r['b_precip_10']:+.2f} ({r['se_precip_10']:.2f})", "Sample": f"N = {r['N']}"})
+    r = regress(p, "crop_growth", ["precip_10", "precip_10_lag", "temp_anom"], "7+lag", boot=False)
+    rows.append({"Check": "Model 7 (crops) with last year's rain: this year's rain / last year's rain",
+                 "Result": f"{r['b_precip_10']:+.2f} ({r['se_precip_10']:.2f}) / {r['b_precip_10_lag']:+.2f} "
+                           f"({r['se_precip_10_lag']:.2f})",
+                 "Sample": f"N = {r['N']}"})
+
+    # 5. Rainfall: is the 2016-2025 mean change detectable? (SE of a 10-year vs 30-year mean)
+    a = a[a.year.between(*WINDOW)]
+    det, dT, dP = [], [], []
+    for c in ORDER:
+        d = a[a.country_code == c]
+        res = d.precip_anom_pct - np.polyval(np.polyfit(d.year, d.precip_anom_pct, 1), d.year)
+        se = res.std(ddof=1) * np.sqrt(1 / 10 + 1 / 30)
+        chg = d.loc[d.year.between(*LAST_DECADE), "precip_anom_pct"].mean() - d.loc[d.year.between(1961, 1990), "precip_anom_pct"].mean()
+        z = chg / se
+        if abs(z) > 2:
+            det.append(f"{NAMES[c]} {chg:+.1f}% (z = {z:+.1f})")
+        dT.append(d.loc[d.year.between(*LAST_DECADE), "temp_anom"].mean())
+        dP.append(d.loc[d.year.between(*LAST_DECADE), "precip_anom_pct"].mean())
+    rows.append({"Check": "Rainfall change 2016-2025 vs 1961-1990 larger than 2 SE of a 10-year mean",
+                 "Result": "; ".join(det), "Sample": "SE ignores autocorrelation"})
+    rows.append({"Check": "Rank correlation across countries: warming vs rainfall change / vs its size |ΔP|",
+                 "Result": f"{st.spearmanr(dT, dP).statistic:+.2f} / {st.spearmanr(dT, np.abs(dP)).statistic:+.2f}",
+                 "Sample": "12 countries (95% interval about ±0.6)"})
+    t = pd.DataFrame(rows)
+    save(t, "table6_robustness",
+         "Table 6. Robustness checks used to interpret Tables 1 and 3. Regressions as in Table 3 (country and year "
+         "fixed effects, SE clustered by country, t(11)); country trends = one linear trend per country.")
+    return t
+
+
 if __name__ == "__main__":
     a = pd.read_csv(os.path.join(PROC, "climate_annual.csv"))
     s = pd.read_csv(os.path.join(PROC, "climate_seasonal.csv"))
@@ -373,3 +449,4 @@ if __name__ == "__main__":
     t3, _ = table3(p); print(t3.to_string(index=False))
     print("Table 4 ..."); print(table4(p).to_string(index=False))
     print("Table 5 ..."); print(table5(p).to_string(index=False))
+    print("Table 6 ..."); print(table6(p, a).to_string(index=False))

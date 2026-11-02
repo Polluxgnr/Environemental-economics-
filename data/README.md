@@ -45,7 +45,7 @@ We checked this in the browser's network log: the CSV button formats that same J
 | Unit | one grid cell containing the national capital, daily, 1960–2023 |
 | Accessed | best_match: 12 Oct 2026; era5: 27 Oct 2026 |
 
-Our first version downloaded these files **without** a `models=` parameter, so Open-Meteo returned its default *best_match* blend. For these dates that blend is essentially ERA5-Land (0.1°), not ERA5 (0.25°) as we first wrote. `scripts/03_compare_sources.py` puts all three routes through identical definitions (Table A1, Figure 6).
+Our first version downloaded these files **without** a `models=` parameter, so Open-Meteo returned its default *best_match* blend. For these dates that blend is essentially ERA5-Land (0.1°), not ERA5 (0.25°) as we first wrote. `scripts/03_compare_sources.py` puts all three routes through identical definitions (Table A1, Figure 5).
 
 ## 3. Economy: World Bank World Development Indicators
 
@@ -61,7 +61,7 @@ Our first version downloaded these files **without** a `models=` parameter, so O
 
 **What the merge loses.** Gaps on the WDI side:
 - Vietnam's GDP per capita growth starts in 1985.
-- The crop index ends in 2023.
+- The crop index ends in 2024 (crop growth 1962–2024).
 - The agriculture share starts late for several countries: Germany 1991, Spain 1995, the USA 1997.
 - Germany's pre-1991 GDP figures are the World Bank's reconstruction for unified Germany.
 

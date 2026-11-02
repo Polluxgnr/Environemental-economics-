@@ -7,7 +7,7 @@ Each answer is two or three sentences and quotes a number we can trace to a tabl
 ### Data
 
 **Q1. Why the Copernicus Atlas and not the API you first used?**
-The brief asks about *countries*, and the Atlas gives country area averages; our API route gave one grid cell at the capital. For temperature the two agree reasonably (median correlation 0.85–0.91 depending on the point product), but for rainfall they differ by 9 pp on median and even flip sign (Kenya: −13 % country vs +11 % at Nairobi). We kept the API data as a comparison (Figure 6).
+The brief asks about *countries*, and the Atlas gives country area averages; our API route gave one grid cell at the capital. For temperature the two agree reasonably (median correlation 0.85–0.91 depending on the point product), but for rainfall they differ by 9 pp on median and even flip sign (Kenya: −13 % country vs +11 % at Nairobi). We kept the API data as a comparison (Figure 5).
 
 **Q2. The Atlas has no country masks outside Europe. How did you get Kenya or Brazil?**
 We used the Atlas's own *user-defined region* tool and uploaded Natural Earth country borders. To check it, we ran France both ways: the polygon reproduces the Atlas's France mask to 0.004 °C.
@@ -30,7 +30,7 @@ Exactly on country code and year, so no climate year is lost. The losses are on 
 A change only matters for people if it exceeds what they already experience as normal variation. Mexico's +1.4 °C is 5.2σ, far outside anything seen in 1961–1990. Australia's +0.7 °C is 1.7σ, still within a run of ordinary years.
 
 **Q8. Some precipitation trends are significant. Why do you say rainfall didn't change?**
-Kenya (−3.4 %/decade), Senegal (−4.1 %) and Spain (−1.8 %) have significant linear trends. But in every country the last decade is within one σ of normal. In the Sahel the trend depends on the window: the wet 1960s are at the start of the sample. We say the evidence for a rainfall change is weak and window-dependent, not that nothing changed.
+We don't: rainfall has changed less than one ordinary year's swing everywhere, so it does not feel like a new climate. But a 10-year average is precise, and the change is measurable in four countries: Brazil −7.6 %, India +8 %, Kenya −14 %, Senegal −12 % (Table 6). Kenya, Senegal and Spain also have significant drying trends. In the Sahel the answer depends on the window, since the wet 1960s sit inside the baseline.
 
 **Q9. Is the seasonal pattern significant?**
 Only in France and Spain, where summer warmed about 1 °C more than autumn (gap > 2 SE). Germany's winter warmed most (+2.5 °C), but German winters vary so much that the gap is not significant.
@@ -38,13 +38,13 @@ Only in France and Spain, where summer warmed about 1 °C more than autumn (gap 
 ### Economy and econometrics
 
 **Q10. Country FE gives −0.75 and is significant, two-way FE −0.67 and is not. Which is right?**
-Two-way FE. Without year effects, the joint drift of warming and the post-1970s growth slowdown leaks into the estimate. With year effects we only compare countries in the same year. The point estimate barely changes, but the SE rises, the CI becomes [−1.49, +0.16], and adding country trends brings it to −0.04.
+Neither: our preferred model is model 4, with country trends. Year effects only remove the trend all countries share, but the countries that warmed fastest also slowed most (correlation of the two trends −0.57; dropping India alone moves β from −0.67 to −0.38). Only country trends isolate year-to-year weather, and then β = −0.04, interval [−0.76, +0.69].
 
 **Q11. So warm years don't hurt growth?**
-We can't say that. The interval includes zero *and* a loss of 1.5 pp per °C; 12 countries are too few to tell them apart. A typical warm year (0.38 °C above normal) would cost about 0.25 pp if the point estimate were right.
+In our sample we find no robust effect, and the preferred interval [−0.76, +0.69] rules out losses larger than about 0.8 pp per °C. That excludes effects as large as Dell, Jones & Olken find for poor countries (over 1 pp per °C). But we pool rich and poor countries, so an effect confined to poorer, agricultural economies could be hidden.
 
 **Q12. Why a wild cluster bootstrap?**
-Clustered SEs need many clusters, and we have 12. The wild cluster bootstrap gives reliable p-values with few clusters, and ours are close to the t(11) ones (0.12 vs 0.10 for the preferred model).
+Clustered SEs need many clusters, and we have 12. The wild cluster bootstrap gives reliable p-values with few clusters, and ours are close to the t(11) ones (0.12 vs 0.10 for model 3, 0.92 for both in the preferred model 4).
 
 **Q13. Why a "hot season" temperature?**
 An annual mean dilutes a summer heatwave: France 2003 is 1.2σ as a year but 3.4σ as a summer. The hot season is each country's three warmest calendar months in 1961–1990.
@@ -65,3 +65,14 @@ As tools, like a tutor or a code reviewer, and declared in the paper. They helpe
 
 **Q18. What would you do with one more month?**
 Extend to every country the Atlas and WDI cover, which multiplies the clusters; weight the climate grid by cropland; and look at sub-national crop data.
+
+### Added after the final review
+
+**Q19. Isn't 2003 a heat effect on crops?**
+It was a heatwave *and* a drought. Germany 2003 and Australia 2019 were each country's hottest and driest year on record, and France 2003 and the USA 1988 were dry too. Across all hot-season shocks, crops show no effect (−0.04 pp, p = 0.99), while dry years show −7.6 pp. Water, not heat alone, moves harvests.
+
+**Q20. Is the rain effect on crops permanent?**
+No, it is a one-year bump in output. With last year's rain added: this year's rain +2.7, last year's −2.4. Crop output is about 2–3 % higher in a year 10 % wetter than normal, then returns to normal. It is robust: 1.9–2.4 dropping any one country, 2.4 with country trends.
+
+**Q21. Does rainfall change where temperature changes?**
+No detectable relationship. If anything, the fastest warmers have the smallest rainfall changes (rank correlation with the size of the change −0.42; with 12 countries ±0.6).
