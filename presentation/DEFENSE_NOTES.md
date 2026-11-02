@@ -61,7 +61,7 @@ No. One unusual year allows neither adaptation (irrigation, crop choice) nor the
 ### On the process
 
 **Q17. How did you use AI?**
-As stated in the paper, we used two assistants. Antigravity helped code our first version. Claude helped us audit it, automate the Copernicus Atlas download that replaced our API route, debug and restructure the scripts, draft and edit text, and build the slides. Every number comes from our scripts run on the raw data in the repository, and we can rerun and explain each one.
+As tools, like a tutor or a code reviewer, and declared in the paper. They helped us write and debug the code, including the automated Atlas download. A review of our first version made us change data source. They also helped edit the text and lay out the slides. The numbers never come from an AI answer: they come from our scripts run on the raw data. We re-ran everything and checked it, and we can justify every methodological choice.
 
 **Q18. What would you do with one more month?**
 Extend to every country the Atlas and WDI cover, which multiplies the clusters; weight the climate grid by cropland; and look at sub-national crop data.

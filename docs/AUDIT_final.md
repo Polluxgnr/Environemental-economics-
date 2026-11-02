@@ -40,8 +40,8 @@ This is a full review of the repository before submission, against the brief (`d
 | ≥ 3 papers or reports, consistent style; data cited with producer, name, version, access date | Paper references | ✅ 10 references; 4 data citations |
 | Code reproduces everything from raw data | `scripts/` | ✅ |
 | Track 1 steps (1)–(4), both directions of step 4 | Paper §4–5, README §5 | ✅ |
-| **AI-use statement** | Paper, end | ✅ names Antigravity and Claude and what each was used for (2 Nov) |
-| **Author names** | Paper header, title slides | ✅ Augustin, Eliott, Pollux Gronier, Saty (2 Nov) |
+| **AI-use statement** | Paper, end | ✅ names the tools, what they were used for, and the good practice followed (2 Nov) |
+| **Author names** | Paper header, title slides | ✅ Eliott Beghin, Pollux Gronier, Saty Viard Laroque, Augustin Vlandas (2 Nov) |
 
 ## 4. Method review
 
@@ -71,10 +71,10 @@ This is a full review of the repository before submission, against the brief (`d
 | Paper Tables 1 and 3 vs generated tables | ✅ 0 mismatches |
 | `paper/PAPER.pdf` | ✅ 9 pages (references and AI statement on page 8); names and AI statement present; no placeholders |
 | Relative links in every Markdown file | ✅ 0 broken |
-| Designed deck (16 slides, speaker notes) | ✅ source in `presentation/deck_source/`; charts from `06_presentation.py` (clean export in `presentation/figures/deck/`) |
+| Designed deck (15 slides, speaker notes) | ✅ source in `presentation/deck_source/`; charts from `06_presentation.py` (clean export in `presentation/figures/deck/`) |
 | Group of four, not five | noted: two speakers + two Q&A (`SCRIPT.md`) |
 
 **Still to do (group):**
 1. Rehearse the talk (`presentation/SCRIPT.md`, about 8 minutes spoken) with a timer.
 2. Every member should be able to answer every question in `DEFENSE_NOTES.md`.
-3. Add surnames to the author line if the course requires full names.
+3. Send the deck link to the group (it is already shared as "anyone with the link").

@@ -2,7 +2,7 @@
 
 **Environmental Economics, BSc AIDAMS, ESSEC, T1 2026–2027 · Track 1: Temperature and precipitation records**
 
-**Authors:** Augustin, Eliott, Pollux Gronier, Saty · **Instructor:** Caterina Seghini · **Submitted:** 2 November 2026
+**Authors:** Eliott Beghin, Pollux Gronier, Saty Viard Laroque, Augustin Vlandas · **Instructor:** Caterina Seghini · **Submitted:** 2 November 2026
 
 **Code and data:** https://github.com/Polluxgnr/Environemental-economics-
 
@@ -205,15 +205,15 @@ What the results would need in order to be causal: many more countries or sub-na
 
 ## Use of AI and reproducibility
 
-**AI use.** We used two AI assistants.
-- **Antigravity (Google)** helped write and debug the Python code of our first version: the Open-Meteo API download, the processing, the regressions and the figures.
-- **Claude (Anthropic), through Claude Code**, was used to:
-  - audit that first version against the brief;
-  - find and automate the Copernicus Interactive Climate Atlas download that replaced our API route, and compare the two data routes;
-  - help debug and restructure the analysis scripts (anomalies, hot-season measure, wild cluster bootstrap, figures);
-  - draft and edit parts of the text (this paper, the README and the project report);
-  - build the presentation slides and the speaker script.
+**AI use.** We used AI assistants as tools, in the way one would use a tutor or a code reviewer, and kept the analysis under our control.
+- **Coding and debugging.** Antigravity (Google) and Claude (Anthropic, via Claude Code) helped write and debug the Python scripts. This includes the automated download of the Copernicus Atlas series that replaced our first, API-based data route.
+- **Review.** Claude was used to check a first version of the project against the brief. That review is why we changed data source and corrected several statements.
+- **Writing and slides.** Claude helped draft and edit parts of the text and lay out the presentation slides.
 
-Every number was produced by the code in the repository from the raw data. We checked the results and can explain each one.
+**Good practice.**
+- Every number comes from code in the repository run on the raw data, never from an AI answer.
+- We re-ran the full pipeline and checked the paper's tables against the generated output.
+- Every data source is documented with its producer, version and access date.
+- We discussed the methodological choices (sample, baseline, model, interpretation) and can justify each of them.
 
-**Reproducibility.** Running `pip install -r requirements.txt` then `scripts/00_…` to `scripts/06_…` in order rebuilds every table and figure. The raw downloads are included in `data/raw/`, and `data/README.md` gives every source, access date and the manual Atlas click-path.
+**Reproducibility.** Running `pip install -r requirements.txt` then `scripts/00_…` to `scripts/07_…` in order rebuilds every table, figure and this PDF. The raw downloads are included in `data/raw/`, and `data/README.md` gives every source, access date and the manual Atlas click-path.

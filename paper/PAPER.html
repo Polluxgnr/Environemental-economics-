@@ -19,7 +19,7 @@ hr { border: none; border-top: 1px solid #d0d7de; margin: 6pt 0; }
 code { font-size: 8.5pt; }
 </style></head><body><h1>Warming, rainfall and growth in twelve countries, 1940–2025</h1>
 <p><strong>Environmental Economics, BSc AIDAMS, ESSEC, T1 2026–2027 · Track 1: Temperature and precipitation records</strong></p>
-<p><strong>Authors:</strong> Augustin, Eliott, Pollux Gronier, Saty · <strong>Instructor:</strong> Caterina Seghini · <strong>Submitted:</strong> 2 November 2026</p>
+<p><strong>Authors:</strong> Eliott Beghin, Pollux Gronier, Saty Viard Laroque, Augustin Vlandas · <strong>Instructor:</strong> Caterina Seghini · <strong>Submitted:</strong> 2 November 2026</p>
 <p><strong>Code and data:</strong> https://github.com/Polluxgnr/Environemental-economics-</p>
 <hr />
 <h2>1. The question</h2>
@@ -437,15 +437,17 @@ code { font-size: 8.5pt; }
 <li>Natural Earth, <em>Admin 0 – Countries</em>, 1:50 m and 1:110 m, v5.</li>
 </ul>
 <h2>Use of AI and reproducibility</h2>
-<p><strong>AI use.</strong> We used two AI assistants.</p>
+<p><strong>AI use.</strong> We used AI assistants as tools, in the way one would use a tutor or a code reviewer, and kept the analysis under our control.</p>
 <ul>
-<li><strong>Antigravity (Google)</strong> helped write and debug the Python code of our first version: the Open-Meteo API download, the processing, the regressions and the figures.</li>
-<li><strong>Claude (Anthropic), through Claude Code</strong>, was used to:</li>
-<li>audit that first version against the brief;</li>
-<li>find and automate the Copernicus Interactive Climate Atlas download that replaced our API route, and compare the two data routes;</li>
-<li>help debug and restructure the analysis scripts (anomalies, hot-season measure, wild cluster bootstrap, figures);</li>
-<li>draft and edit parts of the text (this paper, the README and the project report);</li>
-<li>build the presentation slides and the speaker script.</li>
+<li><strong>Coding and debugging.</strong> Antigravity (Google) and Claude (Anthropic, via Claude Code) helped write and debug the Python scripts. This includes the automated download of the Copernicus Atlas series that replaced our first, API-based data route.</li>
+<li><strong>Review.</strong> Claude was used to check a first version of the project against the brief. That review is why we changed data source and corrected several statements.</li>
+<li><strong>Writing and slides.</strong> Claude helped draft and edit parts of the text and lay out the presentation slides.</li>
 </ul>
-<p>Every number was produced by the code in the repository from the raw data. We checked the results and can explain each one.</p>
-<p><strong>Reproducibility.</strong> Running <code>pip install -r requirements.txt</code> then <code>scripts/00_…</code> to <code>scripts/06_…</code> in order rebuilds every table and figure. The raw downloads are included in <code>data/raw/</code>, and <code>data/README.md</code> gives every source, access date and the manual Atlas click-path.</p></body></html>
+<p><strong>Good practice.</strong></p>
+<ul>
+<li>Every number comes from code in the repository run on the raw data, never from an AI answer.</li>
+<li>We re-ran the full pipeline and checked the paper's tables against the generated output.</li>
+<li>Every data source is documented with its producer, version and access date.</li>
+<li>We discussed the methodological choices (sample, baseline, model, interpretation) and can justify each of them.</li>
+</ul>
+<p><strong>Reproducibility.</strong> Running <code>pip install -r requirements.txt</code> then <code>scripts/00_…</code> to <code>scripts/07_…</code> in order rebuilds every table, figure and this PDF. The raw downloads are included in <code>data/raw/</code>, and <code>data/README.md</code> gives every source, access date and the manual Atlas click-path.</p></body></html>

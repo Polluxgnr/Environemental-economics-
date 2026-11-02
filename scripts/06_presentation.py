@@ -586,7 +586,7 @@ def build_deck(slides):
             textbox(s, 0.9, 2.0, 11.5, 1.6, sl["title"], 40, bold=True)
             textbox(s, 0.9, 3.7, 11.5, 1.0, sl["sub"], 20, color=muted)
             textbox(s, 0.9, 5.4, 11.5, 1.2, "Track 1 · Environmental Economics · ESSEC BSc AIDAMS · 9 November 2026\n"
-                    "Augustin · Eliott · Pollux · Saty", 16, color=muted)
+                    "Eliott Beghin · Pollux Gronier · Saty Viard Laroque · Augustin Vlandas", 16, color=muted)
         else:
             accent(s)
             textbox(s, 0.7, 0.45, 12, 1.0, sl["title"], 34, bold=True)
