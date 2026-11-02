@@ -4,7 +4,6 @@
 
 **Authors:** Eliott Beghin, Pollux Gronier, Saty Viard Laroque, Augustin Vlandas · **Instructor:** Caterina Seghini · **Submitted:** 2 November 2026
 
-**Code and data:** https://github.com/Polluxgnr/Environemental-economics-
 
 ---
 
@@ -24,7 +23,7 @@ An answer to (1)–(3) is a set of numbers, each with a measure of noise, which 
 ## 2. Data
 
 **Climate: Copernicus Interactive Climate Atlas (C3S/ECMWF).**
-- **Dataset and variables.** We use the Atlas's ERA5 dataset: *mean of daily mean 2 m temperature* (°C) and *mean of daily accumulated precipitation* (mm/day), downloaded as monthly series for each calendar month, 1940–2025 (accessed 28 October 2026).
+- **Dataset and variables.** We use the Atlas's ERA5 dataset: *mean of daily mean 2 m temperature* (°C) and *mean of daily accumulated precipitation* (mm/day), downloaded as monthly series for each calendar month, 1940–2025.
 - **ERA5 itself.** It is a reanalysis: a weather model continuously corrected by observations from stations, balloons, ships and, since 1979, satellites (Hersbach et al., 2020).
 - **Regions.** The Atlas averages ERA5 over a region. For France, Germany and Spain we used its predefined *European countries* masks. Outside Europe the Atlas has no country masks, only large IPCC regions, so for the other nine countries we used its *user-defined region* tool with Natural Earth 1:50 m borders. The United States is the 48 contiguous states.
 - **Check on the user-defined route.** We ran France both ways: the user-defined polygon reproduces the Atlas's own France mask to within 0.004 °C and 0.006 mm/day (correlation 0.99999).
@@ -32,7 +31,7 @@ An answer to (1)–(3) is a set of numbers, each with a measure of noise, which 
 
 **The series are absolute values, not anomalies.** We chose the baseline ourselves: 1961–1990, the WMO reference period, which is also the first 30 years for which our economic data exist. For each country and calendar month we subtract that month's 1961–1990 mean. Without this step the seasonal cycle dominates: in France it accounts for 92 % of the variance of monthly temperature. Precipitation anomalies are also expressed in % of the baseline month. Seasons are DJF, MAM, JJA and SON, with December counted in the following year's DJF.
 
-**Economy: World Bank World Development Indicators** (release of 8 October 2026, accessed 28 October 2026). We use:
+**Economy: World Bank World Development Indicators** (release of 8 October 2026). We use:
 - real GDP per capita growth (`NY.GDP.PCAP.KD.ZG`, %);
 - the crop production index (`AG.PRD.CROP.XD`, 2014–2016 = 100), from which we compute annual crop growth;
 - agriculture's share of value added (`NV.AGR.TOTL.ZS`, % of GDP).
@@ -88,9 +87,13 @@ Across countries, real GDP per capita grew 0.6–5.0 % a year on average, with a
 
 **Figure 1** shows the full record, the brief's step 1, as anomalies so that all countries share one scale. Every one of the 120 country-years from 2016 to 2025 was warmer than its 1961–1990 normal. Rainfall alternates between wet and dry years with no comparable drift. The levels behind these anomalies are in the row labels and in Figure A1 of the repository.
 
+*In simple words:* each thin stripe is one year. On the left, blue means colder than the normal of 1961–1990 and red means warmer: every row turns red on the right, so every country now has warm years almost all the time. On the right, brown means a drier year and blue a wetter one. The colours keep switching without a direction, so rainfall goes up and down with no clear trend.
+
 ![Figure 2](../figures/fig2_signal_vs_noise.png)
 
 **Figure 2** answers steps 3a and 3b. Warming since 1961–1990 ranges from +0.7 °C (India, Australia) to +1.85 °C (Germany). In 11 of 12 countries it is more than twice the year-to-year noise. Mexico's +1.4 °C is 5.2σ, because its temperature barely varies from year to year. Australia, at 1.7σ, is the one exception: its climate is so variable that +0.7 °C remains within the range of ordinary years. **Rainfall change exceeds 2σ in none of the 12 countries.** Linear trends say the same thing more weakly: three countries show significant drying (Kenya −3.4 %/decade, Senegal −4.1 %, Spain −1.8 %). Even there, the last decade lies within one σ of normal, so the answer depends on which years are compared. For the Sahel, the wet 1960s sit inside the baseline.
+
+*In simple words:* think of each year's weather as a dice roll. The grey bands show how far an ordinary roll can land. The dot shows where the last ten years landed. When the dot is far outside the bands, the change cannot be bad luck: the dice themselves have changed. That is true for temperature almost everywhere, and never for rainfall.
 
 **Does rainfall move where temperature moves?** No. Across the 12 countries, the rank correlation between warming and rainfall change is 0.06. The fastest warmers, Germany, Spain and France, show almost no rainfall change. The largest rainfall changes are in Kenya (−14 %) and Senegal (−12 %), which warmed less.
 
@@ -103,19 +106,32 @@ Across countries, real GDP per capita grew 0.6–5.0 % a year on average, with a
 
 A summer-heavy warming in southern Europe matters economically: it falls when crop water demand and cooling demand peak.
 
+*In simple words:* we asked whether the warming happens more in summer or in winter. In most countries every season warmed by about the same amount. Only in France and Spain do summers clearly warm faster, and summer is exactly when heat hurts crops and people most.
+
 ![Figure 4](../figures/fig4_climate_vs_growth.png)
 
 **Figure 4** is step 4, direction A: were unusual climate years unusual for the economy? Each country-year is plotted after removing the country's average and the year's average, so 2009 or 2020, bad everywhere, does not count against the climate.
 - **GDP:** a 1 °C warmer-than-usual year goes with growth 0.67 pp lower, but the confidence band includes zero.
-- **Crops:** what stands out is rainfall. A year 10 % wetter than normal goes with crop output 2.2 pp higher (95 % CI 1.0–3.3), and the driest years sit at the bottom left.
+- **Crops:** what stands out is rainfall. A year 10 % wetter than normal goes with crop growth 2.2 pp higher (95 % CI 1.0–3.3), and the driest years sit at the bottom left.
+
+*In simple words:* each dot is one country in one year, compared with what is normal for that country and for that year. On the left, hotter years sit only a tiny bit lower, too little to be sure. On the right, rainier years clearly have better harvests.
 
 ![Figure 5](../figures/fig5_coefficients.png)
 
-**Figure 5** shows how much the GDP answer depends on what is controlled for. Section 5 explains it.
+**Figure 5** shows how much the GDP answer depends on what the model controls for.
+- **Models 1 and 2** (no year effects): a warm year looks clearly costly.
+- **Model 3** (preferred, in red): with year effects the estimate barely moves, but its interval crosses zero.
+- **Model 4:** with country-specific trends it vanishes.
+
+Section 5 explains why.
+
+*In simple words:* each line asks the same question more and more carefully. The simple versions say heat clearly hurts growth, but they confuse two things that both happened over the same decades: the world got warmer *and* economies grew more slowly. Once countries are compared within the same year, the effect becomes too uncertain to tell apart from zero.
 
 ![Figure 6](../figures/fig6_data_route.png)
 
-**Figure 6** shows why we use country means (Section 2).
+**Figure 6** compares the country average (used in this paper) with one grid point at the capital (our first version). Temperature changes agree closely. Rainfall changes differ by 9 pp on median, and for Kenya even the sign flips.
+
+*In simple words:* measuring a whole country's rain at its capital is like judging a whole class by one pupil. For temperature, that pupil is fairly typical. For rain, it can tell the opposite story.
 
 **The most extreme years** (Table 5 in the repository) make the same point concretely:
 - **France's hottest summer, 2003** (3.4σ for the season, but only 1.2σ as an annual mean): crop growth was 21 pp below what the country and year would predict, GDP growth 1.5 pp below (Ciais et al., 2005, document the Europe-wide drop in crop and plant productivity that summer).

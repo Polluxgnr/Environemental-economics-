@@ -24,8 +24,12 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import TwoSlopeNorm
+from matplotlib.colors import TwoSlopeNorm, LinearSegmentedColormap
 from matplotlib.patches import Rectangle
+
+# Rainfall anomalies: dry = brown (earth), normal = white, wet = blue (water)
+RAIN_CMAP = LinearSegmentedColormap.from_list(
+    "dry_wet", ["#7f3b08", "#c47a2c", "#f1d9a7", "#f7f7f5", "#a6cee3", "#3b82c4", "#08306b"])
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROC = os.path.join(ROOT, "data", "processed")
@@ -69,9 +73,10 @@ def fig1_stripes(a):
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.6), sharey=True, gridspec_kw={"wspace": 0.05})
     years = np.arange(a.year.min(), a.year.max() + 1)
     base = a[a.year.between(1961, 1990)].groupby("country_code")[["temp", "precip"]].mean()
-    for ax, col, cmap, lim, title, unit in [
-        (axes[0], "temp_anom", "RdBu_r", 2.5, "Temperature anomaly", "°C"),
-        (axes[1], "precip_anom_pct", "BrBG", 50, "Precipitation anomaly", "% of 1961-1990 normal")]:
+    for ax, col, cmap, lim, title, unit, words in [
+        (axes[0], "temp_anom", "RdBu_r", 2.5, "Temperature anomaly", "°C", "← colder than normal     warmer than normal →"),
+        (axes[1], "precip_anom_pct", RAIN_CMAP, 40, "Precipitation anomaly", "% of 1961-1990 normal",
+         "← drier than normal     wetter than normal →")]:
         M = a.pivot(index="country_code", columns="year", values=col).reindex(index=ORDER, columns=years)
         im = ax.imshow(M.values, aspect="auto", cmap=cmap, norm=TwoSlopeNorm(0, -lim, lim),
                        extent=[years[0] - .5, years[-1] + .5, len(ORDER) - .5, -.5], interpolation="nearest")
@@ -83,6 +88,7 @@ def fig1_stripes(a):
         ax.set_xticks([1940, 1960, 1980, 2000, 2020])
         cb = fig.colorbar(im, ax=ax, orientation="horizontal", fraction=0.05, pad=0.09, aspect=40)
         cb.ax.tick_params(labelsize=7)
+        cb.set_label(words, fontsize=7.5, color=INK)
     axes[0].set_yticks(range(len(ORDER)))
     axes[0].set_yticklabels([f"{NAMES[c]}  ({base.loc[c, 'temp']:.1f} °C, {base.loc[c, 'precip']:.0f} mm)" for c in ORDER])
     fig.suptitle("Figure 1. Every country is warmer than its 1961-1990 normal in almost every recent year; rainfall shows no such pattern",

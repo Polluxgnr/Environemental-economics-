@@ -13,7 +13,7 @@ Each slide answers the question the previous one raises:
 5. **Economy.** The hottest summers hit crops, not GDP. Regressions confirm it: heat → GDP is small and imprecise; rain → crops is clear. *Raises: what kind of claim is that?*
 6. **Claims.** Description, correlation or causation, and what would make the result causal.
 
-**Length.** About 1148 spoken words, about 8 minutes at 140 words per minute. Rehearse with a timer.
+**Length.** About 1157 spoken words, about 8 minutes at 140 words per minute. Rehearse with a timer.
 
 **Roles.**
 - Speaker 1 (climate): slides 1-7.
@@ -53,7 +53,7 @@ Each slide answers the question the previous one raises:
 
 ![slide 5](figures/slide_05_stripes.png)
 
-> Now all twelve countries, every year since 1940. On the left, temperature: blue before the 1980s, red after, and every country-year since 2016 is above its normal. On the right, rainfall, built the same way: it flickers between wet and dry, with no colour trend. The 1940s are faded because the reanalysis rests on fewer observations then, which is why we measure change from 1961. The next slide puts numbers on this contrast.
+> Now all twelve countries, every year since 1940. On the left, temperature: blue before the 1980s, red after, and every country-year since 2016 is above its normal. On the right, rainfall, built the same way: brown is a drier year, blue a wetter one, and it flickers between the two with no colour trend. The 1940s are faded because the reanalysis rests on fewer observations then, which is why we measure change from 1961. The next slide puts numbers on this contrast.
 
 ### 6. Signal versus noise  ·  Speaker 1  ·  3:50-4:50
 

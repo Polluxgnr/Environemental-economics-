@@ -22,8 +22,12 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import TwoSlopeNorm
+from matplotlib.colors import TwoSlopeNorm, LinearSegmentedColormap
 from matplotlib.patches import Rectangle
+
+# Rainfall anomalies: dry = brown (earth), normal = white, wet = blue (water)
+RAIN_CMAP = LinearSegmentedColormap.from_list(
+    "dry_wet", ["#7f3b08", "#c47a2c", "#f1d9a7", "#f7f7f5", "#a6cee3", "#3b82c4", "#08306b"])
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROC = os.path.join(ROOT, "data", "processed")
@@ -177,8 +181,9 @@ def slide_route():
 def slide_stripes(a):
     years = np.arange(1940, a.year.max() + 1)
     fig, axes = plt.subplots(1, 2, figsize=(W, H), sharey=True, gridspec_kw={"wspace": 0.04})
-    for ax, col, cmap, lim, title in [(axes[0], "temp_anom", "RdBu_r", 2.5, "Temperature anomaly (°C)"),
-                                      (axes[1], "precip_anom_pct", "BrBG", 50, "Rainfall anomaly (% of normal)")]:
+    for ax, col, cmap, lim, title, words in [
+            (axes[0], "temp_anom", "RdBu_r", 2.5, "Temperature anomaly (°C)", "← colder than normal     warmer →"),
+            (axes[1], "precip_anom_pct", RAIN_CMAP, 40, "Rainfall anomaly (% of normal)", "← drier than normal     wetter →")]:
         M = a.pivot(index="country_code", columns="year", values=col).reindex(index=ORDER, columns=years)
         im = ax.imshow(M.values, aspect="auto", cmap=cmap, norm=TwoSlopeNorm(0, -lim, lim),
                        extent=[years[0] - .5, years[-1] + .5, 11.5, -.5], interpolation="nearest")
@@ -186,7 +191,8 @@ def slide_stripes(a):
             ax.axhline(y, color="white", lw=3)
         ax.set_title(title, loc="left", fontsize=17, fontweight="bold")
         ax.set_xticks([1940, 1960, 1980, 2000, 2020])
-        fig.colorbar(im, ax=ax, orientation="horizontal", fraction=0.045, pad=0.07, aspect=35)
+        cb = fig.colorbar(im, ax=ax, orientation="horizontal", fraction=0.045, pad=0.07, aspect=35)
+        cb.set_label(words, fontsize=13, color=INK)
     axes[0].set_yticks(range(12)); axes[0].set_yticklabels([NAMES[c] for c in ORDER])
     fig.suptitle("Every recent year is red. Rainfall has no colour trend: it is noise around the normal",
                  x=0.015, ha="left", fontsize=20, fontweight="bold")
@@ -469,7 +475,7 @@ def slides_content(imgs, N):
         dict(time="3:10-3:50", who="Speaker 1", kind="image", img=imgs["stripes"], title="The full record",
              say="Now all twelve countries, every year since 1940. On the left, temperature: blue before the 1980s, "
                  "red after, and every country-year since 2016 is above its normal. On the right, rainfall, built the "
-                 "same way: it flickers between wet and dry, with no colour trend. The 1940s are faded because the "
+                 "same way: brown is a drier year, blue a wetter one, and it flickers between the two with no colour trend. The 1940s are faded because the "
                  "reanalysis rests on fewer observations then, which is why we measure change from 1961. The next "
                  "slide puts numbers on this contrast."),
         dict(time="3:50-4:50", who="Speaker 1", kind="image", img=imgs["signal"], title="Signal versus noise",

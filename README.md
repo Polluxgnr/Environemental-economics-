@@ -285,7 +285,7 @@ The notebook `notebooks/track1_climate_economics.ipynb` runs the same scripts an
 
 **Figure 1: the full record (brief step 1).** Each row is a country, each small vertical stripe one year since 1940.
 - **Left, temperature:** blue = colder than the 1961–1990 normal, red = warmer.
-- **Right, rainfall:** brown = drier, green = wetter.
+- **Right, rainfall:** brown = drier, blue = wetter.
 - **Read:** temperature turns red everywhere after the 1980s; rainfall flickers with no direction.
 
 ![Figure 1](figures/fig1_climate_stripes.png)
