@@ -5,7 +5,10 @@ SCRIPT 06: PRESENTATION VISUALS (16:9) + POWERPOINT DECK WITH SPEAKER NOTES
 ================================================================================
 
 Output: presentation/figures/slide_*.png
+        presentation/figures/deck/*.png         (same charts without baked-in titles, for the designed deck
+                                                 in presentation/deck_source/, plus the warming-stripes cover)
         presentation/Track1_presentation.pptx   (10 min talk + backup slides)
+        presentation/SCRIPT.md                  (spoken script, same text as the speaker notes)
 
 All numbers on the slides are read from paper/tables and data/processed, so the
 deck stays consistent with the paper after any re-run.
@@ -45,15 +48,57 @@ def detrended_sd(d, col):
     return (d[col] - np.polyval(np.polyfit(d.year, d[col], 1), d.year)).std(ddof=1)
 
 
+# "Clean" mode exports the same charts for the designed deck (presentation/figures/deck/):
+# no baked-in title or footer (the slide carries them), painted on the deck's paper colour.
+CLEAN = False
+DECK_BG = "#F7F5F0"
+DECK_OUT = os.path.join(ROOT, "presentation", "figures", "deck")
+
+
 def footer(fig, text):
     import textwrap
+    if CLEAN:
+        return
     fig.text(0.015, -0.05, textwrap.fill(text, 175), fontsize=10, color=MUTED, va="top")
 
 
 def save(fig, name):
-    fig.savefig(os.path.join(OUT, name), bbox_inches="tight", pad_inches=0.3)
+    out_dir = DECK_OUT if CLEAN else OUT
+    os.makedirs(out_dir, exist_ok=True)
+    kw = {}
+    if CLEAN:
+        if fig._suptitle is not None:
+            fig._suptitle.set_visible(False)
+        fig.patch.set_facecolor(DECK_BG)
+        for ax in fig.axes:
+            ax.set_facecolor(DECK_BG)
+        kw["facecolor"] = DECK_BG
+    fig.savefig(os.path.join(out_dir, name), bbox_inches="tight", pad_inches=0.3, **kw)
     plt.close(fig)
-    return os.path.join(OUT, name)
+    return os.path.join(out_dir, name)
+
+
+def deck_stripes(a):
+    """Full-bleed warming stripes of the 12 countries (cover) and of their mean (section band). No text."""
+    years = np.arange(1940, a.year.max() + 1)
+    M = a.pivot(index="country_code", columns="year", values="temp_anom").reindex(index=ORDER, columns=years)
+    norm = TwoSlopeNorm(0, -2.2, 2.2)
+    os.makedirs(DECK_OUT, exist_ok=True)
+    fig = plt.figure(figsize=(19.2, 10.8), dpi=100)
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.imshow(M.values, aspect="auto", cmap="RdBu_r", norm=norm, interpolation="nearest")
+    for y in np.arange(0.5, 11.5):
+        ax.axhline(y, color="#14213D", lw=1.2, alpha=0.35)
+    ax.set_axis_off()
+    fig.savefig(os.path.join(DECK_OUT, "cover_stripes.png"), dpi=100)
+    plt.close(fig)
+    fig = plt.figure(figsize=(19.2, 2.4), dpi=100)
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.imshow(M.mean().values[None, :], aspect="auto", cmap="RdBu_r", norm=TwoSlopeNorm(0, -1.6, 1.6),
+              interpolation="nearest")
+    ax.set_axis_off()
+    fig.savefig(os.path.join(DECK_OUT, "band_stripes.png"), dpi=100)
+    plt.close(fig)
 
 
 def country_changes(a):
@@ -272,20 +317,26 @@ def slide_events():
 def slide_coefs():
     raw = pd.read_csv(os.path.join(PROC, "regression_results_raw.csv"))
     raw = raw[raw.Dependent == "gdp_per_capita_growth"].iloc[::-1].reset_index(drop=True)
-    fig, ax = plt.subplots(figsize=(W, H))
+    # The designed deck shows the p-values in cards beside the chart, so its version is narrower and larger
+    fig, ax = plt.subplots(figsize=(9.2, 6.6) if CLEAN else (W, H))
     n = len(raw)
-    ax.axhspan(n - 2.5, n - 0.5, color="#f6f8fa", zorder=0)
+    ax.axhspan(n - 2.5, n - 0.5, color="#ECE8DF" if CLEAN else "#f6f8fa", zorder=0)
     for i, r in raw.iterrows():
         x = r.temp_var
         col = WARM if r.Model.startswith("(3)") else (MUTED if r.Model.startswith(("(1)", "(2)")) else INK)
-        ax.plot([r[f"ci_lo_{x}"], r[f"ci_hi_{x}"]], [i, i], color=col, lw=5, solid_capstyle="round")
-        ax.plot(r[f"b_{x}"], i, "o", color=col, ms=14)
-        ax.text(1.01, i, f"p = {r[f'p_{x}']:.2f}  (bootstrap {r[f'pwild_{x}']:.2f})", transform=ax.get_yaxis_transform(),
-                va="center", fontsize=12.5, color=col)
+        ax.plot([r[f"ci_lo_{x}"], r[f"ci_hi_{x}"]], [i, i], color=col, lw=6 if CLEAN else 5, solid_capstyle="round")
+        ax.plot(r[f"b_{x}"], i, "o", color=col, ms=16 if CLEAN else 14)
+        if not CLEAN:
+            ax.text(1.01, i, f"p = {r[f'p_{x}']:.2f}  (bootstrap {r[f'pwild_{x}']:.2f})", transform=ax.get_yaxis_transform(),
+                    va="center", fontsize=12.5, color=col)
     ax.axvline(0, color=INK, lw=1.2)
-    ax.set_yticks(range(n)); ax.set_yticklabels(raw.Model)
-    ax.text(0.01, n - 0.55, "naive: no year effects", transform=ax.get_yaxis_transform(), fontsize=12, color=MUTED, va="top")
-    ax.set_xlabel("Change in GDP per capita growth for a +1 °C warmer year (percentage points), 95% CI")
+    ax.set_yticks(range(n)); ax.set_yticklabels(raw.Model, fontsize=17 if CLEAN else 15)
+    ax.tick_params(axis="x", labelsize=16 if CLEAN else 15)
+    ax.text(0.01, n - 0.55, "naive: no year effects", transform=ax.get_yaxis_transform(), fontsize=15 if CLEAN else 12,
+            color=MUTED, va="top")
+    ax.set_xlabel("Growth change for a +1 °C warmer year (pp), 95% CI" if CLEAN else
+                  "Change in GDP per capita growth for a +1 °C warmer year (percentage points), 95% CI",
+                  fontsize=17 if CLEAN else 15)
     fig.suptitle("The 'climate penalty' shrinks as we remove everything that is not weather",
                  x=0.015, ha="left", fontsize=20, fontweight="bold")
     footer(fig, "Panel regressions, 12 countries, 1961-2025 (756 country-years). SE clustered by country, t(11) and wild cluster "
@@ -535,7 +586,7 @@ def build_deck(slides):
             textbox(s, 0.9, 2.0, 11.5, 1.6, sl["title"], 40, bold=True)
             textbox(s, 0.9, 3.7, 11.5, 1.0, sl["sub"], 20, color=muted)
             textbox(s, 0.9, 5.4, 11.5, 1.2, "Track 1 · Environmental Economics · ESSEC BSc AIDAMS · 9 November 2026\n"
-                    "[Group members]", 16, color=muted)
+                    "Augustin · Eliott · Pollux · Saty", 16, color=muted)
         else:
             accent(s)
             textbox(s, 0.7, 0.45, 12, 1.0, sl["title"], 34, bold=True)
@@ -578,7 +629,7 @@ def write_script(slides):
         "**Roles.**",
         "- Speaker 1 (climate): slides 1-7.",
         "- Speaker 2 (economy): slides 8-12.",
-        "- The other three members: the Q&A (see `DEFENSE_NOTES.md`).", "",
+        "- The other two members: the Q&A, with the speakers (see `DEFENSE_NOTES.md`).", "",
         "**Delivery.**",
         "- One number per slide: say it, then point at it.",
         "- Name the type of each result out loud (*description*, *correlation*).",
@@ -609,5 +660,14 @@ if __name__ == "__main__":
     slides = slides_content(imgs, talk_numbers(a, m, ch))
     print("Deck:", build_deck(slides))
     print("Script: presentation/SCRIPT.md,", write_script(slides), "spoken words")
+
+    # Clean chart exports + stripes for the designed deck
+    CLEAN = True
+    for fn, args in [(slide_map, (ch,)), (slide_route, ()), (slide_method, (m, a)), (slide_stripes, (a,)),
+                     (slide_signal, (ch,)), (slide_seasons, (s,)), (slide_events, ()), (slide_coefs, ()),
+                     (slide_crops_rain, (p,))]:
+        fn(*args)
+    deck_stripes(a)
+    print("Deck images:", DECK_OUT)
 
 

@@ -2,7 +2,7 @@
 
 **Environmental Economics, BSc AIDAMS, ESSEC, T1 2026–2027 · Track 1: Temperature and precipitation records**
 
-**Authors:** [names of the five group members] · **Instructor:** Caterina Seghini · **Submitted:** 2 November 2026
+**Authors:** Augustin, Eliott, Pollux Gronier, Saty · **Instructor:** Caterina Seghini · **Submitted:** 2 November 2026
 
 **Code and data:** https://github.com/Polluxgnr/Environemental-economics-
 
@@ -205,6 +205,15 @@ What the results would need in order to be causal: many more countries or sub-na
 
 ## Use of AI and reproducibility
 
-**AI use.** [To be completed by the group, naming every tool. For example: AI coding assistants (name them) were used to write and debug the download and analysis scripts, to reverse-engineer the Atlas download requests, to draft figure code and parts of the text, and to audit the first version of the project. All numbers were produced by the code in the repository from the raw data; the authors checked them and can explain each one.]
+**AI use.** We used two AI assistants.
+- **Antigravity (Google)** helped write and debug the Python code of our first version: the Open-Meteo API download, the processing, the regressions and the figures.
+- **Claude (Anthropic), through Claude Code**, was used to:
+  - audit that first version against the brief;
+  - find and automate the Copernicus Interactive Climate Atlas download that replaced our API route, and compare the two data routes;
+  - help debug and restructure the analysis scripts (anomalies, hot-season measure, wild cluster bootstrap, figures);
+  - draft and edit parts of the text (this paper, the README and the project report);
+  - build the presentation slides and the speaker script.
+
+Every number was produced by the code in the repository from the raw data. We checked the results and can explain each one.
 
 **Reproducibility.** Running `pip install -r requirements.txt` then `scripts/00_…` to `scripts/06_…` in order rebuilds every table and figure. The raw downloads are included in `data/raw/`, and `data/README.md` gives every source, access date and the manual Atlas click-path.

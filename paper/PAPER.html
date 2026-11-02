@@ -19,7 +19,7 @@ hr { border: none; border-top: 1px solid #d0d7de; margin: 6pt 0; }
 code { font-size: 8.5pt; }
 </style></head><body><h1>Warming, rainfall and growth in twelve countries, 1940–2025</h1>
 <p><strong>Environmental Economics, BSc AIDAMS, ESSEC, T1 2026–2027 · Track 1: Temperature and precipitation records</strong></p>
-<p><strong>Authors:</strong> [names of the five group members] · <strong>Instructor:</strong> Caterina Seghini · <strong>Submitted:</strong> 2 November 2026</p>
+<p><strong>Authors:</strong> Augustin, Eliott, Pollux Gronier, Saty · <strong>Instructor:</strong> Caterina Seghini · <strong>Submitted:</strong> 2 November 2026</p>
 <p><strong>Code and data:</strong> https://github.com/Polluxgnr/Environemental-economics-</p>
 <hr />
 <h2>1. The question</h2>
@@ -437,5 +437,15 @@ code { font-size: 8.5pt; }
 <li>Natural Earth, <em>Admin 0 – Countries</em>, 1:50 m and 1:110 m, v5.</li>
 </ul>
 <h2>Use of AI and reproducibility</h2>
-<p><strong>AI use.</strong> [To be completed by the group, naming every tool. For example: AI coding assistants (name them) were used to write and debug the download and analysis scripts, to reverse-engineer the Atlas download requests, to draft figure code and parts of the text, and to audit the first version of the project. All numbers were produced by the code in the repository from the raw data; the authors checked them and can explain each one.]</p>
+<p><strong>AI use.</strong> We used two AI assistants.</p>
+<ul>
+<li><strong>Antigravity (Google)</strong> helped write and debug the Python code of our first version: the Open-Meteo API download, the processing, the regressions and the figures.</li>
+<li><strong>Claude (Anthropic), through Claude Code</strong>, was used to:</li>
+<li>audit that first version against the brief;</li>
+<li>find and automate the Copernicus Interactive Climate Atlas download that replaced our API route, and compare the two data routes;</li>
+<li>help debug and restructure the analysis scripts (anomalies, hot-season measure, wild cluster bootstrap, figures);</li>
+<li>draft and edit parts of the text (this paper, the README and the project report);</li>
+<li>build the presentation slides and the speaker script.</li>
+</ul>
+<p>Every number was produced by the code in the repository from the raw data. We checked the results and can explain each one.</p>
 <p><strong>Reproducibility.</strong> Running <code>pip install -r requirements.txt</code> then <code>scripts/00_…</code> to <code>scripts/06_…</code> in order rebuilds every table and figure. The raw downloads are included in <code>data/raw/</code>, and <code>data/README.md</code> gives every source, access date and the manual Atlas click-path.</p></body></html>

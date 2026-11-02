@@ -18,7 +18,7 @@ Each slide answers the question the previous one raises:
 **Roles.**
 - Speaker 1 (climate): slides 1-7.
 - Speaker 2 (economy): slides 8-12.
-- The other three members: the Q&A (see `DEFENSE_NOTES.md`).
+- The other two members: the Q&A, with the speakers (see `DEFENSE_NOTES.md`).
 
 **Delivery.**
 - One number per slide: say it, then point at it.

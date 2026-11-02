@@ -40,8 +40,8 @@ This is a full review of the repository before submission, against the brief (`d
 | ≥ 3 papers or reports, consistent style; data cited with producer, name, version, access date | Paper references | ✅ 10 references; 4 data citations |
 | Code reproduces everything from raw data | `scripts/` | ✅ |
 | Track 1 steps (1)–(4), both directions of step 4 | Paper §4–5, README §5 | ✅ |
-| **AI-use statement** | Paper, end | ❗ **group must complete it** (name every tool used) |
-| **Author names** | Paper header, title slide | ❗ **group must fill in** |
+| **AI-use statement** | Paper, end | ✅ names Antigravity and Claude and what each was used for (2 Nov) |
+| **Author names** | Paper header, title slides | ✅ Augustin, Eliott, Pollux Gronier, Saty (2 Nov) |
 
 ## 4. Method review
 
@@ -63,9 +63,18 @@ This is a full review of the repository before submission, against the brief (`d
 - **Country averages** are not weighted by exposure (cropland, population).
 - **Agriculture share** starts late for Germany, Spain, the USA and Australia.
 
-## 6. To do before 2 November (group)
+## 6. Hand-in check (2 November)
 
-1. Fill in the **author names** (paper header, title slide in `06_presentation.py`).
-2. Complete the **AI-use statement**, naming every tool and what it was used for. The brief penalises undeclared use, not declared use.
-3. **Rehearse the talk** (`presentation/SCRIPT.md`, about 8 minutes spoken) with a timer.
-4. Every member should be able to answer every question in `DEFENSE_NOTES.md`.
+| Check | Result |
+|---|---|
+| Full re-run of `00` → `07` from `data/raw/` | ✅ all exit 0; no data, table or figure changed |
+| Paper Tables 1 and 3 vs generated tables | ✅ 0 mismatches |
+| `paper/PAPER.pdf` | ✅ 9 pages (references and AI statement on page 8); names and AI statement present; no placeholders |
+| Relative links in every Markdown file | ✅ 0 broken |
+| Designed deck (16 slides, speaker notes) | ✅ source in `presentation/deck_source/`; charts from `06_presentation.py` (clean export in `presentation/figures/deck/`) |
+| Group of four, not five | noted: two speakers + two Q&A (`SCRIPT.md`) |
+
+**Still to do (group):**
+1. Rehearse the talk (`presentation/SCRIPT.md`, about 8 minutes spoken) with a timer.
+2. Every member should be able to answer every question in `DEFENSE_NOTES.md`.
+3. Add surnames to the author line if the course requires full names.

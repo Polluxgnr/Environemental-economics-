@@ -21,7 +21,7 @@ We answer with **country-average ERA5 data from the Copernicus Interactive Clima
 - [Paper (PDF)](paper/PAPER.pdf)
 - [Full report](docs/REPORT.md)
 - [Data sheet](data/README.md)
-- [Slides](presentation/Track1_presentation.pptx) · [Talk script](presentation/SCRIPT.md) · [Q&A preparation](presentation/DEFENSE_NOTES.md) · [Final audit](docs/AUDIT_final.md)
+- Slides: designed deck (source in [presentation/deck_source](presentation/deck_source/)) and an auto-generated [PowerPoint](presentation/Track1_presentation.pptx) · [Talk script](presentation/SCRIPT.md) · [Q&A preparation](presentation/DEFENSE_NOTES.md) · [Final audit](docs/AUDIT_final.md)
 
 ---
 
@@ -231,7 +231,7 @@ flowchart LR
 ```
 ├── paper/            PAPER.md · PAPER.pdf (≤ 10 pages) · tables/ (every table, csv + md)
 ├── docs/             REPORT.md (long version + glossary) · AUDIT_first_version.md · AUDIT_final.md
-├── presentation/     Track1_presentation.pptx · SCRIPT.md (spoken script) · DEFENSE_NOTES.md (Q&A) · figures/
+├── presentation/     deck_source/ (designed deck) · Track1_presentation.pptx · SCRIPT.md (spoken script) · DEFENSE_NOTES.md (Q&A) · figures/
 ├── figures/          paper figures fig1–fig6, figA1
 ├── data/             README.md (data sheet) · raw/ (atlas, openmeteo, WDI, maps) · processed/
 ├── scripts/          00 → 07, run in order

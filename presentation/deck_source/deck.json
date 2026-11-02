@@ -1,0 +1,20 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-30T13:35:00Z"},
+  "lists": "css",
+  "title": "Warming, rainfall and growth: Track 1",
+  "order": ["cover", "map", "data", "method", "record", "noise", "seasons", "economy", "summers", "test", "bite", "claims", "takeaways", "thanks", "backup-data", "backup-qa"],
+  "sections": {
+    "s1": {"description": "The question and the twelve countries", "start": "cover"},
+    "s2": {"description": "What the data measure and how we measure change", "start": "data"},
+    "s3": {"description": "Climate results: change, noise, seasons", "start": "record"},
+    "s4": {"description": "Did the economy notice?", "start": "economy"},
+    "s5": {"description": "What we can and cannot conclude", "start": "claims"},
+    "s6": {"description": "Backup slides for the Q&A", "start": "backup-data"}
+  },
+  "faces": {
+    "eb-garamond": {"family": "EB Garamond", "href": "https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400..700&display=swap"},
+    "ibm-plex-sans": {"family": "IBM Plex Sans", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap"}
+  },
+  "designSystems": []
+}
