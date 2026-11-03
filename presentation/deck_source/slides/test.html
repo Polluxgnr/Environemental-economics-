@@ -1,28 +1,29 @@
 <section id="test" data-transition="fade" style="background:#F7F5F0;color:#14213D;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:20px">
 <p style="font-size:24px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#B5332A">08 · Testing it</p>
-<h2 style="font-family:'EB Garamond', Georgia, serif;font-size:56px;font-weight:600;line-height:1.15;color:#14213D">The “climate penalty” shrinks as we remove everything that is not weather</h2>
+<h2 style="font-family:'EB Garamond', Georgia, serif;font-size:56px;font-weight:600;line-height:1.15;color:#14213D">The “climate penalty” disappears once we remove everything that is not weather</h2>
 <div style="display:flex;flex-direction:row;gap:40px;align-items:start">
-<img src="/_blob/8e73332302a346486654f8ab916a2964" alt="Coefficient plot: effect of a 1 °C warmer year on GDP per capita growth in six specifications; significant without year effects, about −0.67 with an interval including zero in the preferred model, near zero with country trends" style="width:1060px;height:560px;object-fit:contain">
-<div style="flex:1;display:flex;flex-direction:column;gap:16px">
-<div style="background:#ECE8DF;border-radius:12px;padding:20px 24px;display:flex;flex-direction:column;gap:4px">
+<img src="/_blob/1f8d4ac82695592126e0d8d32eab896a" alt="Coefficient plot: effect of a 1 °C warmer year on GDP per capita growth in six specifications; significant without year effects, about −0.67 with year effects, and −0.04 with an interval around zero in the preferred model with country trends" style="width:1060px;height:560px;object-fit:contain">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px">
+<div style="background:#ECE8DF;border-radius:12px;padding:18px 24px;display:flex;flex-direction:column;gap:4px">
 <p style="font-size:24px;font-weight:600;color:#6B7280">Naive: country effects only</p>
-<p style="font-size:30px;font-weight:600;color:#14213D">−0.75 pp/°C · p = 0.01</p>
+<p style="font-size:28px;font-weight:600;color:#14213D">−0.75 pp/°C · p = 0.01</p>
 </div>
-<div style="background:#FFFFFF;border:2px solid #B5332A;border-radius:12px;padding:20px 24px;display:flex;flex-direction:column;gap:4px">
-<p style="font-size:24px;font-weight:600;color:#B5332A">Preferred: + year effects</p>
-<p style="font-size:30px;font-weight:600;color:#14213D">−0.67 pp/°C</p>
-<p style="font-size:24px;color:#4A5568">95% CI [−1.49, +0.16] · bootstrap p = 0.12</p>
+<div style="background:#ECE8DF;border-radius:12px;padding:18px 24px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;font-weight:600;color:#6B7280">+ year effects</p>
+<p style="font-size:28px;font-weight:600;color:#14213D">−0.67 pp/°C · p = 0.10</p>
+<p style="font-size:24px;color:#4A5568">fast warmers also slowed most (trends: −0.57)</p>
 </div>
-<div style="background:#ECE8DF;border-radius:12px;padding:20px 24px;display:flex;flex-direction:column;gap:4px">
-<p style="font-size:24px;font-weight:600;color:#6B7280">+ country trends</p>
-<p style="font-size:30px;font-weight:600;color:#14213D">−0.04 pp/°C · p = 0.92</p>
+<div style="background:#FFFFFF;border:2px solid #B5332A;border-radius:12px;padding:18px 24px;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:24px;font-weight:600;color:#B5332A">Preferred: + country trends</p>
+<p style="font-size:28px;font-weight:600;color:#14213D">−0.04 pp/°C</p>
+<p style="font-size:24px;color:#4A5568">95% CI [−0.76, +0.69] · bootstrap p = 0.92</p>
 </div>
-<p style="font-size:24px;line-height:1.4;color:#4A5568">A typical warm year: about −0.25 pp of growth, not distinguishable from zero.</p>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">No detectable effect; losses above ~0.8 pp per °C ruled out here.</p>
 </div>
 </div>
 <div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between">
 <p style="font-size:24px;color:#6B7280">756 country-years, 1961–2025 · SE clustered by country, t(11) and wild cluster bootstrap · WDI; Atlas</p>
 <p style="font-size:24px;color:#6B7280">10</p>
 </div>
-<aside>Speaker 2 · 6:35–7:50. We regress growth on the temperature and rainfall anomalies over all 756 country-years. The grey lines are the naive versions. Comparing each country only with itself, a warmer year costs 0.75 points, and it looks significant. But that is partly timing: the world warmed while growth slowed after the 1960s. Year effects remove that, because they compare countries within the same year and absorb oil shocks, 2009 and COVID. That is our preferred model, in red: −0.67 points per degree, with an interval from −1.5 to +0.16. With only twelve countries we check it with a wild bootstrap: p = 0.12. Add country trends and it falls to −0.04. In words: a typical warm year might cost about 0.25 points of growth, and we cannot tell that apart from zero.</aside>
+<aside>Speaker 2 · 6:35–7:50. We regress growth on the temperature and rainfall anomalies over all 756 country-years. The grey lines are the naive versions: comparing each country only with itself, a warmer year costs 0.75 points, and it looks significant. Year effects compare countries within the same year, but they only remove the trend all countries share. The countries that warmed fastest also slowed most: across our twelve countries the two trends correlate at −0.57, and dropping India alone moves the estimate from −0.67 to −0.38. So our preferred model, in red, adds one trend per country, which isolates year-to-year weather. The effect is −0.04 points per degree, with an interval from −0.76 to +0.69, checked with a wild bootstrap for our twelve clusters. In words: no detectable effect, and losses larger than about 0.8 points per degree are ruled out in our sample.</aside>
 </section>

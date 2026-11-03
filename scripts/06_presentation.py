@@ -313,7 +313,7 @@ def slide_events():
     ax.set_xlabel("Deviation from what the country and the year would predict (percentage points)")
     ax.legend(frameon=False, fontsize=13, loc="lower left")
     ax.invert_yaxis()
-    fig.suptitle("In each country's hottest season on record, crops often drop; GDP barely moves",
+    fig.suptitle("Each country's hottest season: the big crop losses came when heat met drought",
                  x=0.015, ha="left", fontsize=20, fontweight="bold")
     footer(fig, "Hottest = largest detrended hot-season temperature z-score 1961-2025. Growth two-way demeaned. "
                 "World Bank WDI; " + SRC)
@@ -329,7 +329,7 @@ def slide_coefs():
     ax.axhspan(n - 2.5, n - 0.5, color="#ECE8DF" if CLEAN else "#f6f8fa", zorder=0)
     for i, r in raw.iterrows():
         x = r.temp_var
-        col = WARM if r.Model.startswith("(3)") else (MUTED if r.Model.startswith(("(1)", "(2)")) else INK)
+        col = WARM if r.Model.startswith("(4)") else (MUTED if r.Model.startswith(("(1)", "(2)")) else INK)
         ax.plot([r[f"ci_lo_{x}"], r[f"ci_hi_{x}"]], [i, i], color=col, lw=6 if CLEAN else 5, solid_capstyle="round")
         ax.plot(r[f"b_{x}"], i, "o", color=col, ms=16 if CLEAN else 14)
         if not CLEAN:
@@ -343,10 +343,10 @@ def slide_coefs():
     ax.set_xlabel("Growth change for a +1 °C warmer year (pp), 95% CI" if CLEAN else
                   "Change in GDP per capita growth for a +1 °C warmer year (percentage points), 95% CI",
                   fontsize=17 if CLEAN else 15)
-    fig.suptitle("The 'climate penalty' shrinks as we remove everything that is not weather",
+    fig.suptitle("The 'climate penalty' disappears once we remove everything that is not weather",
                  x=0.015, ha="left", fontsize=20, fontweight="bold")
     footer(fig, "Panel regressions, 12 countries, 1961-2025 (756 country-years). SE clustered by country, t(11) and wild cluster "
-                "bootstrap p-values. Red = preferred two-way fixed effects model. World Bank WDI; " + SRC)
+                "bootstrap p-values. Red = preferred model: country and year effects + country trends. World Bank WDI; " + SRC)
     return save(fig, "slide_09_coefficients.png")
 
 
@@ -381,7 +381,7 @@ def slide_crops_rain(p):
         ax.set_title(f"{title}: {r[f'b_{x}']:+.2f} {unit}  [{r[f'ci_lo_{x}']:+.2f}, {r[f'ci_hi_{x}']:+.2f}]",
                      loc="left", fontsize=16, fontweight="bold", color=col)
         ax.legend(frameon=False, fontsize=12, loc="lower right")
-    fig.suptitle("Where climate shocks really bite: rain moves harvests, heat barely moves GDP",
+    fig.suptitle("Where climate shocks bite: rain moves harvests for a year; heat leaves no robust trace in GDP",
                  x=0.015, ha="left", fontsize=20, fontweight="bold")
     footer(fig, "Each dot = a country-year 1961-2025 after removing country averages, year averages and the other climate variable. "
                 "Line = regression slope with 95% CI (clustered by country). World Bank WDI; " + SRC)
@@ -432,6 +432,7 @@ def talk_numbers(a, m, ch):
         "usa_atlas": tA.loc["USA", "dP_atlas"], "usa_pt": tA.loc["USA", "dP_blend_point"],
         "med_dP": (tA.dP_blend_point - tA.dP_atlas).abs().median(),
         "med_dT": (tA.dT_blend_point - tA.dT_atlas).abs().median(),
+        "t6": pd.read_csv(os.path.join(TABLES, "table6_robustness.csv")).Result.tolist(),
     }
 
 
@@ -482,10 +483,11 @@ def slides_content(imgs, N):
              say=f"Each dot is the change; the grey bands are one and two sigmas of ordinary variation. Temperature is "
                  f"outside two sigma in {N['nT']} of 12 countries. Mexico is the clearest case: +{N['mex']:.1f} degrees "
                  f"is {N['snr_mex']:.1f} sigma, because its temperature barely varies from year to year. Germany warmed "
-                 f"more, but its winters are so variable that it is {N['snr_deu']:.1f} sigma. Australia is the exception, at "
-                 f"{N['snr_aus']:.1f}. Rainfall: zero of twelve. Kenya and Senegal do show significant drying trends, but "
-                 f"the last decade is still within a normal range. And rainfall does not change where warming is "
-                 f"largest: the rank correlation across countries is {N['rho']:.2f}."),
+                 f"more, but its winters are so variable that it is {N['snr_deu']:.1f} sigma. Australia is the exception, "
+                 f"at {N['snr_aus']:.1f}. Rainfall is different: in every country the change is smaller than one ordinary "
+                 f"year's swing, so nobody would feel a new climate. But a ten-year average is precise, and in four "
+                 f"countries, Brazil, India, Kenya and Senegal, the change in average rainfall is measurable. And it is "
+                 f"not where warming is largest: if anything, the fastest warmers have the smallest rainfall changes."),
         dict(time="4:50-5:35", who="Speaker 1", kind="image", img=imgs["seasons"], title="When in the year",
              say=f"Is the warming spread evenly across the year? Mostly, yes. Only in {N['seas_c']} is one season "
                  f"clearly ahead: there, summer warmed by about +{N['fr_jja']:.1f} degrees against +{N['fr_son']:.1f} "
@@ -496,46 +498,49 @@ def slides_content(imgs, N):
              say=f"So, the last part of the question: were the unusual climate years unusual for the economy? One "
                  f"measurement point first. An annual mean dilutes a heatwave: France's 2003 is only {N['fr03_z']:.1f} "
                  f"sigma as a year, but {N['fr03_hz']:.1f} sigma as a summer. So we use each country's hot season, its "
-                 f"three warmest months. Here is every country's hottest one on record, and how growth compared with "
-                 f"what the country and the year would predict. Purple is crops, black is GDP. France 2003: crops "
-                 f"{N['fr03_crop']:.0f} points, GDP {N['fr03_gdp']:.1f}. In {N['n_crop5']} of 12 cases crops fell by more "
-                 f"than five points; GDP fell in only {N['n_gdp_neg']}. These are anecdotes, but they form a pattern, "
-                 f"so let us test it."),
+                 f"three warmest consecutive months. Here is every country's hottest one on record, and how growth "
+                 f"compared with what the country and the year would predict. Purple is crops, black is GDP. France "
+                 f"2003: crops {N['fr03_crop']:.0f} points, GDP {N['fr03_gdp']:.1f}. But look closer: the big crop losses "
+                 f"were heat and drought together. Germany 2003 and Australia 2019 were each country's hottest and "
+                 f"driest year, and France 2003 and the US in 1988 were dry too. Across all hot seasons, crops show no "
+                 f"effect on average. So is it heat, or water? Let us test it."),
         dict(time="6:35-7:50", who="Speaker 2", kind="image", img=imgs["coefs"], title="Testing it",
              say=f"We regress growth on the temperature and rainfall anomalies over all {N['n_obs']} country-years. The "
-                 f"grey lines are the naive versions. Comparing each country only with itself, a warmer year costs "
-                 f"{abs(cfe['b_temp_anom']):.2f} points, and it looks significant. But that is partly timing: the world "
-                 f"warmed while growth slowed after the 1960s. Year effects remove that, because they compare countries "
-                 f"within the same year and absorb oil shocks, 2009 and COVID. That is our preferred model, in red: "
-                 f"{tw['b_temp_anom']:.2f} points per degree, with an interval from {tw['ci_lo_temp_anom']:.1f} to "
-                 f"+{tw['ci_hi_temp_anom']:.2f}. With only twelve countries we check it with a wild bootstrap: p = "
-                 f"{tw['pwild_temp_anom']:.2f}. Add country trends and it falls to {tr['b_temp_anom']:.2f}. In words: a "
-                 f"typical warm year might cost about {abs(N['sd_eff']):.2f} points of growth, and we cannot tell that "
-                 f"apart from zero."),
+                 f"grey lines are the naive versions: comparing each country only with itself, a warmer year costs "
+                 f"{abs(cfe['b_temp_anom']):.2f} points, and it looks significant. Year effects compare countries within "
+                 f"the same year, but they only remove the trend all countries share. The countries that warmed fastest "
+                 f"also slowed most: across our twelve countries the two trends correlate at {N['t6'][0]}, and dropping "
+                 f"India alone moves the estimate from {tw['b_temp_anom']:.2f} to "
+                 f"{N['t6'][1].split('India: ')[1].rstrip(')')}. So our preferred model, in red, adds one trend per "
+                 f"country, which isolates year-to-year weather. The effect is {tr['b_temp_anom']:.2f} points per degree, "
+                 f"with an interval from {tr['ci_lo_temp_anom']:.2f} to +{tr['ci_hi_temp_anom']:.2f}, checked with a wild "
+                 f"bootstrap for our twelve clusters. In words: no detectable effect, and losses larger than about "
+                 f"0.8 points per degree are ruled out in our sample."),
         dict(time="7:50-8:35", who="Speaker 2", kind="image", img=imgs["rain"], title="Where shocks bite",
              say=f"So where do climate shocks bite? In harvests rather than GDP, and through water rather than heat. On "
-                 f"the right, a year ten percent wetter than normal goes with crop growth {crop['b_precip_10']:.1f} points "
-                 f"higher, and that estimate is precise. In dry years crop growth is {abs(N['dry_crop']):.1f} points "
-                 f"below normal, while GDP growth is only {abs(N['dry_gdp']):.2f} below. The likely reason is exposure: "
-                 f"in most of our countries agriculture is one to three percent of GDP. This is the IPCC chain from the "
-                 f"course: a hazard becomes a loss only through exposure and vulnerability."),
+                 f"the right, a year ten percent wetter than normal goes with crop output about {crop['b_precip_10']:.1f} "
+                 f"percent higher, and that is robust: dropping any country, or adding country trends, barely changes it. "
+                 f"It is a one-year effect: the next year output returns to normal. In dry years crop growth is "
+                 f"{abs(N['dry_crop']):.1f} points below normal, while GDP growth is only {abs(N['dry_gdp']):.2f} below. "
+                 f"The likely reason is exposure: in most of our countries agriculture is one to three percent of GDP. "
+                 f"This is the IPCC chain from the course: a hazard becomes a loss only through exposure and vulnerability."),
         dict(time="8:35-9:30", who="Speaker 2", kind="text", title="What we can and cannot conclude",
-             bullets=[f"Description (solid): every country has warmed; {N['nT']}/12 beyond normal variability; rainfall change within the noise.",
-                      "Correlation: dry years go with lower harvests (clear); warm years with slightly lower GDP growth (not distinguishable from zero).",
+             bullets=[f"Description (solid): every country has warmed; {N['nT']}/12 beyond normal variability; rainfall changed far less (measurably in 4 countries).",
+                      "Correlation: dry years go with lower harvests for a year (clear); warm years show no robust link with GDP growth.",
                       "Not causal, and not climate change: one unusual year allows no adaptation; 12 countries are too few; national averages hide local losses.",
                       "To make it causal: many more units (all countries, regions), exposure-weighted weather, a channel fixed in advance."],
              say="Let us be precise about what kind of claims these are. The climate results are descriptions, and they "
                  "are solid. The economic results are correlations. Year-to-year weather is close to random, so our "
-                 "design is close to an experiment, but twelve countries give intervals too wide to claim a causal "
-                 "effect on GDP. And a hot year is not climate change: one unusual year allows no adaptation and no "
+                 "design is close to an experiment, but with twelve countries, rich and poor pooled together, we do not "
+                 "claim causal effects, and an effect confined to poorer, agricultural economies could be hidden. And a hot year is not climate change: one unusual year allows no adaptation and no "
                  "build-up of damage. To go further we would need many more units, weather weighted by where crops and "
                  "people are, and a channel chosen before looking at the data."),
         dict(time="9:30-10:00", who="Speaker 2", kind="text", title="Three takeaways",
              bullets=[f"Warming is unmistakable: +{N['lo']:.1f} to +{N['hi']:.2f} °C since 1961-1990, far outside normal variability.",
-                      "Rainfall is local and noisy, and it depends on how you measure it.",
+                      "Rainfall changed far less, locally, and how much depends on how you measure it.",
                       "Climate shocks reach harvests long before they reach GDP."],
-             say="To close: the warming in these records is unmistakable. Rainfall is a different, local story, and one "
-                 "that depends on how carefully you measure it. And when the climate misbehaves, the first place it "
+             say="To close: the warming in these records is unmistakable. Rainfall changed far less, it is a local story, "
+                 "and how much it changed depends on how carefully you measure it. And when the climate misbehaves, the first place it "
                  "shows is the harvest, not GDP. Thank you; we are happy to take questions."),
         dict(time="Q&A", who="Backup", kind="text", title="Backup: data and definitions",
              bullets=["Climate: Copernicus Interactive Climate Atlas (C3S/ECMWF), ERA5, monthly 1940-2025, 288 series. FRA/DEU/ESP: Atlas country masks; 9 others: Atlas user-defined regions with Natural Earth borders (USA = 48 states). Validated on France to 0.004 °C.",
@@ -545,8 +550,8 @@ def slides_content(imgs, N):
              say="Use in Q&A only."),
         dict(time="Q&A", who="Backup", kind="text", title="Backup: likely questions",
              bullets=["Why not the API? One grid point is not a country, above all for rainfall.",
-                      "Why does the naive model give a big effect? Warming and the growth slowdown both trend over time.",
-                      "Is p ≈ 0.1 'no effect'? No: the interval also includes a loss of 1.5 pp per °C.",
+                      "Why country trends? Fast-warming countries also slowed most (trend correlation -0.57).",
+                      "So heat does not hurt growth? No robust effect here; losses above ~0.8 pp/°C ruled out; poor countries may differ.",
                       "Why the hot season? France 2003: 1.2σ as a year, 3.4σ as a summer.",
                       "Why 1961-1990? WMO reference, before most of the warming, and the start of the WDI data."],
              say="Use in Q&A only."),
@@ -626,7 +631,7 @@ def write_script(slides):
         "2. **What is a country's climate?** A capital's grid point is not the country, so we rebuilt everything from "
         "Copernicus Atlas country averages. *Raises: how do we measure change?*",
         "3. **Method.** Monthly anomalies against 1961-1990, then change compared with noise (σ). *Raises: what does it show?*",
-        "4. **Results.** Warming beyond normal variability almost everywhere; rainfall within the noise; summer leads only in "
+        "4. **Results.** Warming beyond normal variability almost everywhere; rainfall changed far less (measurable in 4 countries); summer leads only in "
         "France and Spain. *Raises: does it matter for the economy?*",
         "5. **Economy.** The hottest summers hit crops, not GDP. Regressions confirm it: heat → GDP is small and imprecise; "
         "rain → crops is clear. *Raises: what kind of claim is that?*",
