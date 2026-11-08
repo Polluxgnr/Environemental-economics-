@@ -149,6 +149,15 @@ def card(slide, x, y, w, h, title, body, marker=None, fill=WHITE, line=(LINE, 0.
     text(slide, x + 0.25, y + 0.58, w - 0.45, h - 0.7, body, size=bsize, color=bcolor, line=1.1)
 
 
+def step(slide, x, y, w, h, n, title, body, color=RED):
+    box(slide, x, y, w, h, fill=WHITE, line=(LINE, 0.75), rounded=True)
+    dot(slide, x + 0.22, y + 0.2, 0.42, color)
+    text(slide, x + 0.22, y + 0.2, 0.42, 0.42, str(n), size=15, color=WHITE, bold=True, align=PP_ALIGN.CENTER,
+         anchor=MSO_ANCHOR.MIDDLE)
+    text(slide, x + 0.8, y + 0.22, w - 1.0, 0.4, title, size=16, color=INK, bold=True)
+    text(slide, x + 0.8, y + 0.62, w - 1.0, h - 0.7, body, size=13.5, color=BODY, line=1.1)
+
+
 def stat(slide, x, y, w, number, label, color, nsize=54):
     text(slide, x, y, w, 0.85, number, size=nsize, color=color, font=HEAD, bold=True, line=0.9)
     text(slide, x, y + 0.9, w, 0.75, label, size=14, color=BODY, line=1.1)
@@ -158,6 +167,8 @@ def dark(prs, image_band=True):
     s = prs.slides.add_slide(prs.slide_layouts[6])
     background(s, NAVY)
     if image_band:
+        text(s, X0 + 0.15, 5.4, 11, 0.3, "Below: the average of our 12 countries, one stripe per year from 1940 (left) to "
+             "2025 (right); blue = cooler, red = warmer than 1961–1990", size=11, color=PALER)
         s.shapes.add_picture(os.path.join(FIG, "band_stripes.png"), Inches(0), Inches(5.83), Inches(SW), Inches(1.67))
     return s
 
@@ -192,63 +203,96 @@ def build():
     cp.subject = "Environmental Economics, Track 1, ESSEC BSc AIDAMS, 9 November 2026"
     slides = []
 
-    # 1. Cover
+    # 1. Cover: the question, and the three questions the talk answers in order
     s = dark(prs, image_band=False)
-    s.shapes.add_picture(os.path.join(FIG, "cover_stripes.png"), Inches(0), Inches(0), Inches(SW), Inches(SH))
-    box(s, 0, 0, 7.78, SH, fill=NAVY, alpha=0.93)
-    text(s, X0 + 0.15, 1.55, 6.3, 0.3, "ENVIRONMENTAL ECONOMICS · TRACK 1", size=12, color=PINK, bold=True, spacing=1.5)
-    text(s, X0 + 0.15, 2.0, 6.75, 2.2, "Is today’s climate still the one we planned for?", size=42, color=PAPER,
+    text(s, X0 + 0.15, 1.35, 6.4, 0.3, "ENVIRONMENTAL ECONOMICS · TRACK 1", size=12, color=PINK, bold=True, spacing=1.5)
+    text(s, X0 + 0.15, 1.8, 6.6, 2.2, "Is today’s climate still the one we planned for?", size=42, color=PAPER,
          font=HEAD, bold=True, line=0.95)
-    text(s, X0 + 0.15, 4.3, 6.0, 0.8, "Temperature and rainfall records for 12 countries, 1940–2025, and what they "
+    text(s, X0 + 0.15, 3.7, 6.2, 0.8, "Temperature and rainfall records for 12 countries, 1940–2025, and what they "
          "did to the economy", size=16, color=PALE, line=1.15)
-    text(s, X0 + 0.15, 5.3, 6.3, 0.6, "Eliott Beghin · Pollux Gronier · Saty Viard Laroque · Augustin Vlandas",
+    text(s, X0 + 0.15, 4.85, 6.4, 0.6, "Eliott Beghin · Pollux Gronier · Saty Viard Laroque · Augustin Vlandas",
          size=14, color=PAPER, bold=True, line=1.15)
-    text(s, X0 + 0.15, 6.0, 6.3, 0.3, "ESSEC BSc AIDAMS · Caterina Seghini · 9 November 2026", size=12, color=PALER)
+    text(s, X0 + 0.15, 5.5, 6.4, 0.3, "ESSEC BSc AIDAMS · Caterina Seghini · 9 November 2026", size=12, color=PALER)
+    qx = 7.85
+    qw = SW - X0 - qx
+    text(s, qx, 1.35, qw, 0.3, "THREE QUESTIONS", size=12, color=PINK, bold=True, spacing=1.5)
+    for i, q in enumerate(["How far has the climate moved?", "Is that large next to normal ups and downs?",
+                           "Were the unusual years also unusual for the economy?"]):
+        y = 1.8 + i * 1.45
+        box(s, qx, y, qw, 1.25, fill="22325A", rounded=True)
+        text(s, qx + 0.3, y + 0.15, 0.6, 0.95, str(i + 1), size=36, color=PINK, font=HEAD, bold=True,
+             anchor=MSO_ANCHOR.MIDDLE)
+        text(s, qx + 1.0, y + 0.15, qw - 1.25, 0.95, q, size=17, color=PAPER, line=1.1, anchor=MSO_ANCHOR.MIDDLE)
     slides.append(s)
 
-    # 2. Map
-    s = frame(prs, "01 · The question", "Twelve countries on four continents, and every one is warmer than in "
-              "1961–1990", "Country-average temperature, mean 2016–2025 minus 1961–1990 · Copernicus Interactive "
-              "Climate Atlas, ERA5", 2)
-    picture(s, "slide_02_map.png", X0, TOP, CW, 4.6)
+    # 2. Our countries
+    s = frame(prs, "01 · Our countries", "Our choice: three contrasting countries per continent, and every one is "
+              "warmer than in 1961–1990", "Warming = country-average temperature, mean 2016–2025 minus 1961–1990 "
+              "(Copernicus Atlas, ERA5) · farming share of GDP: World Bank WDI, 2016–2025 average", 2)
+    picture(s, "slide_02_map.png", X0, TOP + 0.35, 8.2, 4.4, align="left")
+    rx = 9.25
+    rw = SW - X0 - rx
+    for i, (region, countries, detail, strong) in enumerate([
+            ("EUROPE", "France · Germany · Spain", "temperate, continental, Mediterranean", False),
+            ("AFRICA", "Kenya · Senegal · South Africa", "farming: 21 % of GDP in Kenya, 2.5 % in South Africa", True),
+            ("ASIA-PACIFIC", "India · Vietnam · Australia", "monsoon, tropical, dry", False),
+            ("AMERICAS", "United States · Brazil · Mexico", "temperate, tropical, highland", False)]):
+        y = TOP + 0.1 + [0, 1.05, 2.3, 3.35][i]
+        text(s, rx, y, rw, 0.25, region, size=11, color=RED, bold=True, spacing=1.2)
+        text(s, rx, y + 0.27, rw, 0.3, countries, size=15, color=INK, bold=True)
+        text(s, rx, y + 0.6, rw, 0.45, detail, size=13, color=INK if strong else BODY, bold=strong, line=1.05)
     slides.append(s)
 
-    # 3. A country's climate
-    s = frame(prs, "02 · What is a country’s climate?", "A capital is not a country: rainfall change even flips sign",
+    # 3. Our data
+    s = frame(prs, "02 · Our data", "A capital is not a country: we use country averages",
               "Change 2014–2023 vs 1961–1990, same definitions · Copernicus Atlas (ERA5) vs Open-Meteo API (default model)", 3)
     picture(s, "slide_03_data_route.png", X0, TOP, 7.3, 4.55, align="left")
-    rx, rw = 8.35, SW - X0 - 8.35
-    card(s, rx, TOP + 0.05, rw, 1.25, "Now: country average",
-         "Copernicus Climate Atlas, ERA5, averaged over each country’s borders", marker=NAVY)
-    card(s, rx, TOP + 1.5, rw, 1.25, "First version: one grid point",
-         "Weather API at the capital: typical gap 0.2 °C, but 9 points for rain", marker=ORANGE)
-    card(s, rx, TOP + 2.95, rw, 1.45, "Kenya: −13 % vs +11 %",
-         "Warm years are wide; rain is local. Check what the data measure.", fill=NAVY, line=None,
-         tcolor=PAPER, bcolor=PALE)
+    rx = 8.35
+    rw = SW - X0 - rx
+    card(s, rx, TOP + 0.05, rw, 1.2, "Orange: our first attempt",
+         "One point at each capital, from a free weather API", marker=ORANGE)
+    card(s, rx, TOP + 1.4, rw, 1.2, "Black: what we use",
+         "Copernicus Climate Atlas: ERA5 averaged over each country’s borders", marker=NAVY)
+    card(s, rx, TOP + 2.75, rw, 1.65, "Kenya: +11 % vs −13 %",
+         "Rainfall at the capital vs the country. Temperature agrees (about 0.2 °C apart); rain is local. Check what "
+         "your data measure.", fill=NAVY, line=None, tcolor=PAPER, bcolor=PALE)
     slides.append(s)
 
-    # 4. Method
-    s = frame(prs, "03 · The method", "Remove the seasons, then compare the change with the noise",
-              "France · anomaly = month minus the same month’s 1961–1990 mean · rainfall: same steps, in % of its "
-              "1961–1990 average", 4)
-    picture(s, "slide_04_method.png", X0, TOP - 0.2, CW, 4.85)
+    # 4. How we measure change
+    s = frame(prs, "03 · How we measure change", "Three steps: remove the seasons, measure the change, compare it "
+              "with the noise", "France, 1961–2025 · rainfall gets the same three steps, in % of its 1961–1990 "
+              "average · Copernicus Atlas, ERA5", 4)
+    picture(s, "slide_04_method.png", X0, TOP + 0.05, 7.75, 4.5, align="left")
+    rx = 8.75
+    rw = SW - X0 - rx
+    step(s, rx, TOP + 0.05, rw, 1.42, 1, "Remove the seasons",
+         "Each month minus the same month’s 1961–1990 average = the anomaly")
+    step(s, rx, TOP + 1.57, rw, 1.42, 2, "Measure the change Δ", "Last 10 years vs 1961–1990: +1.74 °C")
+    step(s, rx, TOP + 3.09, rw, 1.42, 3, "Compare it with the noise σ",
+         "Normal swing 0.51 °C, so Δ/σ = 3.4. Above 2: unlike any ordinary year")
     slides.append(s)
 
-    # 5. Full record
-    s = frame(prs, "04 · The full record", "Every recent year is red; rainfall has no colour trend",
-              "One cell = one year · both vs 1961–1990: °C, and % of the 1961–1990 average rain · 1940–60 faded: "
-              "fewer observations", 5)
-    picture(s, "slide_05_stripes.png", X0, TOP - 0.2, CW, 4.85)
+    # 5. How far has the climate moved?
+    s = frame(prs, "04 · How far has the climate moved?", "Same method, all twelve countries: every recent year is "
+              "red, rainfall has no trend", "One cell = one year · both vs 1961–1990: °C, and % of the 1961–1990 "
+              "average rain · 1940–60 faded: fewer observations", 5)
+    picture(s, "slide_05_stripes.png", X0, TOP - 0.05, 8.6, 4.75, align="left")
+    rx = 9.6
+    rw = SW - X0 - rx
+    stat(s, rx, TOP + 0.35, rw, "120 / 120", "country-years since 2016 warmer than their 1961–1990 normal", RED,
+         nsize=40)
+    stat(s, rx, TOP + 2.25, rw, "No trend", "in rainfall: drier and wetter years simply alternate", GREEN, nsize=40)
     slides.append(s)
 
-    # 6. Signal versus noise
-    s = frame(prs, "05 · Signal versus noise", "Warming is far outside normal year-to-year variation; rainfall "
-              "changed far less", "σ = SD of the detrended annual anomaly, 1961–2025 · Copernicus Atlas, ERA5", 6)
+    # 6. Is it large next to normal swings?
+    s = frame(prs, "05 · Is it large next to normal swings?", "Warming is far outside normal year-to-year swings; "
+              "rainfall changed far less", "σ = SD of the detrended annual anomaly, 1961–2025 · Copernicus Atlas, ERA5", 6)
     picture(s, "slide_06_signal_noise.png", X0, TOP, 7.3, 4.55, align="left")
-    rx, rw = 8.45, SW - X0 - 8.45
+    rx = 8.45
+    rw = SW - X0 - rx
     stat(s, rx, TOP + 0.1, rw, "11 / 12", "countries where warming exceeds one ordinary year’s swing (2σ)", RED)
-    stat(s, rx, TOP + 1.85, rw, "0 / 12", "for rainfall, yet the 10-year change is measurable in Brazil, India, "
-         "Kenya, Senegal", GREEN)
+    stat(s, rx, TOP + 1.85, rw, "0 / 12", "for rainfall, though its 10-year average shifted measurably in Brazil, "
+         "India, Kenya, Senegal", GREEN)
     text(s, rx, TOP + 3.65, rw, 0.7, "Rainfall change does not follow the warming (rank correlation −0.42, not "
          "significant with 12 countries)", size=13, color=BODY, line=1.1)
     slides.append(s)
@@ -341,19 +385,22 @@ def build():
         text(s, x + 0.35, TOP + 2.15, cw3 - 0.7, 2.0, body, size=15, color=BODY, line=1.15)
     slides.append(s)
 
-    # 13. The answer
-    s = frame(prs, "11 · Back to our question", "So, is today’s climate still the one we planned for?",
-              "Warming 2016–2025 vs 1961–1990 · countries beyond 2σ · crop output per +10 % rain", 13)
-    for i, (num, col, lead, body) in enumerate([
-            ("+0.7–1.85 °C", RED, "Temperature: no.", " Every country is warmer, 11 of 12 far outside normal "
-             "variation"),
-            ("0 / 12", GREEN, "Rainfall: mostly yes.", " Within one ordinary year’s swing everywhere; measurable in "
-             "4 countries"),
-            ("+2.2 %", PURPLE, "Economy:", " harvests notice, for a year, through water; GDP not detectably")]):
+    # 13. The answers
+    s = frame(prs, "11 · The answers", "Back to our three questions",
+              "Warming 2016–2025 vs 1961–1990 · normal swing = 2σ of the detrended annual anomaly · crop output per "
+              "+10 % rain", 13)
+    for i, (question, num, col, body) in enumerate([
+            ("1 · How far has the climate moved?", "+0.7–1.85 °C", RED, "All 12 countries warmed, from India and Australia (+0.7) to Germany (+1.85)"),
+            ("2 · Is that large next to normal swings?", "11 / 12", INK, "Temperature: yes, in 11 of 12 countries. "
+             "Rainfall: no, though its average shifted in 4"),
+            ("3 · Did the economy notice?", "+2.2 %", PURPLE, "Harvests, for a year, through water (crop output per "
+             "+10 % rain). GDP: not detectably")]):
         x = X0 + i * (cw3 + gap)
-        text(s, x, TOP + 0.7, cw3, 0.9, num, size=44, color=col, font=HEAD, bold=True, line=0.9)
-        text(s, x, TOP + 1.85, cw3 - 0.1, 1.6, [[(lead, {"bold": True, "color": INK}), (body, {})]], size=18,
-             color=INK, line=1.15)
+        text(s, x, TOP + 0.15, cw3 - 0.1, 0.7, question, size=15, color=MUTED, bold=True, line=1.05)
+        text(s, x, TOP + 0.9, cw3, 0.85, num, size=40, color=col, font=HEAD, bold=True, line=0.9)
+        text(s, x, TOP + 1.85, cw3 - 0.1, 1.4, body, size=16, color=INK, line=1.15)
+    text(s, X0, 5.75, CW, 0.5, "For temperature, today’s climate is no longer the one we planned for.", size=22,
+         color=INK, font=HEAD, bold=True)
     slides.append(s)
 
     # 14. Questions
@@ -402,9 +449,7 @@ def build():
 
     # Speaker notes
     say = notes_from_script()
-    extra = {8: "\n\nRead the title, pause one beat, next slide. Augustin continues from slide 7.",
-             1: "\n\n(The stripes behind the title are our data: one row per country, one stripe per year since "
-                "1940, blue cooler and red warmer than 1961–1990.)"}
+    extra = {8: "\n\nRead the title, pause one beat, next slide. Augustin continues from slide 7."}
     for k, s in enumerate(slides, 1):
         if k in say:
             note = say[k] + extra.get(k, "")

@@ -80,19 +80,10 @@ def save(fig, name):
 
 
 def deck_stripes(a):
-    """Full-bleed warming stripes of the 12 countries (cover) and of their mean (section band). No text."""
+    """Warming stripes of the 12 countries' mean, one per year, for the section slides (labelled on the slide)."""
     years = np.arange(1940, a.year.max() + 1)
     M = a.pivot(index="country_code", columns="year", values="temp_anom").reindex(index=ORDER, columns=years)
-    norm = TwoSlopeNorm(0, -2.2, 2.2)
     os.makedirs(OUT, exist_ok=True)
-    fig = plt.figure(figsize=(19.2, 10.8), dpi=100)
-    ax = fig.add_axes([0, 0, 1, 1])
-    ax.imshow(M.values, aspect="auto", cmap="RdBu_r", norm=norm, interpolation="nearest")
-    for y in np.arange(0.5, 11.5):
-        ax.axhline(y, color="#14213D", lw=1.2, alpha=0.35)
-    ax.set_axis_off()
-    fig.savefig(os.path.join(OUT, "cover_stripes.png"), dpi=100)
-    plt.close(fig)
     fig = plt.figure(figsize=(19.2, 2.4), dpi=100)
     ax = fig.add_axes([0, 0, 1, 1])
     ax.imshow(M.mean().values[None, :], aspect="auto", cmap="RdBu_r", norm=TwoSlopeNorm(0, -1.6, 1.6),

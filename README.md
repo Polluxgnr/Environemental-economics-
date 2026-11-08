@@ -55,7 +55,7 @@ How every number in the talk is computed, from the raw file to the slide: [`pres
 ├── data/             raw/ (downloads, never modified) · processed/ (outputs of 02–04) · README.md (data sheet)
 ├── figures/          the paper's figures
 ├── presentation/     Track1_presentation.pptx · figures/ (slide charts) · SCRIPT.md · DEFENSE_NOTES.md
-│                     · LEARN_slides_4-6.md
+│                     · PREP_Pollux.md (Pollux's prep for slides 4–6)
 └── docs/             assignment_brief.pdf
 ```
 
@@ -83,14 +83,14 @@ Then run the scripts in order, from `python scripts/00_download_atlas.py` to `py
 
 ## The talk (9 November)
 
-The deck is [`presentation/Track1_presentation.pptx`](presentation/Track1_presentation.pptx): 15 slides, Cambria and Calibri fonts so it looks the same on any PC. Its speaker notes are [`SCRIPT.md`](presentation/SCRIPT.md): 1,264 words, 9 minutes at 140 words per minute.
+The deck is [`presentation/Track1_presentation.pptx`](presentation/Track1_presentation.pptx): 15 slides, Cambria and Calibri fonts so it looks the same on any PC. Its speaker notes are [`SCRIPT.md`](presentation/SCRIPT.md): 1,304 words, about 9:55 at 140 words per minute.
 
 | Slides | Who | Part |
 |---|---|---|
-| 1–3 | Saty | The question, the 12 countries, what "a country's climate" means |
-| 4–6 | Pollux | The method, the full record, signal versus noise |
-| 7–10 | Augustin | Seasons, the hottest summers, the regressions |
-| 11–13 | Eliott | Where shocks bite, what we can claim, the answer |
+| 1–3 | Saty | The question and its three sub-questions, our choice of countries, our data |
+| 4–6 | Pollux | How we measure change; how far the climate moved (Q1); is it large next to normal swings (Q2) |
+| 7–10 | Augustin | Seasons; did the economy notice (Q3): the hottest summers, the regressions |
+| 11–13 | Eliott | Where shocks bite, what we can claim, the answers to the three questions |
 
 Everyone answers questions: [`DEFENSE_NOTES.md`](presentation/DEFENSE_NOTES.md) has 22 likely questions and the computation behind every number.
 

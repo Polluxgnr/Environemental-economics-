@@ -120,7 +120,7 @@ Check: the 1961–1990 annual anomalies average 0.0004, so the reference really 
 | Number | What it is | How it is computed | Where |
 |---|---|---|---|
 | +0.7 °C (India, Australia), +1.85 °C (Germany) | Δ for each country | Step 4 above. India 0.69, Australia 0.69, Germany 1.85 | Table 1, "ΔT 2016-25" |
-| 1 to over 20 % of GDP | Agriculture's share of GDP | Average of the WDI agriculture share over 2016–2025: from 0.8 % (Germany) to 21.4 % (Kenya) | Table 1b |
+| Farming 21 % of GDP in Kenya, 2.5 % in South Africa | Agriculture's share of GDP | Average of the WDI agriculture share over 2016–2025: Kenya 21.4 %, South Africa 2.5 % (range across the 12: 0.8 % Germany to 21.4 % Kenya) | Table 1b |
 | 12 countries, 4 continents | Our sample | 3 per continent, chosen for different climates and farm shares | `02` (`COUNTRY_META`) |
 
 ### Slide 3: what is a country's climate?
@@ -130,6 +130,7 @@ Check: the 1961–1990 annual anomalies average 0.0004, so the reference really 
 | 0.2 °C | Typical gap between the capital's grid point and the country average | For each country: warming 2014–2023 vs 1961–1990 from the weather API at the capital, minus the same from the Atlas country average. Median of the 12 absolute gaps = 0.19 °C | `03_compare_sources.py`, Table A1 |
 | 9 points | The same for rainfall | Median of the 12 absolute gaps in rainfall change = 9.2 percentage points | Table A1 |
 | Kenya +11 % vs −13 % | Rainfall change at Nairobi vs over Kenya | API at the capital +10.9 %, Atlas country average −13.4 % | Table A1 |
+| Sign flips | Countries where the capital point and the country average disagree on the sign of the rainfall change | **Four**: France (+4.2 vs −3.2 %), Kenya (+10.9 vs −13.4 %), Vietnam (+10.0 vs −0.8 %), Australia (+15.0 vs −4.3 %). Say "four", not "three" | Table A1 |
 | 0.004 °C | Check of our country borders | France downloaded twice, with the Atlas's own France mask and with our uploaded border. Largest monthly difference: 0.004 °C (correlation 0.9999995) | `data/raw/atlas/validation_france_user_defined_vs_mask.json` |
 
 The comparison uses 2014–2023, not 2016–2025, because the API data we compare with end in 2023.
@@ -197,9 +198,9 @@ See the worked example above: **92 %**, **Δ = +1.74 °C**, **σ = 0.51 °C**, *
 | Dry years: crops −7.6, GDP −0.27 | Dry year = rainfall z-score below −1.5 (about 50 country-years). Average growth in dry years minus other years, after removing country and year averages: crops −7.56 (p = 0.045), GDP −0.27 (p = 0.50) | Table 4 |
 | Agriculture 1–3 % of GDP | 2016–2025 average share: France 1.5, Germany 0.8, Spain 2.7, South Africa 2.5, Australia 2.4, USA 0.9 | Table 1b |
 
-### Slide 13: the answer
+### Slide 13: back to the three questions
 
-Every number on this slide repeats an earlier one: +0.7 to +1.85 °C (slide 2), 0 of 12 and 4 measurable (slide 6), +2.2 % (slide 11).
+Every number on this slide repeats an earlier one: +0.7 to +1.85 °C (slide 2), 11 of 12 beyond 2σ, rainfall 0 of 12 but measurable in 4 (slide 6), +2.2 % crop output per +10 % rain (slide 11).
 
 ## How to check a number yourself
 
