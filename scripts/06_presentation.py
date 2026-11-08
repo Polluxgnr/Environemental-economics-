@@ -1,17 +1,16 @@
 """
 ================================================================================
 TRACK 1: TEMPERATURE AND PRECIPITATION RECORDS
-SCRIPT 06: PRESENTATION VISUALS (16:9) + POWERPOINT DECK WITH SPEAKER NOTES
+SCRIPT 06: PRESENTATION VISUALS (16:9)
 ================================================================================
 
-Output: presentation/figures/slide_*.png
+Output: presentation/figures/slide_*.png        (charts with title and source line)
         presentation/figures/deck/*.png         (same charts without baked-in titles, for the designed deck
                                                  in presentation/deck_source/, plus the warming-stripes cover)
-        presentation/Track1_presentation.pptx   (10 min talk + backup slides)
-        presentation/SCRIPT.md                  (spoken script, same text as the speaker notes)
 
-All numbers on the slides are read from paper/tables and data/processed, so the
-deck stays consistent with the paper after any re-run.
+The talk itself is the designed deck (presentation/deck_source/); its spoken text
+is presentation/SCRIPT.md, and DEFENSE_NOTES.md traces every number it quotes.
+All numbers drawn here are computed from data/processed and paper/tables.
 """
 
 import os
@@ -180,15 +179,22 @@ def slide_route():
 
 def slide_stripes(a):
     years = np.arange(1940, a.year.max() + 1)
-    fig, axes = plt.subplots(1, 2, figsize=(W, H), sharey=True, gridspec_kw={"wspace": 0.04})
+    fig, axes = plt.subplots(1, 2, figsize=(W, H), sharey=True, gridspec_kw={"wspace": 0.09})
     for ax, col, cmap, lim, title, words in [
-            (axes[0], "temp_anom", "RdBu_r", 2.5, "Temperature anomaly (°C)", "← colder than normal     warmer →"),
-            (axes[1], "precip_anom_pct", RAIN_CMAP, 40, "Rainfall anomaly (% of normal)", "← drier than normal     wetter →")]:
+            (axes[0], "temp_anom", "RdBu_r", 2.5, "Temperature (°C vs 1961-1990)", "← colder than 1961-1990     warmer →"),
+            (axes[1], "precip_anom_pct", RAIN_CMAP, 40, "Rainfall (% vs 1961-1990)", "← drier than 1961-1990     wetter →")]:
         M = a.pivot(index="country_code", columns="year", values=col).reindex(index=ORDER, columns=years)
         im = ax.imshow(M.values, aspect="auto", cmap=cmap, norm=TwoSlopeNorm(0, -lim, lim),
                        extent=[years[0] - .5, years[-1] + .5, 11.5, -.5], interpolation="nearest")
         for y in [2.5, 5.5, 8.5]:
             ax.axhline(y, color="white", lw=3)
+        # 1940-1960: fewer observations behind ERA5, shown but not used to measure change
+        ax.axvspan(years[0] - .5, 1960.5, color=DECK_BG if CLEAN else "white", alpha=0.55, lw=0, zorder=3)
+        # the reference period both anomalies are measured against
+        ax.plot([1960.6, 1990.4], [-0.75, -0.75], color=INK, lw=2.5, clip_on=False, solid_capstyle="butt")
+        ax.text(1975.5, -0.95, "reference 1961-1990", ha="center", va="bottom", fontsize=12, color=INK)
+        ax.set_ylim(11.5, -1.6)
+        ax.spines["left"].set_bounds(11.5, -0.5)
         ax.set_title(title, loc="left", fontsize=17, fontweight="bold")
         ax.set_xticks([1940, 1960, 1980, 2000, 2020])
         cb = fig.colorbar(im, ax=ax, orientation="horizontal", fraction=0.045, pad=0.07, aspect=35)
@@ -196,7 +202,9 @@ def slide_stripes(a):
     axes[0].set_yticks(range(12)); axes[0].set_yticklabels([NAMES[c] for c in ORDER])
     fig.suptitle("Every recent year is red. Rainfall has no colour trend: it is noise around the normal",
                  x=0.015, ha="left", fontsize=20, fontweight="bold")
-    footer(fig, "One cell = one year, 1940-2025, anomaly vs 1961-1990 (our baseline). " + SRC)
+    footer(fig, "One cell = one year, 1940-2025. Both variables are measured against the same reference period, "
+                "1961-1990: temperature in °C above or below it, rainfall in % of its 1961-1990 average. "
+                "1940-1960 faded: fewer observations behind the reanalysis. " + SRC)
     return save(fig, "slide_05_stripes.png")
 
 
@@ -391,274 +399,6 @@ def slide_crops_rain(p):
 # ------------------------------------------------------------------------------
 # Numbers used in the talk, all read from the generated tables
 # ------------------------------------------------------------------------------
-def talk_numbers(a, m, ch):
-    from scipy import stats
-    t2 = pd.read_csv(os.path.join(TABLES, "table2_seasonal_change.csv")).set_index("Country")
-    t3 = pd.read_csv(os.path.join(TABLES, "table3_regressions.csv")).set_index("Model")
-    t4 = pd.read_csv(os.path.join(TABLES, "table4_shock_years.csv"))
-    t5 = pd.read_csv(os.path.join(TABLES, "table5_landmark_years.csv"))
-    tA = pd.read_csv(os.path.join(TABLES, "table_A1_source_comparison.csv")).set_index("country")
-    raw = pd.read_csv(os.path.join(PROC, "regression_results_raw.csv")).set_index("Model")
-    fr_m = m[(m.country_code == "FRA") & m.year.between(1961, 2025)]
-    fra03 = a[(a.country_code == "FRA") & (a.year == 2003)].iloc[0]
-    hot = t5[t5.Shock.str.startswith("Hottest")]
-    pick = lambda out, shock: t4[t4.Outcome.str.startswith(out) & t4.Shock.str.startswith(shock) & (t4.Sample == "all years")].iloc[0]
-    first = lambda cell: float(str(cell).split(" ")[0])
-    lo2 = ch.dT.nsmallest(2).index
-    return {
-        "lo": ch.dT.min(), "hi": ch.dT.max(), "lo_c": " and ".join(NAMES[c] for c in lo2), "hi_c": NAMES[ch.dT.idxmax()],
-        "nT": int((ch.dT > 2 * ch.sT).sum()), "nP": int((ch.dP.abs() > 2 * ch.sP).sum()),
-        "snr_mex": ch.loc["MEX", "dT"] / ch.loc["MEX", "sT"], "snr_aus": ch.loc["AUS", "dT"] / ch.loc["AUS", "sT"],
-        "snr_deu": ch.loc["DEU", "dT"] / ch.loc["DEU", "sT"], "mex": ch.loc["MEX", "dT"],
-        "rho": stats.spearmanr(ch.dT, ch.dP).statistic,
-        "share": 1 - m[m.country_code == "FRA"].temp_anom.var() / m[m.country_code == "FRA"].temp.var(),
-        "fr_sd": ch.loc["FRA", "sT"], "fr_d": ch.loc["FRA", "dT"],
-        "fr_jja": first(t2.loc["France", "JJA"]), "fr_son": first(t2.loc["France", "SON"]),
-        "de_djf": first(t2.loc["Germany", "DJF"]),
-        "nseas": int((t2["Gap > 2 SE"] == "yes").sum()),
-        "seas_c": " and ".join(t2.index[t2["Gap > 2 SE"] == "yes"]),
-        "fr03_z": fra03.temp_z, "fr03_hz": fra03.hot_temp_z,
-        "fr03_crop": float(hot.loc[hot.Country == "France", "Crop growth vs normal (pp)"].iat[0]),
-        "fr03_gdp": float(hot.loc[hot.Country == "France", "Growth vs normal (pp)"].iat[0]),
-        "n_crop5": int((hot["Crop growth vs normal (pp)"] < -5).sum()),
-        "n_gdp_neg": int((hot["Growth vs normal (pp)"] < 0).sum()),
-        "cfe": raw.loc["(2) Country FE"], "tw": raw.loc["(3) Two-way FE"],
-        "tr": raw.loc["(4) Two-way FE + country trends"], "crop": raw.loc["(7) Crop growth, two-way FE"],
-        "n_obs": int(raw.loc["(3) Two-way FE", "N"]),
-        "sd_eff": t3.loc["(3) Two-way FE", "Effect of a 1-SD warm year (pp)"],
-        "dry_crop": pick("Crop", "Dry")["Within-country & year gap"],
-        "dry_gdp": pick("GDP", "Dry")["Within-country & year gap"],
-        "ken_atlas": tA.loc["KEN", "dP_atlas"], "ken_pt": tA.loc["KEN", "dP_blend_point"],
-        "usa_atlas": tA.loc["USA", "dP_atlas"], "usa_pt": tA.loc["USA", "dP_blend_point"],
-        "med_dP": (tA.dP_blend_point - tA.dP_atlas).abs().median(),
-        "med_dT": (tA.dT_blend_point - tA.dT_atlas).abs().median(),
-        "t6": pd.read_csv(os.path.join(TABLES, "table6_robustness.csv")).Result.tolist(),
-    }
-
-
-def slides_content(imgs, N):
-    """The talk: one list drives both the PowerPoint (visuals + speaker notes) and presentation/SCRIPT.md."""
-    tw, cfe, tr, crop = N["tw"], N["cfe"], N["tr"], N["crop"]
-    return [
-        dict(time="0:00-0:35", who="Speaker 1", kind="title", title="Is today's climate still the one we planned for?",
-             sub="Temperature and precipitation records for 12 countries, 1940-2025, and what they did to the economy",
-             say="Every plan we make, a harvest, a dam, a heating system, assumes that a normal year looks like "
-                 "the normal years we remember. Our question is whether that is still true. We read 85 years of "
-                 "temperature and rainfall records for twelve countries, measured how far they have moved, compared "
-                 "that with ordinary year-to-year swings, and then asked whether the unusual years were also unusual "
-                 "for the economy."),
-        dict(time="0:35-1:15", who="Speaker 1", kind="image", img=imgs["map"], title="Twelve countries, one answer",
-             say=f"Three countries per continent, chosen to cover temperate Europe, the Mediterranean, the Sahel, "
-                 f"East Africa, the monsoon and the Americas, and economies where agriculture is anywhere from one to "
-                 f"twenty-three percent of GDP. The headline is already on this map: every one of them is warmer than "
-                 f"in 1961 to 1990, from +{N['lo']:.1f} degrees in {N['lo_c']} to +{N['hi']:.2f} in {N['hi_c']}. "
-                 f"The rest of the talk asks whether that is large, when in the year it happens, and whether it matters. "
-                 f"But first, a question we had to answer before anything else: what is the climate of a country?"),
-        dict(time="1:15-2:15", who="Speaker 1", kind="image", img=imgs["route"], title="What does our data measure?",
-             say=f"Our first version used a weather API and one grid point at each capital. When we rebuilt the "
-                 f"data from the Copernicus Climate Atlas, which averages the ERA5 reanalysis over the whole country, "
-                 f"temperature barely moved: the typical gap is {N['med_dT']:.1f} degrees. Rainfall did not survive: the "
-                 f"typical gap is {N['med_dP']:.0f} percentage points, the United States goes from +{N['usa_pt']:.0f} percent "
-                 f"at Washington to +{N['usa_atlas']:.0f} for the country, and Kenya flips from +{N['ken_pt']:.0f} to "
-                 f"{N['ken_atlas']:.0f}. A warm year is warm over hundreds of kilometres; rain is local. So everything "
-                 f"from now on is a country average. For France, Germany and Spain the Atlas has country masks; for the "
-                 f"others we uploaded the borders into the Atlas's own user-defined region tool, and checked on France "
-                 f"that both routes agree to four thousandths of a degree."),
-        dict(time="2:15-3:10", who="Speaker 1", kind="image", img=imgs["method"], title="Method",
-             say=f"Here is the whole method on one country. On the left, raw monthly temperature: the seasons are "
-                 f"{N['share']:.0%} of the variation, so a January cannot be compared with a July. For each calendar "
-                 f"month we subtract its average over our baseline, 1961 to 1990. The Atlas gives absolute values, so "
-                 f"the baseline is our choice: the WMO reference period, before most of the warming. On the right, the "
-                 f"annual result, with two numbers. The change, the last ten years against the baseline: "
-                 f"+{N['fr_d']:.2f} degrees. And the noise, sigma, how far an ordinary year strays from the trend: "
-                 f"{N['fr_sd']:.2f}. Their ratio, {N['fr_d'] / N['fr_sd']:.1f}, tells us whether the change could pass "
-                 f"for a normal year. Above two, it could not."),
-        dict(time="3:10-3:50", who="Speaker 1", kind="image", img=imgs["stripes"], title="The full record",
-             say="Now all twelve countries, every year since 1940. On the left, temperature: blue before the 1980s, "
-                 "red after, and every country-year since 2016 is above its normal. On the right, rainfall, built the "
-                 "same way: brown is a drier year, blue a wetter one, and it flickers between the two with no colour trend. The 1940s are faded because the "
-                 "reanalysis rests on fewer observations then, which is why we measure change from 1961. The next "
-                 "slide puts numbers on this contrast."),
-        dict(time="3:50-4:50", who="Speaker 1", kind="image", img=imgs["signal"], title="Signal versus noise",
-             say=f"Each dot is the change; the grey bands are one and two sigmas of ordinary variation. Temperature is "
-                 f"outside two sigma in {N['nT']} of 12 countries. Mexico is the clearest case: +{N['mex']:.1f} degrees "
-                 f"is {N['snr_mex']:.1f} sigma, because its temperature barely varies from year to year. Germany warmed "
-                 f"more, but its winters are so variable that it is {N['snr_deu']:.1f} sigma. Australia is the exception, "
-                 f"at {N['snr_aus']:.1f}. Rainfall is different: in every country the change is smaller than one ordinary "
-                 f"year's swing, so nobody would feel a new climate. But a ten-year average is precise, and in four "
-                 f"countries, Brazil, India, Kenya and Senegal, the change in average rainfall is measurable. And it is "
-                 f"not where warming is largest: if anything, the fastest warmers have the smallest rainfall changes."),
-        dict(time="4:50-5:35", who="Speaker 1", kind="image", img=imgs["seasons"], title="When in the year",
-             say=f"Is the warming spread evenly across the year? Mostly, yes. Only in {N['seas_c']} is one season "
-                 f"clearly ahead: there, summer warmed by about +{N['fr_jja']:.1f} degrees against +{N['fr_son']:.1f} "
-                 f"in autumn. Germany's winter warmed even more, +{N['de_djf']:.1f}, but German winters vary so much that "
-                 f"we cannot call it faster. Summer-heavy warming matters because it lands exactly when crops need water "
-                 f"and cities need cooling, which brings us to the economy."),
-        dict(time="5:35-6:35", who="Speaker 2", kind="image", img=imgs["events"], title="The hottest summers",
-             say=f"So, the last part of the question: were the unusual climate years unusual for the economy? One "
-                 f"measurement point first. An annual mean dilutes a heatwave: France's 2003 is only {N['fr03_z']:.1f} "
-                 f"sigma as a year, but {N['fr03_hz']:.1f} sigma as a summer. So we use each country's hot season, its "
-                 f"three warmest consecutive months. Here is every country's hottest one on record, and how growth "
-                 f"compared with what the country and the year would predict. Purple is crops, black is GDP. France "
-                 f"2003: crops {N['fr03_crop']:.0f} points, GDP {N['fr03_gdp']:.1f}. But look closer: the big crop losses "
-                 f"were heat and drought together. Germany 2003 and Australia 2019 were each country's hottest and "
-                 f"driest year, and France 2003 and the US in 1988 were dry too. Across all hot seasons, crops show no "
-                 f"effect on average. So is it heat, or water? Let us test it."),
-        dict(time="6:35-7:50", who="Speaker 2", kind="image", img=imgs["coefs"], title="Testing it",
-             say=f"We regress growth on the temperature and rainfall anomalies over all {N['n_obs']} country-years. The "
-                 f"grey lines are the naive versions: comparing each country only with itself, a warmer year costs "
-                 f"{abs(cfe['b_temp_anom']):.2f} points, and it looks significant. Year effects compare countries within "
-                 f"the same year, but they only remove the trend all countries share. The countries that warmed fastest "
-                 f"also slowed most: across our twelve countries the two trends correlate at {N['t6'][0]}, and dropping "
-                 f"India alone moves the estimate from {tw['b_temp_anom']:.2f} to "
-                 f"{N['t6'][1].split('India: ')[1].rstrip(')')}. So our preferred model, in red, adds one trend per "
-                 f"country, which isolates year-to-year weather. The effect is {tr['b_temp_anom']:.2f} points per degree, "
-                 f"with an interval from {tr['ci_lo_temp_anom']:.2f} to +{tr['ci_hi_temp_anom']:.2f}, checked with a wild "
-                 f"bootstrap for our twelve clusters. In words: no detectable effect, and losses larger than about "
-                 f"0.8 points per degree are ruled out in our sample."),
-        dict(time="7:50-8:35", who="Speaker 2", kind="image", img=imgs["rain"], title="Where shocks bite",
-             say=f"So where do climate shocks bite? In harvests rather than GDP, and through water rather than heat. On "
-                 f"the right, a year ten percent wetter than normal goes with crop output about {crop['b_precip_10']:.1f} "
-                 f"percent higher, and that is robust: dropping any country, or adding country trends, barely changes it. "
-                 f"It is a one-year effect: the next year output returns to normal. In dry years crop growth is "
-                 f"{abs(N['dry_crop']):.1f} points below normal, while GDP growth is only {abs(N['dry_gdp']):.2f} below. "
-                 f"The likely reason is exposure: in most of our countries agriculture is one to three percent of GDP. "
-                 f"This is the IPCC chain from the course: a hazard becomes a loss only through exposure and vulnerability."),
-        dict(time="8:35-9:30", who="Speaker 2", kind="text", title="What we can and cannot conclude",
-             bullets=[f"Description (solid): every country has warmed; {N['nT']}/12 beyond normal variability; rainfall changed far less (measurably in 4 countries).",
-                      "Correlation: dry years go with lower harvests for a year (clear); warm years show no robust link with GDP growth.",
-                      "Not causal, and not climate change: one unusual year allows no adaptation; 12 countries are too few; national averages hide local losses.",
-                      "To make it causal: many more units (all countries, regions), exposure-weighted weather, a channel fixed in advance."],
-             say="Let us be precise about what kind of claims these are. The climate results are descriptions, and they "
-                 "are solid. The economic results are correlations. Year-to-year weather is close to random, so our "
-                 "design is close to an experiment, but with twelve countries, rich and poor pooled together, we do not "
-                 "claim causal effects, and an effect confined to poorer, agricultural economies could be hidden. And a hot year is not climate change: one unusual year allows no adaptation and no "
-                 "build-up of damage. To go further we would need many more units, weather weighted by where crops and "
-                 "people are, and a channel chosen before looking at the data."),
-        dict(time="9:30-10:00", who="Speaker 2", kind="text", title="Three takeaways",
-             bullets=[f"Warming is unmistakable: +{N['lo']:.1f} to +{N['hi']:.2f} °C since 1961-1990, far outside normal variability.",
-                      "Rainfall changed far less, locally, and how much depends on how you measure it.",
-                      "Climate shocks reach harvests long before they reach GDP."],
-             say="To close: the warming in these records is unmistakable. Rainfall changed far less, it is a local story, "
-                 "and how much it changed depends on how carefully you measure it. And when the climate misbehaves, the first place it "
-                 "shows is the harvest, not GDP. Thank you; we are happy to take questions."),
-        dict(time="Q&A", who="Backup", kind="text", title="Backup: data and definitions",
-             bullets=["Climate: Copernicus Interactive Climate Atlas (C3S/ECMWF), ERA5, monthly 1940-2025, 288 series. FRA/DEU/ESP: Atlas country masks; 9 others: Atlas user-defined regions with Natural Earth borders (USA = 48 states). Validated on France to 0.004 °C.",
-                      "Anomaly = month minus its 1961-1990 calendar-month mean; precipitation = mm/day × days; Δ = mean 2016-2025; σ = SD of the detrended annual anomaly.",
-                      "Economy: World Bank WDI, release 8 Oct 2026: GDP per capita growth, crop production index, agriculture share.",
-                      "Regressions: two-way fixed effects, SE clustered by country, t(11) + wild cluster bootstrap (Webb weights, 9,999 draws)."],
-             say="Use in Q&A only."),
-        dict(time="Q&A", who="Backup", kind="text", title="Backup: likely questions",
-             bullets=["Why not the API? One grid point is not a country, above all for rainfall.",
-                      "Why country trends? Fast-warming countries also slowed most (trend correlation -0.57).",
-                      "So heat does not hurt growth? No robust effect here; losses above ~0.8 pp/°C ruled out; poor countries may differ.",
-                      "Why the hot season? France 2003: 1.2σ as a year, 3.4σ as a summer.",
-                      "Why 1961-1990? WMO reference, before most of the warming, and the start of the WDI data."],
-             say="Use in Q&A only."),
-    ]
-
-
-def build_deck(slides):
-    from pptx import Presentation
-    from pptx.util import Inches, Pt
-    from pptx.dml.color import RGBColor
-    from pptx.enum.shapes import MSO_SHAPE
-    from PIL import Image
-
-    prs = Presentation()
-    prs.slide_width, prs.slide_height = Inches(W), Inches(H)
-    blank = prs.slide_layouts[6]
-    ink, red, muted = RGBColor(0x1f, 0x23, 0x28), RGBColor(0xc0, 0x39, 0x2b), RGBColor(0x6e, 0x77, 0x81)
-
-    def textbox(s, x, y, w, h, text, size, bold=False, color=ink):
-        tf = s.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h)).text_frame
-        tf.word_wrap = True
-        tf.text = text
-        for p in tf.paragraphs:
-            for r in p.runs:
-                r.font.size, r.font.bold, r.font.color.rgb = Pt(size), bold, color
-        return tf
-
-    def accent(s):
-        bar = s.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, 0, Inches(0.18), prs.slide_height)
-        bar.fill.solid()
-        bar.fill.fore_color.rgb = red
-        bar.line.fill.background()
-
-    for k, sl in enumerate(slides, 1):
-        s = prs.slides.add_slide(blank)
-        if sl["kind"] == "image":
-            w, h = Image.open(sl["img"]).size
-            scale = min(prs.slide_width / w, prs.slide_height / h)
-            pw, ph = int(w * scale), int(h * scale)
-            s.shapes.add_picture(sl["img"], (prs.slide_width - pw) // 2, (prs.slide_height - ph) // 2, width=pw, height=ph)
-        elif sl["kind"] == "title":
-            accent(s)
-            textbox(s, 0.9, 2.0, 11.5, 1.6, sl["title"], 40, bold=True)
-            textbox(s, 0.9, 3.7, 11.5, 1.0, sl["sub"], 20, color=muted)
-            textbox(s, 0.9, 5.4, 11.5, 1.2, "Track 1 · Environmental Economics · ESSEC BSc AIDAMS · 9 November 2026\n"
-                    "Eliott Beghin · Pollux Gronier · Saty Viard Laroque · Augustin Vlandas", 16, color=muted)
-        else:
-            accent(s)
-            textbox(s, 0.7, 0.45, 12, 1.0, sl["title"], 34, bold=True)
-            body = s.shapes.add_textbox(Inches(0.9), Inches(1.7), Inches(11.6), Inches(5.3)).text_frame
-            body.word_wrap = True
-            size = 16 if sl["who"] == "Backup" else (22 if len(sl["bullets"]) <= 3 else 19)
-            for j, b in enumerate(sl["bullets"]):
-                p = body.paragraphs[0] if j == 0 else body.add_paragraph()
-                p.text = "▸  " + b
-                p.font.size, p.font.color.rgb = Pt(size), ink
-                p.space_after = Pt(16)
-        if sl["who"] != "Backup":
-            textbox(s, 12.5, 7.05, 0.7, 0.4, f"{k}", 11, color=muted)
-        s.notes_slide.notes_text_frame.text = f"[{sl['who']} · {sl['time']}]\n\n{sl['say']}"
-
-    out = os.path.join(ROOT, "presentation", "Track1_presentation.pptx")
-    prs.save(out)
-    return out
-
-
-def write_script(slides):
-    talk = [sl for sl in slides if sl["who"] != "Backup"]
-    words = sum(len(sl["say"].split()) for sl in talk)
-    lines = [
-        "# Talk script: 10 minutes + 3 minutes Q&A (9 November 2026)", "",
-        "*Generated by `scripts/06_presentation.py` from the same text as the speaker notes in `Track1_presentation.pptx`; "
-        "every number is read from `paper/tables/`. Edit the script there, not here, so slides, notes and paper never diverge.*", "",
-        "## The thread", "",
-        "Each slide answers the question the previous one raises:", "",
-        "1. **Question.** Is today's climate still the one people plan around? And does the economy notice when it is not?",
-        "2. **What is a country's climate?** A capital's grid point is not the country, so we rebuilt everything from "
-        "Copernicus Atlas country averages. *Raises: how do we measure change?*",
-        "3. **Method.** Monthly anomalies against 1961-1990, then change compared with noise (σ). *Raises: what does it show?*",
-        "4. **Results.** Warming beyond normal variability almost everywhere; rainfall changed far less (measurable in 4 countries); summer leads only in "
-        "France and Spain. *Raises: does it matter for the economy?*",
-        "5. **Economy.** The hottest summers hit crops, not GDP. Regressions confirm it: heat → GDP is small and imprecise; "
-        "rain → crops is clear. *Raises: what kind of claim is that?*",
-        "6. **Claims.** Description, correlation or causation, and what would make the result causal.", "",
-        f"**Length.** About {words} spoken words, about {words / 140:.0f} minutes at 140 words per minute. Rehearse with a timer.", "",
-        "**Roles.**",
-        "- Speaker 1 (climate): slides 1-7.",
-        "- Speaker 2 (economy): slides 8-12.",
-        "- The other two members: the Q&A, with the speakers (see `DEFENSE_NOTES.md`).", "",
-        "**Delivery.**",
-        "- One number per slide: say it, then point at it.",
-        "- Name the type of each result out loud (*description*, *correlation*).",
-        "- The handover at slide 8 is the sentence ending slide 7, not a pause.", "",
-        "---", "",
-    ]
-    for k, sl in enumerate(slides, 1):
-        lines += [f"### {k}. {sl['title']}  ·  {sl['who']}  ·  {sl['time']}", ""]
-        if sl["kind"] == "image":
-            lines += [f"![slide {k}](figures/{os.path.basename(sl['img'])})", ""]
-        if sl.get("bullets"):
-            lines += [f"- {b}" for b in sl["bullets"]] + [""]
-        lines += [f"> {sl['say']}", ""]
-    with open(os.path.join(ROOT, "presentation", "SCRIPT.md"), "w", encoding="utf-8") as f:
-        f.write("\n".join(lines))
-    return words
-
-
 if __name__ == "__main__":
     a = pd.read_csv(os.path.join(PROC, "climate_annual.csv"))
     m = pd.read_csv(os.path.join(PROC, "climate_monthly.csv"))
@@ -668,9 +408,7 @@ if __name__ == "__main__":
     imgs = {"map": slide_map(ch), "route": slide_route(), "method": slide_method(m, a), "stripes": slide_stripes(a),
             "signal": slide_signal(ch), "seasons": slide_seasons(s), "events": slide_events(),
             "coefs": slide_coefs(), "rain": slide_crops_rain(p)}
-    slides = slides_content(imgs, talk_numbers(a, m, ch))
-    print("Deck:", build_deck(slides))
-    print("Script: presentation/SCRIPT.md,", write_script(slides), "spoken words")
+    print("Slide charts:", OUT)
 
     # Clean chart exports + stripes for the designed deck
     CLEAN = True

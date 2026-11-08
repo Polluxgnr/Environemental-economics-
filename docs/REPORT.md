@@ -1,6 +1,6 @@
 # Project report: data, process, explanations and insights
 
-This is the long version of the project, written for the group so that everyone can explain every choice in the Q&A. The 10-page paper is `paper/PAPER.md` (PDF in `paper/PAPER.pdf`). The slides are `presentation/Track1_presentation.pptx`.
+This is the long version of the project, written for the group so that everyone can explain every choice in the Q&A. The 10-page paper is `paper/PAPER.md` (PDF in `paper/PAPER.pdf`). The slides are the designed deck in `presentation/deck_source/`, spoken text in `presentation/SCRIPT.md`.
 
 ---
 
@@ -131,7 +131,7 @@ flowchart LR
   C --> E[04 tables + regressions<br/>+ wild bootstrap]
   D --> F[05 paper figures]
   E --> F
-  E --> G[06 slide visuals<br/>+ PowerPoint deck]
+  E --> G[06 slide visuals]
   F --> H[07 paper PDF]
 ```
 

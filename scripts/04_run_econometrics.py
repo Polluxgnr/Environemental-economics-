@@ -286,7 +286,7 @@ def table3(p):
     t = pd.DataFrame(rows)
     save(t, "table3_regressions",
          "Table 3. Annual growth on annual climate anomalies, 12 countries, 1961-2025. Dependent variable: real GDP "
-         "per capita growth (%) in (1)-(6) (Vietnam from 1985), crop production growth (%) in (7)-(8) (1962-2023). "
+         "per capita growth (%) in (1)-(6) (Vietnam from 1985), crop production growth (%) in (7)-(8) (1962-2024). "
          "Temperature: annual anomaly "
          "relative to 1961-1990 (°C), or the hot-season anomaly (warmest three calendar months) in (5) and (8). "
          "Precipitation: annual anomaly in units of 10% of normal rainfall. Standard errors clustered by country "

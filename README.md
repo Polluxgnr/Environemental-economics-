@@ -272,7 +272,7 @@ flowchart LR
 | **`03_compare_sources.py`** | Applies identical definitions to the country average and to the two capital-point versions, to measure how much the data route matters. | processed + API files | `paper/tables/table_A1_source_comparison.*` |
 | **`04_run_econometrics.py`** | Produces every table: change, noise and trends (1), economy summary (1b), seasons (2), regressions with bootstrap (3), shock vs normal years (4), most extreme year per country (5). About 1 minute. | processed files | `paper/tables/*.csv` and `*.md`, `data/processed/regression_results_raw.csv` |
 | **`05_generate_figures.py`** | Draws the paper's figures. Each has its units, period and source, and its conclusion as its title. | processed files, tables | `figures/fig1…fig6, figA1` |
-| **`06_presentation.py`** | Draws the slide charts, builds a PowerPoint with speaker notes, and writes the spoken script. All numbers are read from the tables, so slides and paper always agree. | processed files, tables | `presentation/figures/`, `Track1_presentation.pptx`, `SCRIPT.md` |
+| **`06_presentation.py`** | Draws the slide charts (with titles, and clean versions for the designed deck). Every number drawn is computed from the processed data and the tables, so slides and paper always agree. | processed files, tables | `presentation/figures/` |
 | **`07_build_paper_pdf.py`** | Turns `paper/PAPER.md` into an A4 PDF (via Chrome or Edge) to check the 10-page limit. | `PAPER.md`, figures | `paper/PAPER.pdf` |
 
 The notebook `notebooks/track1_climate_economics.ipynb` runs the same scripts and shows each table and figure inline, if you prefer Jupyter.
@@ -395,9 +395,9 @@ Environemental-economics-/
 │
 ├── presentation/                   ← THE TALK (9 November)
 │   ├── deck_source/                ← the designed 15-slide deck (one HTML file per slide)
-│   ├── Track1_presentation.pptx    ← an automatically generated PowerPoint version
-│   ├── SCRIPT.md                   ← the word-for-word talk, with timings and speakers
-│   ├── DEFENSE_NOTES.md            ← 18 likely questions with short, sourced answers
+│   ├── SCRIPT.md                   ← the word-for-word talk: 4 speakers, timings, question → answer thread
+│   ├── LEARN_slides_4-6.md         ← learning guide for slides 4–6 (skeletons, main points, self-test)
+│   ├── DEFENSE_NOTES.md            ← 22 likely questions + how every number in the talk is computed
 │   └── figures/                    ← slide charts (deck/ = versions used in the designed deck)
 │
 ├── docs/
@@ -447,21 +447,19 @@ Then the same way: `01_download_data.py`, `02_process_data.py`, `03_compare_sour
 
 ## 13. The presentation (9 November)
 
-- **Format:** 10 minutes + 3 minutes of questions. Two people speak, and everyone must be able to answer any question.
-- **Slides:** the designed deck (`presentation/deck_source/`, 15 slides). The spoken text is in the speaker notes and in [`presentation/SCRIPT.md`](presentation/SCRIPT.md).
-- **Storyline:** each slide answers the question the previous one raises.
+- **Format:** 10 minutes + 3 minutes of questions. All four of us speak, and everyone must be able to answer any question.
+- **Slides:** one deck, the designed deck (`presentation/deck_source/`, 13 slides + thanks + a backup). The spoken text is in its speaker notes and in [`presentation/SCRIPT.md`](presentation/SCRIPT.md). For an offline copy, export it to PDF or PowerPoint from the deck itself.
+- **Storyline:** each slide answers the question the previous one raises, and the last slide answers the two opening questions.
 
 | Slides | Speaker | Content |
 |---|---|---|
-| 1–2 | Speaker 1 | The question; the 12 countries; every one is warmer |
-| 3 | Speaker 1 | What "a country's climate" means: country average vs capital point |
-| 4 | Speaker 1 | Method on France: remove the seasons, compare change with noise |
-| 5–7 | Speaker 1 | Full record, signal vs noise, seasons |
-| 8–11 | Speaker 2 | The economy: hottest summers, regressions, rain and harvests |
-| 12–13 | Speaker 2 | What we can and cannot conclude; three takeaways |
+| 1–3 | Speaker 1 | The question; the 12 countries; what "a country's climate" means |
+| 4–6 | Speaker 2 (Pollux) | Method on France; the full record; signal vs noise |
+| 7–10 | Speaker 3 | Seasons; the economy: hottest summers, the regressions |
+| 11–13 | Speaker 4 | Rain and harvests; what we can claim; the answer to the opening question |
 | 14–15 | everyone | Questions; backup slide with data definitions |
 
-- **Preparing:** rehearse `SCRIPT.md` with a timer (about 8 minutes spoken), and go through [`DEFENSE_NOTES.md`](presentation/DEFENSE_NOTES.md) together.
+- **Preparing:** rehearse `SCRIPT.md` with a timer (1,264 words: 9 minutes at 140 words per minute), and go through [`DEFENSE_NOTES.md`](presentation/DEFENSE_NOTES.md) together. Its part 2 shows how every number in the talk is computed, from the raw file to the slide.
 
 ## 14. Glossary
 

@@ -72,9 +72,9 @@ This is a full review of the repository before submission, against the brief (`d
 | `paper/PAPER.pdf` | ✅ 9 pages (references and AI statement on page 8); names and AI statement present; no placeholders |
 | Relative links in every Markdown file | ✅ 0 broken |
 | Designed deck (15 slides, speaker notes) | ✅ source in `presentation/deck_source/`; charts from `06_presentation.py` (clean export in `presentation/figures/deck/`) |
-| Group of four, not five | noted: two speakers + two Q&A (`SCRIPT.md`) |
+| Group of four, not five | all four speak, slides split 3 / 3 / 4 / 3 (`SCRIPT.md`) |
 
 **Still to do (group):**
-1. Rehearse the talk (`presentation/SCRIPT.md`, about 8 minutes spoken) with a timer.
+1. Rehearse the talk (`presentation/SCRIPT.md`, 9 minutes at 140 words per minute) with a timer.
 2. Every member should be able to answer every question in `DEFENSE_NOTES.md`.
 3. Send the deck link to the group (it is already shared as "anyone with the link").
