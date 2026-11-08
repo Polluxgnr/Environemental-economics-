@@ -4,10 +4,10 @@ TRACK 1: TEMPERATURE AND PRECIPITATION RECORDS
 SCRIPT 06: PRESENTATION VISUALS (16:9)
 ================================================================================
 
-Output: presentation/figures/*.png   (the charts of the designed deck, without baked-in titles, plus the
+Output: presentation/figures/*.png   (the charts of the talk deck, without baked-in titles, plus the
                                       warming stripes of the cover and the section slides)
 
-The talk itself is the designed deck (presentation/deck_source/); its spoken text
+08_build_deck.py places them in presentation/Track1_presentation.pptx; the spoken text
 is presentation/SCRIPT.md, and DEFENSE_NOTES.md traces every number it quotes.
 All numbers drawn here are computed from data/processed and paper/tables.
 """
@@ -50,7 +50,7 @@ def detrended_sd(d, col):
     return (d[col] - np.polyval(np.polyfit(d.year, d[col], 1), d.year)).std(ddof=1)
 
 
-# "Clean" mode draws the charts for the designed deck: no baked-in title or footer (the slide
+# "Clean" mode draws the charts for the deck: no baked-in title or footer (the slide
 # carries them), painted on the deck's paper colour. Set it to False for standalone charts
 # with their title and source line.
 CLEAN = True
@@ -289,7 +289,7 @@ def slide_method(m, a):
     ax2.bar(fr.year, fr.temp_anom, color=cols, width=0.8, alpha=0.9, zorder=2)
     ax2.plot(fr.year, trend, color=INK, lw=1.5)
     ax2.axhline(0, color=INK, lw=0.8)
-    ax2.text(1975.5, -1.45, "baseline 1961-1990 (mean = 0)", ha="center", fontsize=12, color=MUTED)
+    ax2.text(1961.5, -1.45, "baseline 1961-1990 (mean = 0)", ha="left", fontsize=12, color=MUTED)
     ax2.annotate("", xy=(2026.8, delta), xytext=(2026.8, 0), arrowprops=dict(arrowstyle="<->", color=INK, lw=2))
     ax2.plot([2015.6, 2025.4], [delta, delta], color=INK, lw=2.5)
     ax2.text(2006, 2.5, f"Δ = +{delta:.2f} °C (mean 2016-2025)", ha="center", fontsize=13, fontweight="bold", zorder=3)
@@ -329,7 +329,7 @@ def slide_events():
 def slide_coefs():
     raw = pd.read_csv(os.path.join(PROC, "regression_results_raw.csv"))
     raw = raw[raw.Dependent == "gdp_per_capita_growth"].iloc[::-1].reset_index(drop=True)
-    # The designed deck shows the p-values in cards beside the chart, so its version is narrower and larger
+    # The deck shows the p-values in cards beside the chart, so its version is narrower and larger
     fig, ax = plt.subplots(figsize=(9.2, 6.6) if CLEAN else (W, H))
     n = len(raw)
     ax.axhspan(n - 2.5, n - 0.5, color="#ECE8DF" if CLEAN else "#f6f8fa", zorder=0)
@@ -356,9 +356,11 @@ def slide_coefs():
     return save(fig, "slide_09_coefficients.png")
 
 
-def twoway_resid(d, col, control):
-    X = pd.concat([pd.get_dummies(d.country_code, dtype=float), pd.get_dummies(d.year, dtype=float),
-                   d[[control]].astype(float)], axis=1).values
+def twoway_resid(d, col, control, trends=False):
+    parts = [pd.get_dummies(d.country_code, dtype=float), pd.get_dummies(d.year, dtype=float), d[[control]].astype(float)]
+    if trends:   # one linear trend per country, as in model 4
+        parts.append(pd.get_dummies(d.country_code, dtype=float).mul(d.year - d.year.mean(), axis=0))
+    X = pd.concat(parts, axis=1).values
     return d[col].values - X @ np.linalg.lstsq(X, d[col].values, rcond=None)[0]
 
 
@@ -367,13 +369,14 @@ def slide_crops_rain(p):
     p = p.copy()
     p["precip_10"] = p.precip_anom_pct / 10.0
     fig, axes = plt.subplots(1, 2, figsize=(W, H), gridspec_kw={"wspace": 0.22})
-    panels = [(axes[0], "gdp_per_capita_growth", "temp_anom", "precip_10", "(3) Two-way FE", WARM,
-               "Warmer than usual (°C)", "GDP per capita growth (pp)", "Heat → GDP", "pp per °C"),
-              (axes[1], "crop_growth", "precip_10", "temp_anom", "(7) Crop growth, two-way FE", WET,
+    # GDP panel = preferred model 4 (country trends); crops panel = model 7
+    panels = [(axes[0], "gdp_per_capita_growth", "temp_anom", "precip_10", "(4) Two-way FE + country trends", True,
+               WARM, "Warmer than usual (°C)", "GDP per capita growth (pp)", "Heat → GDP", "pp per °C"),
+              (axes[1], "crop_growth", "precip_10", "temp_anom", "(7) Crop growth, two-way FE", False, WET,
                "Wetter than usual (+10% of normal rain)", "Crop production growth (pp)", "Rain → crops", "pp per +10%")]
-    for ax, y, x, ctrl, mod, col, xl, yl, title, unit in panels:
+    for ax, y, x, ctrl, mod, trends, col, xl, yl, title, unit in panels:
         d = p.dropna(subset=[y, x, ctrl]).copy()
-        d["ry"], d["rx"] = twoway_resid(d, y, ctrl), twoway_resid(d, x, ctrl)
+        d["ry"], d["rx"] = twoway_resid(d, y, ctrl, trends), twoway_resid(d, x, ctrl, trends)
         ax.scatter(d.rx, d.ry, s=14, color="#8c959f", alpha=0.4, lw=0)
         bm = d.groupby(pd.qcut(d.rx, 10), observed=True)[["rx", "ry"]].mean()
         ax.plot(bm.rx, bm.ry, "s", color=INK, ms=9, label="decile means")
@@ -384,19 +387,17 @@ def slide_crops_rain(p):
         ax.axhline(0, color=MUTED, lw=0.8); ax.axvline(0, color=MUTED, lw=0.8)
         ax.set_ylim(np.percentile(d.ry, [1, 99]) * 1.3)
         ax.set_xlabel(xl); ax.set_ylabel(yl)
-        ax.set_title(f"{title}: {r[f'b_{x}']:+.2f} {unit}  [{r[f'ci_lo_{x}']:+.2f}, {r[f'ci_hi_{x}']:+.2f}]",
+        ax.set_title(f"{title}: {r[f'b_{x}']:+.2f} {unit}\n95% CI [{r[f'ci_lo_{x}']:+.2f}, {r[f'ci_hi_{x}']:+.2f}]",
                      loc="left", fontsize=16, fontweight="bold", color=col)
         ax.legend(frameon=False, fontsize=12, loc="lower right")
     fig.suptitle("Where climate shocks bite: rain moves harvests for a year; heat leaves no robust trace in GDP",
                  x=0.015, ha="left", fontsize=20, fontweight="bold")
-    footer(fig, "Each dot = a country-year 1961-2025 after removing country averages, year averages and the other climate variable. "
+    footer(fig, "Each dot = a country-year 1961-2025 after removing country averages, year averages and the other climate variable "
+                "(left: also each country's trend, as in the preferred model 4). "
                 "Line = regression slope with 95% CI (clustered by country). World Bank WDI; " + SRC)
     return save(fig, "slide_10_crops_rain.png")
 
 
-# ------------------------------------------------------------------------------
-# Numbers used in the talk, all read from the generated tables
-# ------------------------------------------------------------------------------
 if __name__ == "__main__":
     a = pd.read_csv(os.path.join(PROC, "climate_annual.csv"))
     m = pd.read_csv(os.path.join(PROC, "climate_monthly.csv"))

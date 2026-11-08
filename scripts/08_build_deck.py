@@ -1,0 +1,423 @@
+"""
+================================================================================
+TRACK 1: TEMPERATURE AND PRECIPITATION RECORDS
+SCRIPT 08: THE TALK AS A POWERPOINT DECK
+================================================================================
+
+Input:  presentation/figures/*.png   (charts drawn by 06_presentation.py)
+        presentation/SCRIPT.md       (spoken text, one section per slide)
+Output: presentation/Track1_presentation.pptx
+
+15 slides (13 for the 10-minute talk, "Questions?", one backup), 16:9.
+Each slide's speaker notes hold its part of SCRIPT.md, with speaker and timing.
+Fonts are Cambria (titles) and Calibri (text), which ship with every Office.
+"""
+
+import os
+import re
+import sys
+sys.stdout.reconfigure(encoding="utf-8")
+from PIL import Image
+from pptx import Presentation
+from pptx.dml.color import RGBColor
+from pptx.enum.shapes import MSO_SHAPE
+from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
+from pptx.oxml.ns import qn
+from pptx.util import Inches, Pt
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FIG = os.path.join(ROOT, "presentation", "figures")
+OUT = os.path.join(ROOT, "presentation", "Track1_presentation.pptx")
+
+NAVY, PAPER, SAND, WHITE = "14213D", "F7F5F0", "ECE8DF", "FFFFFF"
+RED, GREEN, PURPLE, BROWN, ORANGE = "B5332A", "1B7F6B", "7A5195", "A6611A", "D9772B"
+INK, BODY, MUTED, LINE = "14213D", "4A5568", "6B7280", "D9D4C7"
+PINK, PALE, PALER = "E8A598", "C9D3E0", "A9B6C8"
+HEAD, TEXT = "Cambria", "Calibri"
+
+SW, SH = 13.333, 7.5        # slide size (in)
+X0, CW = 0.75, 11.833       # left margin, content width
+TOP = 2.1                   # top of the content area
+
+
+# ------------------------------------------------------------------------------
+# Drawing helpers
+# ------------------------------------------------------------------------------
+def rgb(h):
+    return RGBColor.from_string(h)
+
+
+def background(slide, color):
+    fill = slide.background.fill
+    fill.solid()
+    fill.fore_color.rgb = rgb(color)
+
+
+def box(slide, x, y, w, h, fill=None, line=None, rounded=False, alpha=None, name=None):
+    shp = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE if rounded else MSO_SHAPE.RECTANGLE,
+                                 Inches(x), Inches(y), Inches(w), Inches(h))
+    if rounded:
+        shp.adjustments[0] = 0.06
+    if fill:
+        shp.fill.solid()
+        shp.fill.fore_color.rgb = rgb(fill)
+        if alpha is not None:
+            clr = shp.fill._xPr.find(qn("a:solidFill")).find(qn("a:srgbClr"))
+            clr.append(clr.makeelement(qn("a:alpha"), {"val": str(int(alpha * 100000))}))
+    else:
+        shp.fill.background()
+    if line:
+        shp.line.color.rgb = rgb(line[0])
+        shp.line.width = Pt(line[1])
+    else:
+        shp.line.fill.background()
+    shp.shadow.inherit = False
+    if name:
+        shp.name = name
+    return shp
+
+
+def dot(slide, x, y, d, color):
+    shp = slide.shapes.add_shape(MSO_SHAPE.OVAL, Inches(x), Inches(y), Inches(d), Inches(d))
+    shp.fill.solid()
+    shp.fill.fore_color.rgb = rgb(color)
+    shp.line.fill.background()
+    shp.shadow.inherit = False
+    return shp
+
+
+def text(slide, x, y, w, h, paras, size=15, color=BODY, font=TEXT, bold=False, align=PP_ALIGN.LEFT,
+         anchor=MSO_ANCHOR.TOP, spacing=None, line=1.1, after=0):
+    """paras: a string, or a list of paragraphs; a paragraph is a string or a list of (text, {overrides}) runs."""
+    tb = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
+    tf = tb.text_frame
+    tf.word_wrap = True
+    tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
+    tf.vertical_anchor = anchor
+    if isinstance(paras, str):
+        paras = [paras]
+    for i, para in enumerate(paras):
+        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+        p.alignment = align
+        p.line_spacing = line
+        p.space_after = Pt(after)
+        runs = [(para, {})] if isinstance(para, str) else para
+        for t, o in runs:
+            r = p.add_run()
+            r.text = t
+            f = r.font
+            f.name = o.get("font", font)
+            f.size = Pt(o.get("size", size))
+            f.bold = o.get("bold", bold)
+            f.color.rgb = rgb(o.get("color", color))
+            if spacing:
+                r._r.get_or_add_rPr().set("spc", str(int(spacing * 100)))
+    return tb
+
+
+def picture(slide, name, x, y, w, h, align="center"):
+    """Fit a chart inside the box (x, y, w, h), keeping its aspect ratio."""
+    path = os.path.join(FIG, name)
+    iw, ih = Image.open(path).size
+    s = min(w / iw, h / ih)
+    pw, ph = iw * s, ih * s
+    px = x + (w - pw) / 2 if align == "center" else x
+    return slide.shapes.add_picture(path, Inches(px), Inches(y), Inches(pw), Inches(ph))
+
+
+def frame(prs, eyebrow, title, footer=None, number=None, bg=PAPER, eyebrow_color=RED):
+    """Content slide: eyebrow, title, source line and slide number at fixed positions."""
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    background(s, bg)
+    text(s, X0, 0.62, CW, 0.3, eyebrow.upper(), size=12, color=eyebrow_color, bold=True, spacing=1.5)
+    text(s, X0, 0.95, CW, 1.05, title, size=28, color=INK, font=HEAD, bold=True, line=1.0)
+    if footer:
+        text(s, X0, 6.92, CW - 0.8, 0.3, footer, size=11, color=MUTED)
+    if number:
+        text(s, SW - X0 - 0.6, 6.92, 0.6, 0.3, str(number), size=11, color=MUTED, align=PP_ALIGN.RIGHT)
+    return s
+
+
+def card(slide, x, y, w, h, title, body, marker=None, fill=WHITE, line=(LINE, 0.75), tcolor=INK, bcolor=BODY,
+         tsize=16, bsize=14):
+    box(slide, x, y, w, h, fill=fill, line=line, rounded=True)
+    tx = x + 0.25
+    if marker:
+        dot(slide, tx, y + 0.27, 0.16, marker)
+        tx += 0.3
+    text(slide, tx, y + 0.18, x + w - tx - 0.2, 0.35, title, size=tsize, color=tcolor, bold=True)
+    text(slide, x + 0.25, y + 0.58, w - 0.45, h - 0.7, body, size=bsize, color=bcolor, line=1.1)
+
+
+def stat(slide, x, y, w, number, label, color, nsize=54):
+    text(slide, x, y, w, 0.85, number, size=nsize, color=color, font=HEAD, bold=True, line=0.9)
+    text(slide, x, y + 0.9, w, 0.75, label, size=14, color=BODY, line=1.1)
+
+
+def dark(prs, image_band=True):
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    background(s, NAVY)
+    if image_band:
+        s.shapes.add_picture(os.path.join(FIG, "band_stripes.png"), Inches(0), Inches(5.83), Inches(SW), Inches(1.67))
+    return s
+
+
+# ------------------------------------------------------------------------------
+# Speaker notes from SCRIPT.md
+# ------------------------------------------------------------------------------
+def notes_from_script():
+    s = open(os.path.join(ROOT, "presentation", "SCRIPT.md"), encoding="utf-8").read()
+    out = {}
+    for part in s.split("\n### ")[1:]:
+        m = re.match(r"(\d+)\. [^\n]*?  ·  ([^·]+?)  ·  (\S+)", part)
+        if not m:
+            continue
+        lines = part.split("\n")
+        say = " ".join(l[2:] for l in lines if l.startswith("> ")).replace("*(handover)* ", "[handover] ")
+        point = [l for l in lines if l.startswith("*Point at:*") or l.startswith("*On screen:*")]
+        point = point[0].replace("*", "") if point else ""
+        out[int(m.group(1))] = f"{m.group(2).strip()} · {m.group(3)}\n\n{say}" + (f"\n\n{point}" if point else "")
+    return out
+
+
+# ------------------------------------------------------------------------------
+# The slides
+# ------------------------------------------------------------------------------
+def build():
+    prs = Presentation()
+    prs.slide_width, prs.slide_height = Inches(SW), Inches(SH)
+    cp = prs.core_properties
+    cp.title = "Is today's climate still the one we planned for?"
+    cp.author = "Eliott Beghin, Pollux Gronier, Saty Viard Laroque, Augustin Vlandas"
+    cp.subject = "Environmental Economics, Track 1, ESSEC BSc AIDAMS, 9 November 2026"
+    slides = []
+
+    # 1. Cover
+    s = dark(prs, image_band=False)
+    s.shapes.add_picture(os.path.join(FIG, "cover_stripes.png"), Inches(0), Inches(0), Inches(SW), Inches(SH))
+    box(s, 0, 0, 7.78, SH, fill=NAVY, alpha=0.93)
+    text(s, X0 + 0.15, 1.55, 6.3, 0.3, "ENVIRONMENTAL ECONOMICS · TRACK 1", size=12, color=PINK, bold=True, spacing=1.5)
+    text(s, X0 + 0.15, 2.0, 6.75, 2.2, "Is today’s climate still the one we planned for?", size=42, color=PAPER,
+         font=HEAD, bold=True, line=0.95)
+    text(s, X0 + 0.15, 4.3, 6.0, 0.8, "Temperature and rainfall records for 12 countries, 1940–2025, and what they "
+         "did to the economy", size=16, color=PALE, line=1.15)
+    text(s, X0 + 0.15, 5.3, 6.3, 0.6, "Eliott Beghin · Pollux Gronier · Saty Viard Laroque · Augustin Vlandas",
+         size=14, color=PAPER, bold=True, line=1.15)
+    text(s, X0 + 0.15, 6.0, 6.3, 0.3, "ESSEC BSc AIDAMS · Caterina Seghini · 9 November 2026", size=12, color=PALER)
+    slides.append(s)
+
+    # 2. Map
+    s = frame(prs, "01 · The question", "Twelve countries on four continents, and every one is warmer than in "
+              "1961–1990", "Country-average temperature, mean 2016–2025 minus 1961–1990 · Copernicus Interactive "
+              "Climate Atlas, ERA5", 2)
+    picture(s, "slide_02_map.png", X0, TOP, CW, 4.6)
+    slides.append(s)
+
+    # 3. A country's climate
+    s = frame(prs, "02 · What is a country’s climate?", "A capital is not a country: rainfall change even flips sign",
+              "Change 2014–2023 vs 1961–1990, same definitions · Copernicus Atlas (ERA5) vs Open-Meteo API (default model)", 3)
+    picture(s, "slide_03_data_route.png", X0, TOP, 7.3, 4.55, align="left")
+    rx, rw = 8.35, SW - X0 - 8.35
+    card(s, rx, TOP + 0.05, rw, 1.25, "Now: country average",
+         "Copernicus Climate Atlas, ERA5, averaged over each country’s borders", marker=NAVY)
+    card(s, rx, TOP + 1.5, rw, 1.25, "First version: one grid point",
+         "Weather API at the capital: typical gap 0.2 °C, but 9 points for rain", marker=ORANGE)
+    card(s, rx, TOP + 2.95, rw, 1.45, "Kenya: −13 % vs +11 %",
+         "Warm years are wide; rain is local. Check what the data measure.", fill=NAVY, line=None,
+         tcolor=PAPER, bcolor=PALE)
+    slides.append(s)
+
+    # 4. Method
+    s = frame(prs, "03 · The method", "Remove the seasons, then compare the change with the noise",
+              "France · anomaly = month minus the same month’s 1961–1990 mean · rainfall: same steps, in % of its "
+              "1961–1990 average", 4)
+    picture(s, "slide_04_method.png", X0, TOP - 0.2, CW, 4.85)
+    slides.append(s)
+
+    # 5. Full record
+    s = frame(prs, "04 · The full record", "Every recent year is red; rainfall has no colour trend",
+              "One cell = one year · both vs 1961–1990: °C, and % of the 1961–1990 average rain · 1940–60 faded: "
+              "fewer observations", 5)
+    picture(s, "slide_05_stripes.png", X0, TOP - 0.2, CW, 4.85)
+    slides.append(s)
+
+    # 6. Signal versus noise
+    s = frame(prs, "05 · Signal versus noise", "Warming is far outside normal year-to-year variation; rainfall "
+              "changed far less", "σ = SD of the detrended annual anomaly, 1961–2025 · Copernicus Atlas, ERA5", 6)
+    picture(s, "slide_06_signal_noise.png", X0, TOP, 7.3, 4.55, align="left")
+    rx, rw = 8.45, SW - X0 - 8.45
+    stat(s, rx, TOP + 0.1, rw, "11 / 12", "countries where warming exceeds one ordinary year’s swing (2σ)", RED)
+    stat(s, rx, TOP + 1.85, rw, "0 / 12", "for rainfall, yet the 10-year change is measurable in Brazil, India, "
+         "Kenya, Senegal", GREEN)
+    text(s, rx, TOP + 3.65, rw, 0.7, "Rainfall change does not follow the warming (rank correlation −0.42, not "
+         "significant with 12 countries)", size=13, color=BODY, line=1.1)
+    slides.append(s)
+
+    # 7. Seasons
+    s = frame(prs, "06 · When in the year", "Warming is spread evenly across the year, except in France and Spain",
+              "Calendar seasons; Jun–Aug is winter in the south · box = gap > 2 SE · Copernicus Atlas, ERA5", 7)
+    picture(s, "slide_07_seasons.png", X0, TOP, 7.3, 4.55, align="left")
+    rx, rw = 8.35, SW - X0 - 8.35
+    card(s, rx, TOP + 0.05, rw, 1.3, "Summer leads", "France and Spain: summer +2.3 to +2.4 °C, autumn +1.3 to "
+         "+1.4 °C", marker=RED)
+    card(s, rx, TOP + 1.55, rw, 1.3, "Large, but noisy", "German winters +2.5 °C, yet so variable that the gap is "
+         "not significant", marker=MUTED)
+    text(s, rx, TOP + 3.1, rw, 0.9, "Why it matters: summer heat lands when crops need water and cities need "
+         "cooling.", size=14, color=BODY, line=1.1)
+    slides.append(s)
+
+    # 8. Part two
+    s = dark(prs)
+    text(s, X0 + 0.15, 1.45, 10, 0.3, "PART TWO · THE ECONOMY", size=12, color=PINK, bold=True, spacing=1.5)
+    text(s, X0 + 0.15, 1.9, 10.5, 2.4, "Were the unusual climate years also unusual for the economy?", size=48,
+         color=PAPER, font=HEAD, bold=True, line=0.95)
+    text(s, X0 + 0.15, 4.45, 10, 0.4, "GDP per capita growth and crop output, World Bank WDI, 1961–2025", size=16,
+         color=PALE)
+    slides.append(s)
+
+    # 9. Hottest summers
+    s = frame(prs, "07 · The hottest summers", "In each country’s hottest season, the big crop losses came when heat "
+              "met drought", "Growth vs what the country and the year would predict (pp) · World Bank WDI; "
+              "Copernicus Atlas, ERA5", 9)
+    picture(s, "slide_08_hottest_years.png", X0, TOP + 0.1, 7.4, 4.4, align="left")
+    rx, rw = 8.45, SW - X0 - 8.45
+    stat(s, rx, TOP + 0.05, rw, "−21", "crop points in France, summer 2003 (GDP: −1.5)", INK)
+    card(s, rx, TOP + 1.65, rw, 1.55, "Heat and drought together", "Germany 2003, Australia 2019: hottest and "
+         "driest year. France 2003, USA 1988: dry too.", marker=BROWN)
+    text(s, rx, TOP + 3.4, rw, 0.6, "Across all hot seasons, crops show no effect on average.", size=14, color=BODY)
+    slides.append(s)
+
+    # 10. Testing it
+    s = frame(prs, "08 · Testing it", "The “climate penalty” disappears once we remove everything that is not "
+              "weather", "756 country-years, 1961–2025 · SE clustered by country, t(11) and wild cluster bootstrap · "
+              "WDI; Atlas", 10)
+    picture(s, "slide_09_coefficients.png", X0, TOP + 0.1, 7.4, 4.4, align="left")
+    rx, rw = 8.45, SW - X0 - 8.45
+    box(s, rx, TOP + 0.05, rw, 0.85, fill=SAND, rounded=True)
+    text(s, rx + 0.25, TOP + 0.15, rw - 0.4, 0.3, "Naive: country effects only", size=13, color=MUTED, bold=True)
+    text(s, rx + 0.25, TOP + 0.45, rw - 0.4, 0.35, "−0.75 pp/°C · p = 0.01", size=16, color=INK, bold=True)
+    box(s, rx, TOP + 1.05, rw, 1.15, fill=SAND, rounded=True)
+    text(s, rx + 0.25, TOP + 1.15, rw - 0.4, 0.3, "+ year effects", size=13, color=MUTED, bold=True)
+    text(s, rx + 0.25, TOP + 1.45, rw - 0.4, 0.35, "−0.67 pp/°C · p = 0.10", size=16, color=INK, bold=True)
+    text(s, rx + 0.25, TOP + 1.8, rw - 0.4, 0.3, "fast warmers also slowed most (trends: −0.57)", size=13, color=BODY)
+    box(s, rx, TOP + 2.35, rw, 1.15, fill=WHITE, line=(RED, 2), rounded=True)
+    text(s, rx + 0.25, TOP + 2.45, rw - 0.4, 0.3, "Preferred: + country trends", size=13, color=RED, bold=True)
+    text(s, rx + 0.25, TOP + 2.75, rw - 0.4, 0.35, "−0.04 pp/°C", size=16, color=INK, bold=True)
+    text(s, rx + 0.25, TOP + 3.1, rw - 0.4, 0.3, "95% CI [−0.76, +0.69] · bootstrap p = 0.92", size=13, color=BODY)
+    text(s, rx, TOP + 3.7, rw, 0.6, "No detectable effect; losses above ~0.8 pp per °C ruled out here.", size=14,
+         color=BODY)
+    slides.append(s)
+
+    # 11. Where shocks bite
+    s = frame(prs, "09 · Where shocks bite", "Rain moves harvests for a year; heat leaves no robust trace in GDP",
+              "Each dot: a country-year, after country and year effects (left: + country trends, model 4) · WDI; "
+              "Copernicus Atlas, ERA5", 11)
+    picture(s, "slide_10_crops_rain.png", X0, TOP - 0.1, CW, 3.95)
+    text(s, X0, 6.05, CW, 0.65, [[
+        ("+10 % rain: crop output about ", {}), ("2.2 %", {"bold": True, "color": INK}),
+        (" higher, robust to dropping any country or adding trends, and it lasts one year. Dry years: crops ", {}),
+        ("7.6 points", {"bold": True, "color": INK}), (" below normal, GDP only ", {}),
+        ("0.27", {"bold": True, "color": INK}), (".", {})]], size=15, color=BODY, line=1.1)
+    slides.append(s)
+
+    # 12. Claims
+    s = frame(prs, "10 · What we can and cannot conclude", "Three kinds of claim, three levels of confidence",
+              "Paper §6", 12, bg=SAND)
+    cw3, gap = (CW - 2 * 0.35) / 3, 0.35
+    for i, (label, col, title, body) in enumerate([
+            ("DESCRIPTION · SOLID", NAVY, "Every country has warmed",
+             "11 of 12 beyond normal variability. Rainfall changed far less (measurable in 4 countries). Summer "
+             "leads in France and Spain."),
+            ("CORRELATION · MIXED", GREEN, "Harvests clearly; GDP barely",
+             "Dry years go with lower crop output for a year. Warm years show no robust link with GDP growth."),
+            ("NOT CLAIMED", RED, "Causal effects of climate change",
+             "One hot year allows no adaptation. Needed: many more units, exposure-weighted weather, a channel "
+             "fixed in advance.")]):
+        x = X0 + i * (cw3 + gap)
+        box(s, x, TOP + 0.2, cw3, 3.6, fill=WHITE, rounded=True)
+        dot(s, x + 0.35, TOP + 0.55, 0.18, col)
+        text(s, x + 0.65, TOP + 0.5, cw3 - 0.9, 0.3, label, size=12, color=col, bold=True, spacing=1.2)
+        text(s, x + 0.35, TOP + 1.05, cw3 - 0.7, 1.0, title, size=22, color=INK, font=HEAD, bold=True, line=1.0)
+        text(s, x + 0.35, TOP + 2.15, cw3 - 0.7, 2.0, body, size=15, color=BODY, line=1.15)
+    slides.append(s)
+
+    # 13. The answer
+    s = frame(prs, "11 · Back to our question", "So, is today’s climate still the one we planned for?",
+              "Warming 2016–2025 vs 1961–1990 · countries beyond 2σ · crop output per +10 % rain", 13)
+    for i, (num, col, lead, body) in enumerate([
+            ("+0.7–1.85 °C", RED, "Temperature: no.", " Every country is warmer, 11 of 12 far outside normal "
+             "variation"),
+            ("0 / 12", GREEN, "Rainfall: mostly yes.", " Within one ordinary year’s swing everywhere; measurable in "
+             "4 countries"),
+            ("+2.2 %", PURPLE, "Economy:", " harvests notice, for a year, through water; GDP not detectably")]):
+        x = X0 + i * (cw3 + gap)
+        text(s, x, TOP + 0.7, cw3, 0.9, num, size=44, color=col, font=HEAD, bold=True, line=0.9)
+        text(s, x, TOP + 1.85, cw3 - 0.1, 1.6, [[(lead, {"bold": True, "color": INK}), (body, {})]], size=18,
+             color=INK, line=1.15)
+    slides.append(s)
+
+    # 14. Questions
+    s = dark(prs)
+    text(s, X0 + 0.15, 1.45, 10, 0.3, "THANK YOU", size=12, color=PINK, bold=True, spacing=1.5)
+    text(s, X0 + 0.15, 1.85, 10, 1.2, "Questions?", size=60, color=PAPER, font=HEAD, bold=True)
+    text(s, X0 + 0.15, 3.35, 11, 0.4, "Eliott Beghin · Pollux Gronier · Saty Viard Laroque · Augustin Vlandas",
+         size=16, color=PALE)
+    text(s, X0 + 0.15, 3.95, 11, 0.4, "Paper, data and every script: github.com/Polluxgnr/Environemental-economics-",
+         size=13, color=PALER)
+    slides.append(s)
+
+    # 15. Backup
+    s = frame(prs, "Backup · Data and definitions", "Where every number comes from", "Full data sheet: "
+              "data/README.md · every number traced: presentation/DEFENSE_NOTES.md", 15, bg=SAND, eyebrow_color=MUTED)
+    rows = [("Item", "Definition"),
+            ("Climate data", "Copernicus Interactive Climate Atlas (C3S/ECMWF), ERA5, monthly 1940–2025, 288 series, "
+             "accessed 28 Oct 2026"),
+            ("Countries", "FRA, DEU, ESP: Atlas country masks · 9 others: Atlas user-defined regions with Natural "
+             "Earth borders (USA = 48 states) · validated on France to 0.004 °C"),
+            ("Anomaly", "Month minus its 1961–1990 calendar-month mean · rain = mm/day × days, anomaly in % of its "
+             "1961–1990 average"),
+            ("Change and noise", "Δ = mean 2016–2025 · σ = SD of the detrended annual anomaly, 1961–2025"),
+            ("Economy", "World Bank WDI, release 8 Oct 2026: GDP per capita growth, crop production index, "
+             "agriculture share"),
+            ("Regressions", "Country and year fixed effects + country trends (preferred model 4) · SE clustered by "
+             "country, t(11) + wild cluster bootstrap (Webb weights, 9,999 draws)")]
+    tbl = s.shapes.add_table(len(rows), 2, Inches(X0), Inches(TOP), Inches(CW), Inches(4.3)).table
+    tbl.columns[0].width, tbl.columns[1].width = Inches(2.4), Inches(CW - 2.4)
+    for r, (a, b) in enumerate(rows):
+        for c, v in enumerate((a, b)):
+            cell = tbl.cell(r, c)
+            cell.fill.solid()
+            cell.fill.fore_color.rgb = rgb(NAVY if r == 0 else (WHITE if r % 2 else PAPER))
+            cell.margin_left = cell.margin_right = Inches(0.12)
+            cell.margin_top = cell.margin_bottom = Inches(0.06)
+            tf = cell.text_frame
+            tf.word_wrap = True
+            p = tf.paragraphs[0]
+            run = p.add_run()
+            run.text = v
+            run.font.name, run.font.size = TEXT, Pt(13)
+            run.font.bold = r == 0 or c == 0
+            run.font.color.rgb = rgb(WHITE if r == 0 else INK)
+    slides.append(s)
+
+    # Speaker notes
+    say = notes_from_script()
+    extra = {8: "\n\nRead the title, pause one beat, next slide. Augustin continues from slide 7.",
+             1: "\n\n(The stripes behind the title are our data: one row per country, one stripe per year since "
+                "1940, blue cooler and red warmer than 1961–1990.)"}
+    for k, s in enumerate(slides, 1):
+        if k in say:
+            note = say[k] + extra.get(k, "")
+        elif k == 14:
+            note = ("Q&A, 3 minutes. All four of us answer; whoever knows the slide best takes the question. "
+                    "Answers: DEFENSE_NOTES.md part 1; how every number is computed: part 2.")
+        else:
+            note = "Backup for the Q&A only."
+        s.notes_slide.notes_text_frame.text = note
+    prs.save(OUT)
+    return OUT, len(slides), sorted(say)
+
+
+if __name__ == "__main__":
+    out, n, noted = build()
+    print(f"Deck: {out} ({n} slides; script notes on slides {noted})")

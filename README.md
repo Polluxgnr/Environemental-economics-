@@ -10,8 +10,8 @@
 | Deliverable | Where |
 |---|---|
 | Paper (submitted 2 November) | [`paper/PAPER.pdf`](paper/PAPER.pdf), source [`paper/PAPER.md`](paper/PAPER.md) |
-| Code that reproduces every number | [`scripts/`](scripts/), run 00 → 07 |
-| Talk (9 November, 10 min + 3 min Q&A) | [the deck](https://claude.ai/artifact/1zyA9MS72NWnftvQrRFxCT), [`presentation/SCRIPT.md`](presentation/SCRIPT.md), [`presentation/DEFENSE_NOTES.md`](presentation/DEFENSE_NOTES.md) |
+| Code that reproduces every number | [`scripts/`](scripts/), run 00 → 08 |
+| Talk (9 November, 10 min + 3 min Q&A) | [`presentation/Track1_presentation.pptx`](presentation/Track1_presentation.pptx), [`presentation/SCRIPT.md`](presentation/SCRIPT.md), [`presentation/DEFENSE_NOTES.md`](presentation/DEFENSE_NOTES.md) |
 | Assignment | [`docs/assignment_brief.pdf`](docs/assignment_brief.pdf) |
 
 ## The answer
@@ -51,10 +51,10 @@ How every number in the talk is computed, from the raw file to the slide: [`pres
 
 ```
 ├── paper/            PAPER.md, PAPER.pdf, tables/ (every table as .csv and .md)
-├── scripts/          00 → 07, the full pipeline (below)
+├── scripts/          00 → 08, the full pipeline (below)
 ├── data/             raw/ (downloads, never modified) · processed/ (outputs of 02–04) · README.md (data sheet)
 ├── figures/          the paper's figures
-├── presentation/     deck_source/ (the slides) · figures/ (slide charts) · SCRIPT.md · DEFENSE_NOTES.md
+├── presentation/     Track1_presentation.pptx · figures/ (slide charts) · SCRIPT.md · DEFENSE_NOTES.md
 │                     · LEARN_slides_4-6.md
 └── docs/             assignment_brief.pdf
 ```
@@ -69,6 +69,7 @@ How every number in the talk is computed, from the raw file to the slide: [`pres
 | `05_generate_figures.py` | The paper's figures | `figures/` |
 | `06_presentation.py` | The deck's charts | `presentation/figures/` |
 | `07_build_paper_pdf.py` | `PAPER.md` → A4 PDF (needs Chrome or Edge) | `paper/PAPER.pdf` |
+| `08_build_deck.py` | The talk as a PowerPoint, speaker notes taken from `SCRIPT.md` | `presentation/Track1_presentation.pptx` |
 
 ## Run it
 
@@ -78,11 +79,11 @@ All raw data are in the repository, so nothing needs to be downloaded again.
 pip install -r requirements.txt
 ```
 
-Then run the scripts in order, from `python scripts/00_download_atlas.py` to `python scripts/07_build_paper_pdf.py`. Steps 00–01 find the cached files. The rest takes about 3 minutes, and the results are identical every run (the bootstrap uses a fixed seed). To re-download a source, delete its file in `data/raw/`. A full Atlas download takes 1–2 hours.
+Then run the scripts in order, from `python scripts/00_download_atlas.py` to `python scripts/08_build_deck.py`. Steps 00–01 find the cached files. The rest takes about 3 minutes, and the results are identical every run (the bootstrap uses a fixed seed). To re-download a source, delete its file in `data/raw/`. A full Atlas download takes 1–2 hours.
 
 ## The talk (9 November)
 
-One deck: [the designed deck](https://claude.ai/artifact/1zyA9MS72NWnftvQrRFxCT) (source in `presentation/deck_source/`). Its speaker notes are [`SCRIPT.md`](presentation/SCRIPT.md): 1,264 words, 9 minutes at 140 words per minute. For an offline copy, export the deck to PDF or PowerPoint.
+The deck is [`presentation/Track1_presentation.pptx`](presentation/Track1_presentation.pptx): 15 slides, Cambria and Calibri fonts so it looks the same on any PC. Its speaker notes are [`SCRIPT.md`](presentation/SCRIPT.md): 1,264 words, 9 minutes at 140 words per minute.
 
 | Slides | Who | Part |
 |---|---|---|

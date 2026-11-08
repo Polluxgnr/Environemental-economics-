@@ -1,6 +1,6 @@
 # Talk script: 10 minutes + 3 minutes Q&A (9 November 2026)
 
-**There is one deck:** the designed deck, <https://claude.ai/artifact/1zyA9MS72NWnftvQrRFxCT> (source: `presentation/deck_source/`). Its speaker notes contain the same text as this file. For an offline copy, use the deck's own export (PDF or PowerPoint) on the morning of the talk.
+**The deck:** [`Track1_presentation.pptx`](Track1_presentation.pptx), 15 slides (13 for the talk, "Questions?", one backup). Each slide's speaker notes contain its text below, with the speaker and the timing. Rebuilt by `scripts/08_build_deck.py`.
 
 **Length.** 1,264 spoken words. At 140 words per minute that is 9 minutes; at a calmer 135 plus a few seconds per slide change it is exactly 10:00, which is the timing below. So aim for a steady 140 and never slower. If one part runs long, cut examples, never the handover sentences.
 
