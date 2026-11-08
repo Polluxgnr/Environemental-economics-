@@ -4,6 +4,25 @@
 
 The brief says any member may be asked about any choice, so everyone should know both parts.
 
+## The Q&A (3 minutes)
+
+- There is no "Questions?" slide. Eliott's last line ("Thank you; we are happy to take questions") opens the Q&A, and slide 12, the three answers, stays on screen.
+- Whoever knows the slide best takes the question: data and countries → Saty; method, σ, rainfall → Pollux; seasons, summers, regressions → Augustin; harvests and what we claim → Eliott. Any of us can answer any question.
+- If asked for the code or data: everything is on GitHub, github.com/Polluxgnr/Environemental-economics-.
+
+## Data and definitions (say this if asked "where does it come from?")
+
+| Item | Definition |
+|---|---|
+| Climate data | Copernicus Interactive Climate Atlas (C3S/ECMWF), ERA5, monthly 1940–2025, 288 series (12 countries × 2 variables × 12 calendar months), accessed 28 Oct 2026 |
+| Countries | FRA, DEU, ESP: the Atlas's country masks · 9 others: Atlas user-defined regions with Natural Earth borders (USA = 48 contiguous states) · validated on France to 0.004 °C |
+| Anomaly | Month minus its 1961–1990 calendar-month mean · rain = mm/day × days in the month, anomaly in % of its 1961–1990 average |
+| Change and noise | Δ = mean 2016–2025 · σ = SD of the detrended annual anomaly, 1961–2025 |
+| Economy | World Bank WDI, release 8 Oct 2026: GDP per capita growth, crop production index, agriculture share of GDP |
+| Regressions | Country and year fixed effects + country trends (preferred model 4) · SE clustered by country, t(11) + wild cluster bootstrap (Webb weights, 9,999 draws) |
+
+Full data sheet: `data/README.md`.
+
 # Part 1. Likely questions and short answers
 
 Each answer is two or three sentences and quotes a number that Part 2 traces back to the data.
@@ -115,7 +134,7 @@ Check: the 1961–1990 annual anomalies average 0.0004, so the reference really 
 
 ## Slide by slide
 
-### Slide 2: the map
+### Slide 2: our countries
 
 | Number | What it is | How it is computed | Where |
 |---|---|---|---|
@@ -123,7 +142,7 @@ Check: the 1961–1990 annual anomalies average 0.0004, so the reference really 
 | Farming 21 % of GDP in Kenya, 2.5 % in South Africa | Agriculture's share of GDP | Average of the WDI agriculture share over 2016–2025: Kenya 21.4 %, South Africa 2.5 % (range across the 12: 0.8 % Germany to 21.4 % Kenya) | Table 1b |
 | 12 countries, 4 continents | Our sample | 3 per continent, chosen for different climates and farm shares | `02` (`COUNTRY_META`) |
 
-### Slide 3: what is a country's climate?
+### Slide 3: our data
 
 | Number | What it is | How it is computed | Where |
 |---|---|---|---|
@@ -135,18 +154,18 @@ Check: the 1961–1990 annual anomalies average 0.0004, so the reference really 
 
 The comparison uses 2014–2023, not 2016–2025, because the API data we compare with end in 2023.
 
-### Slide 4: method (France)
+### Slide 4: how we measure change (France)
 
 See the worked example above: **92 %**, **Δ = +1.74 °C**, **σ = 0.51 °C**, **3.4**. The 2σ threshold works because year-to-year gaps are roughly bell-shaped, so about 95 % of ordinary years stay within 2σ of what is expected.
 
-### Slide 5: the full record
+### Slide 5: how far has the climate moved?
 
 | Number | How it is computed | Where |
 |---|---|---|
 | Every country-year since 2016 is warmer than normal | All 120 annual temperature anomalies 2016–2025 (12 countries × 10 years) are above 0. The lowest is Australia 2022, +0.07 °C | `climate_annual.csv` |
 | Colours | Each cell = one annual anomaly (step 3): °C for temperature, % of the 1961–1990 average for rainfall | `06_presentation.py` (`slide_stripes`) |
 
-### Slide 6: signal versus noise
+### Slide 6: is it large next to normal swings?
 
 | Number | How it is computed | Where |
 |---|---|---|
@@ -166,7 +185,7 @@ See the worked example above: **92 %**, **Δ = +1.74 °C**, **σ = 0.51 °C**, *
 | "Clearly ahead" | The gap between the fastest and slowest season is larger than 2 standard errors. Each season's SE = its σ × √(1/10 + 1/30). France: gap 0.99, SE 0.42, so 2.4 SE (yes) | Table 2 |
 | Germany winter +2.5 °C, not significant | DJF +2.48 vs SON +1.35: gap 1.13, but SE 0.71 (German winters vary a lot), so 1.6 SE | Table 2 |
 
-### Slide 9: the hottest summers
+### Slide 8: the hottest summers
 
 | Number | How it is computed | Where |
 |---|---|---|
@@ -175,7 +194,7 @@ See the worked example above: **92 %**, **Δ = +1.74 °C**, **σ = 0.51 °C**, *
 | Crops −21, GDP −1.5 (France 2003) | Growth that year compared with what the country and the year would predict ("two-way demeaned"): the residual of a regression of growth on one dummy per country and one per year (on a balanced panel this is growth minus the country average, minus the year average, plus the overall average). Crop growth −20.6, GDP growth −1.5 points | `04` (`table5`), Table 5 |
 | Hottest and driest | Germany 2003 and Australia 2019 are each country's record year for both the hot-season z-score and the rainfall z-score (driest) | Table 5 |
 
-### Slide 10: testing it (the regressions)
+### Slide 9: testing it (the regressions)
 
 | Number | How it is computed | Where |
 |---|---|---|
@@ -188,7 +207,7 @@ See the worked example above: **92 %**, **Δ = +1.74 °C**, **σ = 0.51 °C**, *
 | p = 0.92 | Wild cluster bootstrap: 9,999 simulated datasets in which the true effect is zero, resampling whole countries with random signs (Webb weights). p = share of simulated estimates as extreme as ours = 0.924. Used because 12 clusters are too few for ordinary clustered SEs | Table 3 |
 | Losses above ~0.8 ruled out | The lower end of the interval, −0.76 | Table 3 |
 
-### Slide 11: where shocks bite
+### Slide 10: where shocks bite
 
 | Number | How it is computed | Where |
 |---|---|---|
@@ -198,9 +217,9 @@ See the worked example above: **92 %**, **Δ = +1.74 °C**, **σ = 0.51 °C**, *
 | Dry years: crops −7.6, GDP −0.27 | Dry year = rainfall z-score below −1.5 (about 50 country-years). Average growth in dry years minus other years, after removing country and year averages: crops −7.56 (p = 0.045), GDP −0.27 (p = 0.50) | Table 4 |
 | Agriculture 1–3 % of GDP | 2016–2025 average share: France 1.5, Germany 0.8, Spain 2.7, South Africa 2.5, Australia 2.4, USA 0.9 | Table 1b |
 
-### Slide 13: back to the three questions
+### Slide 12: back to the three questions
 
-Every number on this slide repeats an earlier one: +0.7 to +1.85 °C (slide 2), 11 of 12 beyond 2σ, rainfall 0 of 12 but measurable in 4 (slide 6), +2.2 % crop output per +10 % rain (slide 11).
+Every number on this slide repeats an earlier one: +0.7 to +1.85 °C (slide 2), 11 of 12 beyond 2σ, rainfall 0 of 12 but measurable in 4 (slide 6), +2.2 % crop output per +10 % rain (slide 10).
 
 ## How to check a number yourself
 

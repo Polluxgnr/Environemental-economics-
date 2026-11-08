@@ -1,6 +1,6 @@
 # Talk script: 10 minutes + 3 minutes Q&A (9 November 2026)
 
-**The deck:** [`Track1_presentation.pptx`](Track1_presentation.pptx), 15 slides (13 for the talk, "Questions?", one backup). Each slide's speaker notes contain its text below, with the speaker and the timing. Rebuilt by `scripts/08_build_deck.py`.
+**The deck:** [`Track1_presentation.pptx`](Track1_presentation.pptx), 12 slides. There is no "Questions?" slide: Eliott's last line opens the Q&A, and everything for the Q&A (data definitions, likely questions, how each number is computed) is in `DEFENSE_NOTES.md`. Each slide's speaker notes contain its text below, with the speaker and the timing. Rebuilt by `scripts/08_build_deck.py`.
 
 **Length.** 1,304 spoken words: 9 min 20 s at 140 words per minute, plus about 3 seconds per slide change, which gives the timings below (end at 9:55). Aim for a steady 140; if a part runs long, cut examples, never the handover sentences.
 
@@ -10,14 +10,14 @@
 |---|---|---|---|
 | Saty | 1–3 | The question, our countries, our data | 0:00–2:35 |
 | Pollux | 4–6 | How we measure change; how far the climate moved; is it large next to normal swings | 2:35–5:20 |
-| Augustin | 7–10 | Seasons; the economy: hottest summers, the regressions | 5:20–7:50 |
-| Eliott | 11–13 | Where shocks bite, what we can claim, the answers | 7:50–9:55 |
+| Augustin | 7–9 | Seasons; the economy: hottest summers, the regressions | 5:20–7:45 |
+| Eliott | 10–12 | Where shocks bite, what we can claim, the answers | 7:45–9:55 |
 
 All four answer questions (see `DEFENSE_NOTES.md`).
 
 ## The thread: three questions, answered in order
 
-Slide 1 asks three questions. Every slide after it answers one of them, or the question the slide before it raised, and slide 13 answers all three.
+Slide 1 asks three questions. Every slide after it answers one of them, or the question the slide before it raised, and slide 12 answers all three.
 
 | Slide | Question it answers | Answer | Question it hands on |
 |---|---|---|---|
@@ -28,12 +28,11 @@ Slide 1 asks three questions. Every slide after it answers one of them, or the q
 | 5 | **Q1** How far has the climate moved? | Every country-year since 2016 is warmer; rainfall has no trend | **Q2** Is that large next to normal swings? |
 | 6 | **Q2** | Temperature: yes in 11/12. Rainfall: no, though its average shifted in 4 | When in the year? |
 | 7 | When in the year? | Evenly, except summer in France and Spain | **Q3** |
-| 8 | **Q3** Were the unusual years unusual for the economy? | (part two) | |
-| 9 | What happened in the hottest seasons? | Big crop losses, but when heat met drought | Heat or water? Does it reach GDP? |
-| 10 | Does heat reach GDP? | No robust effect once we isolate weather | So where do shocks bite? |
-| 11 | Where do shocks bite? | Harvests, through water, for one year; not GDP | What kind of claim is this? |
-| 12 | What kind of claim? | Description: solid. Correlation: mixed. Causation: not claimed | |
-| 13 | **Q1, Q2, Q3** | +0.7 to +1.85 °C · temperature beyond normal swings in 11/12, rainfall in none · harvests notice, GDP not detectably | Questions |
+| 8 | **Q3** Were the unusual years unusual for the economy? First: what happened in the hottest seasons? | Big crop losses, but when heat met drought | Heat or water? Does it reach GDP? |
+| 9 | Does heat reach GDP? | No robust effect once we isolate weather | So where do shocks bite? |
+| 10 | Where do shocks bite? | Harvests, through water, for one year; not GDP | What kind of claim is this? |
+| 11 | What kind of claim? | Description: solid. Correlation: mixed. Causation: not claimed | |
+| 12 | **Q1, Q2, Q3** | +0.7 to +1.85 °C · temperature beyond normal swings in 11/12, rainfall in none · harvests notice, GDP not detectably | Questions |
 
 **Delivery.**
 - One number per sentence: say it, then point at it on the chart.
@@ -84,35 +83,29 @@ Slide 1 asks three questions. Every slide after it answers one of them, or the q
 
 > Mostly, evenly across the year. Only in France and Spain is one season clearly ahead: summer warmed by about +2.3 degrees, against +1.3 in autumn. Germany's winter warmed even more, +2.5, but German winters vary so much that we cannot call it faster. Summer-heavy warming matters because it lands exactly when crops need water and cities need cooling. Which brings us to our third question.
 
-### 8. Part two: the economy  ·  Augustin  ·  5:50–5:55
-
-> Were the unusual climate years also unusual for the economy?
-
-*(Read the title, one beat of silence, next slide.)*
-
-### 9. The hottest summers  ·  Augustin  ·  5:55–6:50
+### 8. The hottest summers  ·  Augustin  ·  5:50–6:45
 
 *Point at:* France 2003 (purple bar −21, black bar −1.5).
 
-> One measurement point first: an annual mean dilutes a heatwave. France's 2003 is 1.2 sigma as a year, but 3.4 sigma as a summer. So we use each country's hot season, its three warmest months. Here is every country's hottest one, and how growth compared with what the country and the year would predict: purple for crops, black for GDP. France 2003: crops −21 points, GDP −1.5. But the big crop losses were heat and drought together: Germany 2003 and Australia 2019 were each country's hottest and driest year, and France 2003 and the US in 1988 were dry too. So, heat or water? And does it reach GDP? We tested both on every country-year.
+> Were the unusual climate years also unusual for the economy? One measurement point first: an annual mean dilutes a heatwave. France's 2003 is 1.2 sigma as a year, but 3.4 sigma as a summer. So we use each country's hot season, its three warmest months. Here is every country's hottest one, and how growth compared with what the country and the year would predict: purple for crops, black for GDP. France 2003: crops −21 points, GDP −1.5. But the big crop losses were heat and drought together: Germany 2003 and Australia 2019 were each country's hottest and driest year, and France 2003 and the US in 1988 were dry too. So, heat or water? And does it reach GDP? We tested both on every country-year.
 
-### 10. Testing it  ·  Augustin  ·  6:50–7:50
+### 9. Testing it  ·  Augustin  ·  6:45–7:45
 
 *Point at:* the grey lines, then the red line (model 4) crossing zero.
 
 > We regress growth on the temperature and rainfall anomalies: 756 country-years. The grey lines are the naive versions: comparing each country only with itself, a warmer year costs 0.75 points of growth, and it looks significant. Year effects remove shocks every country shares, like 2009. But the countries that warmed fastest also slowed most: the two trends correlate at −0.57, and dropping India alone moves the estimate from −0.67 to −0.38. So our preferred model, in red, also gives each country its own trend, which leaves only year-to-year weather. The effect: −0.04 points per degree, interval −0.76 to +0.69, and the wild bootstrap gives p = 0.92. No detectable effect, and losses above about 0.8 points per degree are ruled out in our sample. *(handover)* So where do climate shocks bite?
 
-### 11. Where shocks bite  ·  Eliott  ·  7:50–8:35
+### 10. Where shocks bite  ·  Eliott  ·  7:45–8:30
 
 *Point at:* the right panel's slope, then the flat red line on the left.
 
 > In harvests rather than GDP, and through water rather than heat. On the right, a year ten percent wetter than normal goes with crop output about 2.2 percent higher, and that holds whichever country we drop. It lasts one year: the next year output returns to normal. In dry years crop growth is 7.6 points below normal, while GDP growth is only 0.27 below. The likely reason is exposure: in most of our countries agriculture is one to three percent of GDP. That is the IPCC chain from the course: a hazard becomes a loss only through exposure and vulnerability.
 
-### 12. What we can and cannot conclude  ·  Eliott  ·  8:35–9:20
+### 11. What we can and cannot conclude  ·  Eliott  ·  8:30–9:15
 
 > What kind of claims are these? The climate results are descriptions, and they are solid. The economic results are correlations. Year-to-year weather is close to random, so our design is close to an experiment; but with twelve countries, rich and poor pooled together, we do not claim causal effects, and an effect limited to poorer, farming economies could be hidden. And a hot year is not climate change: it allows no adaptation. Going further would take many more regions, weather weighted by where crops and people are, and a channel fixed in advance.
 
-### 13. Back to our three questions  ·  Eliott  ·  9:20–9:55
+### 12. Back to our three questions  ·  Eliott  ·  9:15–9:55
 
 *Point at:* the three columns, left to right.
 
@@ -120,10 +113,4 @@ Slide 1 asks three questions. Every slide after it answers one of them, or the q
 
 ---
 
-### Backup: data and definitions (Q&A only)
-
-- Climate: Copernicus Interactive Climate Atlas (C3S/ECMWF), ERA5, monthly 1940–2025, 288 series (12 countries × 2 variables × 12 calendar months). FRA/DEU/ESP: Atlas country masks; 9 others: Atlas user-defined regions with Natural Earth borders (USA = 48 contiguous states). Validated on France to 0.004 °C.
-- Anomaly = month minus its 1961–1990 calendar-month mean; rainfall = mm/day × days in the month, anomaly in % of the 1961–1990 average; Δ = mean 2016–2025; σ = SD of the detrended annual anomaly, 1961–2025.
-- Economy: World Bank WDI, release 8 Oct 2026: GDP per capita growth, crop production index, agriculture share.
-- Regressions: two-way fixed effects (+ country trends in the preferred model 4), SE clustered by country, t(11) + wild cluster bootstrap (Webb weights, 9,999 draws).
-- How each number above is computed, from the raw file to the slide: `DEFENSE_NOTES.md`, part 2.
+For the Q&A: data definitions, 22 likely questions and how every number above is computed are in `DEFENSE_NOTES.md`.

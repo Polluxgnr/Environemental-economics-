@@ -8,7 +8,7 @@ Input:  presentation/figures/*.png   (charts drawn by 06_presentation.py)
         presentation/SCRIPT.md       (spoken text, one section per slide)
 Output: presentation/Track1_presentation.pptx
 
-15 slides (13 for the 10-minute talk, "Questions?", one backup), 16:9.
+12 slides for the 10-minute talk, 16:9. The data definitions and Q&A material are in DEFENSE_NOTES.md.
 Each slide's speaker notes hold its part of SCRIPT.md, with speaker and timing.
 Fonts are Cambria (titles) and Calibri (text), which ship with every Office.
 """
@@ -163,16 +163,6 @@ def stat(slide, x, y, w, number, label, color, nsize=54):
     text(slide, x, y + 0.9, w, 0.75, label, size=14, color=BODY, line=1.1)
 
 
-def dark(prs, image_band=True):
-    s = prs.slides.add_slide(prs.slide_layouts[6])
-    background(s, NAVY)
-    if image_band:
-        text(s, X0 + 0.15, 5.4, 11, 0.3, "Below: the average of our 12 countries, one stripe per year from 1940 (left) to "
-             "2025 (right); blue = cooler, red = warmer than 1961–1990", size=11, color=PALER)
-        s.shapes.add_picture(os.path.join(FIG, "band_stripes.png"), Inches(0), Inches(5.83), Inches(SW), Inches(1.67))
-    return s
-
-
 # ------------------------------------------------------------------------------
 # Speaker notes from SCRIPT.md
 # ------------------------------------------------------------------------------
@@ -204,7 +194,8 @@ def build():
     slides = []
 
     # 1. Cover: the question, and the three questions the talk answers in order
-    s = dark(prs, image_band=False)
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    background(s, NAVY)
     text(s, X0 + 0.15, 1.35, 6.4, 0.3, "ENVIRONMENTAL ECONOMICS · TRACK 1", size=12, color=PINK, bold=True, spacing=1.5)
     text(s, X0 + 0.15, 1.8, 6.6, 2.2, "Is today’s climate still the one we planned for?", size=42, color=PAPER,
          font=HEAD, bold=True, line=0.95)
@@ -310,19 +301,10 @@ def build():
          "cooling.", size=14, color=BODY, line=1.1)
     slides.append(s)
 
-    # 8. Part two
-    s = dark(prs)
-    text(s, X0 + 0.15, 1.45, 10, 0.3, "PART TWO · THE ECONOMY", size=12, color=PINK, bold=True, spacing=1.5)
-    text(s, X0 + 0.15, 1.9, 10.5, 2.4, "Were the unusual climate years also unusual for the economy?", size=48,
-         color=PAPER, font=HEAD, bold=True, line=0.95)
-    text(s, X0 + 0.15, 4.45, 10, 0.4, "GDP per capita growth and crop output, World Bank WDI, 1961–2025", size=16,
-         color=PALE)
-    slides.append(s)
-
-    # 9. Hottest summers
+    # 8. Hottest summers
     s = frame(prs, "07 · The hottest summers", "In each country’s hottest season, the big crop losses came when heat "
               "met drought", "Growth vs what the country and the year would predict (pp) · World Bank WDI; "
-              "Copernicus Atlas, ERA5", 9)
+              "Copernicus Atlas, ERA5", 8)
     picture(s, "slide_08_hottest_years.png", X0, TOP + 0.1, 7.4, 4.4, align="left")
     rx, rw = 8.45, SW - X0 - 8.45
     stat(s, rx, TOP + 0.05, rw, "−21", "crop points in France, summer 2003 (GDP: −1.5)", INK)
@@ -331,10 +313,10 @@ def build():
     text(s, rx, TOP + 3.4, rw, 0.6, "Across all hot seasons, crops show no effect on average.", size=14, color=BODY)
     slides.append(s)
 
-    # 10. Testing it
+    # 9. Testing it
     s = frame(prs, "08 · Testing it", "The “climate penalty” disappears once we remove everything that is not "
               "weather", "756 country-years, 1961–2025 · SE clustered by country, t(11) and wild cluster bootstrap · "
-              "WDI; Atlas", 10)
+              "WDI; Atlas", 9)
     picture(s, "slide_09_coefficients.png", X0, TOP + 0.1, 7.4, 4.4, align="left")
     rx, rw = 8.45, SW - X0 - 8.45
     box(s, rx, TOP + 0.05, rw, 0.85, fill=SAND, rounded=True)
@@ -352,10 +334,10 @@ def build():
          color=BODY)
     slides.append(s)
 
-    # 11. Where shocks bite
+    # 10. Where shocks bite
     s = frame(prs, "09 · Where shocks bite", "Rain moves harvests for a year; heat leaves no robust trace in GDP",
               "Each dot: a country-year, after country and year effects (left: + country trends, model 4) · WDI; "
-              "Copernicus Atlas, ERA5", 11)
+              "Copernicus Atlas, ERA5", 10)
     picture(s, "slide_10_crops_rain.png", X0, TOP - 0.1, CW, 3.95)
     text(s, X0, 6.05, CW, 0.65, [[
         ("+10 % rain: crop output about ", {}), ("2.2 %", {"bold": True, "color": INK}),
@@ -364,9 +346,9 @@ def build():
         ("0.27", {"bold": True, "color": INK}), (".", {})]], size=15, color=BODY, line=1.1)
     slides.append(s)
 
-    # 12. Claims
+    # 11. Claims
     s = frame(prs, "10 · What we can and cannot conclude", "Three kinds of claim, three levels of confidence",
-              "Paper §6", 12, bg=SAND)
+              "Paper §6", 11, bg=SAND)
     cw3, gap = (CW - 2 * 0.35) / 3, 0.35
     for i, (label, col, title, body) in enumerate([
             ("DESCRIPTION · SOLID", NAVY, "Every country has warmed",
@@ -385,10 +367,10 @@ def build():
         text(s, x + 0.35, TOP + 2.15, cw3 - 0.7, 2.0, body, size=15, color=BODY, line=1.15)
     slides.append(s)
 
-    # 13. The answers
+    # 12. The answers
     s = frame(prs, "11 · The answers", "Back to our three questions",
               "Warming 2016–2025 vs 1961–1990 · normal swing = 2σ of the detrended annual anomaly · crop output per "
-              "+10 % rain", 13)
+              "+10 % rain", 12)
     for i, (question, num, col, body) in enumerate([
             ("1 · How far has the climate moved?", "+0.7–1.85 °C", RED, "All 12 countries warmed, from India and Australia (+0.7) to Germany (+1.85)"),
             ("2 · Is that large next to normal swings?", "11 / 12", INK, "Temperature: yes, in 11 of 12 countries. "
@@ -403,62 +385,10 @@ def build():
          color=INK, font=HEAD, bold=True)
     slides.append(s)
 
-    # 14. Questions
-    s = dark(prs)
-    text(s, X0 + 0.15, 1.45, 10, 0.3, "THANK YOU", size=12, color=PINK, bold=True, spacing=1.5)
-    text(s, X0 + 0.15, 1.85, 10, 1.2, "Questions?", size=60, color=PAPER, font=HEAD, bold=True)
-    text(s, X0 + 0.15, 3.35, 11, 0.4, "Eliott Beghin · Pollux Gronier · Saty Viard Laroque · Augustin Vlandas",
-         size=16, color=PALE)
-    text(s, X0 + 0.15, 3.95, 11, 0.4, "Paper, data and every script: github.com/Polluxgnr/Environemental-economics-",
-         size=13, color=PALER)
-    slides.append(s)
-
-    # 15. Backup
-    s = frame(prs, "Backup · Data and definitions", "Where every number comes from", "Full data sheet: "
-              "data/README.md · every number traced: presentation/DEFENSE_NOTES.md", 15, bg=SAND, eyebrow_color=MUTED)
-    rows = [("Item", "Definition"),
-            ("Climate data", "Copernicus Interactive Climate Atlas (C3S/ECMWF), ERA5, monthly 1940–2025, 288 series, "
-             "accessed 28 Oct 2026"),
-            ("Countries", "FRA, DEU, ESP: Atlas country masks · 9 others: Atlas user-defined regions with Natural "
-             "Earth borders (USA = 48 states) · validated on France to 0.004 °C"),
-            ("Anomaly", "Month minus its 1961–1990 calendar-month mean · rain = mm/day × days, anomaly in % of its "
-             "1961–1990 average"),
-            ("Change and noise", "Δ = mean 2016–2025 · σ = SD of the detrended annual anomaly, 1961–2025"),
-            ("Economy", "World Bank WDI, release 8 Oct 2026: GDP per capita growth, crop production index, "
-             "agriculture share"),
-            ("Regressions", "Country and year fixed effects + country trends (preferred model 4) · SE clustered by "
-             "country, t(11) + wild cluster bootstrap (Webb weights, 9,999 draws)")]
-    tbl = s.shapes.add_table(len(rows), 2, Inches(X0), Inches(TOP), Inches(CW), Inches(4.3)).table
-    tbl.columns[0].width, tbl.columns[1].width = Inches(2.4), Inches(CW - 2.4)
-    for r, (a, b) in enumerate(rows):
-        for c, v in enumerate((a, b)):
-            cell = tbl.cell(r, c)
-            cell.fill.solid()
-            cell.fill.fore_color.rgb = rgb(NAVY if r == 0 else (WHITE if r % 2 else PAPER))
-            cell.margin_left = cell.margin_right = Inches(0.12)
-            cell.margin_top = cell.margin_bottom = Inches(0.06)
-            tf = cell.text_frame
-            tf.word_wrap = True
-            p = tf.paragraphs[0]
-            run = p.add_run()
-            run.text = v
-            run.font.name, run.font.size = TEXT, Pt(13)
-            run.font.bold = r == 0 or c == 0
-            run.font.color.rgb = rgb(WHITE if r == 0 else INK)
-    slides.append(s)
-
     # Speaker notes
     say = notes_from_script()
-    extra = {8: "\n\nRead the title, pause one beat, next slide. Augustin continues from slide 7."}
     for k, s in enumerate(slides, 1):
-        if k in say:
-            note = say[k] + extra.get(k, "")
-        elif k == 14:
-            note = ("Q&A, 3 minutes. All four of us answer; whoever knows the slide best takes the question. "
-                    "Answers: DEFENSE_NOTES.md part 1; how every number is computed: part 2.")
-        else:
-            note = "Backup for the Q&A only."
-        s.notes_slide.notes_text_frame.text = note
+        s.notes_slide.notes_text_frame.text = say[k]
     prs.save(OUT)
     return OUT, len(slides), sorted(say)
 

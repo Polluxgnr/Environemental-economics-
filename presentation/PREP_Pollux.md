@@ -1,6 +1,6 @@
 # Prep, Pollux: slides 4–6
 
-2:35–5:20 · about 370 spoken words · between Saty (slides 1–3) and Augustin (slides 7–10).
+2:35–5:20 · about 370 spoken words · between Saty (slides 1–3) and Augustin (slides 7–9).
 
 ## Where your part sits
 

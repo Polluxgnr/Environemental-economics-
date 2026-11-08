@@ -83,14 +83,14 @@ Then run the scripts in order, from `python scripts/00_download_atlas.py` to `py
 
 ## The talk (9 November)
 
-The deck is [`presentation/Track1_presentation.pptx`](presentation/Track1_presentation.pptx): 15 slides, Cambria and Calibri fonts so it looks the same on any PC. Its speaker notes are [`SCRIPT.md`](presentation/SCRIPT.md): 1,304 words, about 9:55 at 140 words per minute.
+The deck is [`presentation/Track1_presentation.pptx`](presentation/Track1_presentation.pptx): 12 slides, no backup or "Questions?" slide (that material is in `DEFENSE_NOTES.md`), Cambria and Calibri fonts so it looks the same on any PC. Its speaker notes are [`SCRIPT.md`](presentation/SCRIPT.md): 1,304 words, about 9:55 at 140 words per minute.
 
 | Slides | Who | Part |
 |---|---|---|
 | 1–3 | Saty | The question and its three sub-questions, our choice of countries, our data |
 | 4–6 | Pollux | How we measure change; how far the climate moved (Q1); is it large next to normal swings (Q2) |
-| 7–10 | Augustin | Seasons; did the economy notice (Q3): the hottest summers, the regressions |
-| 11–13 | Eliott | Where shocks bite, what we can claim, the answers to the three questions |
+| 7–9 | Augustin | Seasons; did the economy notice (Q3): the hottest summers, the regressions |
+| 10–12 | Eliott | Where shocks bite, what we can claim, the answers to the three questions |
 
 Everyone answers questions: [`DEFENSE_NOTES.md`](presentation/DEFENSE_NOTES.md) has 22 likely questions and the computation behind every number.
 

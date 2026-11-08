@@ -4,8 +4,7 @@ TRACK 1: TEMPERATURE AND PRECIPITATION RECORDS
 SCRIPT 06: PRESENTATION VISUALS (16:9)
 ================================================================================
 
-Output: presentation/figures/*.png   (the charts of the talk deck, without baked-in titles, plus the
-                                      warming stripes of the cover and the section slides)
+Output: presentation/figures/*.png   (the charts of the talk deck, without baked-in titles)
 
 08_build_deck.py places them in presentation/Track1_presentation.pptx; the spoken text
 is presentation/SCRIPT.md, and DEFENSE_NOTES.md traces every number it quotes.
@@ -77,20 +76,6 @@ def save(fig, name):
     fig.savefig(os.path.join(out_dir, name), bbox_inches="tight", pad_inches=0.3, **kw)
     plt.close(fig)
     return os.path.join(out_dir, name)
-
-
-def deck_stripes(a):
-    """Warming stripes of the 12 countries' mean, one per year, for the section slides (labelled on the slide)."""
-    years = np.arange(1940, a.year.max() + 1)
-    M = a.pivot(index="country_code", columns="year", values="temp_anom").reindex(index=ORDER, columns=years)
-    os.makedirs(OUT, exist_ok=True)
-    fig = plt.figure(figsize=(19.2, 2.4), dpi=100)
-    ax = fig.add_axes([0, 0, 1, 1])
-    ax.imshow(M.mean().values[None, :], aspect="auto", cmap="RdBu_r", norm=TwoSlopeNorm(0, -1.6, 1.6),
-              interpolation="nearest")
-    ax.set_axis_off()
-    fig.savefig(os.path.join(OUT, "band_stripes.png"), dpi=100)
-    plt.close(fig)
 
 
 def country_changes(a):
@@ -399,7 +384,6 @@ if __name__ == "__main__":
                      (slide_signal, (ch,)), (slide_seasons, (s,)), (slide_events, ()), (slide_coefs, ()),
                      (slide_crops_rain, (p,))]:
         fn(*args)
-    deck_stripes(a)
     print("Slide charts:", OUT)
 
 
