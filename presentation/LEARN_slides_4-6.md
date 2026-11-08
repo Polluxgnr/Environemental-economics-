@@ -1,8 +1,8 @@
 # Learning slides 4–6: method, full record, signal versus noise
 
-Speaker 2 (Pollux) · 2:15–5:10 · about 370 spoken words.
+Pollux · 2:15–5:10 · about 370 spoken words.
 
-Your part answers the question Speaker 1 hands you: **"How do we measure whether that climate has changed?"** You end by handing on the next one: **"But when in the year does the warming happen?"**
+Your part answers the question Saty hands you: **"How do we measure whether that climate has changed?"** You end by handing on the next one: **"But when in the year does the warming happen?"**
 
 Your three slides in one breath:
 
@@ -167,4 +167,4 @@ There are two possible "gaps", and neither means missing data.
 1. Read the three texts aloud twice with the slides open.
 2. Close the text and say each slide from the skeleton only. It is fine if the words change; the order and the numbers must not.
 3. Time yourself: 2:55 for the three slides. If you run long, shorten the examples, never the handover sentence.
-4. Rehearse the two handovers with Speaker 1 and Speaker 3. Their last sentence is your cue, and yours is theirs.
+4. Rehearse the two handovers with Saty (before you) and Augustin (after you). Their last sentence is your cue, and yours is theirs.

@@ -38,3 +38,6 @@ desktop.ini
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# Paper build intermediate (scripts/07)
+paper/PAPER.html

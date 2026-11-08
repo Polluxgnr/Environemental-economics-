@@ -4,9 +4,8 @@ TRACK 1: TEMPERATURE AND PRECIPITATION RECORDS
 SCRIPT 06: PRESENTATION VISUALS (16:9)
 ================================================================================
 
-Output: presentation/figures/slide_*.png        (charts with title and source line)
-        presentation/figures/deck/*.png         (same charts without baked-in titles, for the designed deck
-                                                 in presentation/deck_source/, plus the warming-stripes cover)
+Output: presentation/figures/*.png   (the charts of the designed deck, without baked-in titles, plus the
+                                      warming stripes of the cover and the section slides)
 
 The talk itself is the designed deck (presentation/deck_source/); its spoken text
 is presentation/SCRIPT.md, and DEFENSE_NOTES.md traces every number it quotes.
@@ -51,11 +50,11 @@ def detrended_sd(d, col):
     return (d[col] - np.polyval(np.polyfit(d.year, d[col], 1), d.year)).std(ddof=1)
 
 
-# "Clean" mode exports the same charts for the designed deck (presentation/figures/deck/):
-# no baked-in title or footer (the slide carries them), painted on the deck's paper colour.
-CLEAN = False
+# "Clean" mode draws the charts for the designed deck: no baked-in title or footer (the slide
+# carries them), painted on the deck's paper colour. Set it to False for standalone charts
+# with their title and source line.
+CLEAN = True
 DECK_BG = "#F7F5F0"
-DECK_OUT = os.path.join(ROOT, "presentation", "figures", "deck")
 
 
 def footer(fig, text):
@@ -66,8 +65,7 @@ def footer(fig, text):
 
 
 def save(fig, name):
-    out_dir = DECK_OUT if CLEAN else OUT
-    os.makedirs(out_dir, exist_ok=True)
+    out_dir = OUT
     kw = {}
     if CLEAN:
         if fig._suptitle is not None:
@@ -86,21 +84,21 @@ def deck_stripes(a):
     years = np.arange(1940, a.year.max() + 1)
     M = a.pivot(index="country_code", columns="year", values="temp_anom").reindex(index=ORDER, columns=years)
     norm = TwoSlopeNorm(0, -2.2, 2.2)
-    os.makedirs(DECK_OUT, exist_ok=True)
+    os.makedirs(OUT, exist_ok=True)
     fig = plt.figure(figsize=(19.2, 10.8), dpi=100)
     ax = fig.add_axes([0, 0, 1, 1])
     ax.imshow(M.values, aspect="auto", cmap="RdBu_r", norm=norm, interpolation="nearest")
     for y in np.arange(0.5, 11.5):
         ax.axhline(y, color="#14213D", lw=1.2, alpha=0.35)
     ax.set_axis_off()
-    fig.savefig(os.path.join(DECK_OUT, "cover_stripes.png"), dpi=100)
+    fig.savefig(os.path.join(OUT, "cover_stripes.png"), dpi=100)
     plt.close(fig)
     fig = plt.figure(figsize=(19.2, 2.4), dpi=100)
     ax = fig.add_axes([0, 0, 1, 1])
     ax.imshow(M.mean().values[None, :], aspect="auto", cmap="RdBu_r", norm=TwoSlopeNorm(0, -1.6, 1.6),
               interpolation="nearest")
     ax.set_axis_off()
-    fig.savefig(os.path.join(DECK_OUT, "band_stripes.png"), dpi=100)
+    fig.savefig(os.path.join(OUT, "band_stripes.png"), dpi=100)
     plt.close(fig)
 
 
@@ -405,18 +403,11 @@ if __name__ == "__main__":
     s = pd.read_csv(os.path.join(PROC, "climate_seasonal.csv"))
     p = pd.read_csv(os.path.join(PROC, "panel.csv"))
     ch = country_changes(a)
-    imgs = {"map": slide_map(ch), "route": slide_route(), "method": slide_method(m, a), "stripes": slide_stripes(a),
-            "signal": slide_signal(ch), "seasons": slide_seasons(s), "events": slide_events(),
-            "coefs": slide_coefs(), "rain": slide_crops_rain(p)}
-    print("Slide charts:", OUT)
-
-    # Clean chart exports + stripes for the designed deck
-    CLEAN = True
     for fn, args in [(slide_map, (ch,)), (slide_route, ()), (slide_method, (m, a)), (slide_stripes, (a,)),
                      (slide_signal, (ch,)), (slide_seasons, (s,)), (slide_events, ()), (slide_coefs, ()),
                      (slide_crops_rain, (p,))]:
         fn(*args)
     deck_stripes(a)
-    print("Deck images:", DECK_OUT)
+    print("Slide charts:", OUT)
 
 
