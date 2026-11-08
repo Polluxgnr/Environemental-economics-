@@ -1,6 +1,6 @@
 # Talk script: 10 minutes + 3 minutes Q&A (9 November 2026)
 
-**The deck:** [`Track1_presentation.pptx`](Track1_presentation.pptx), 12 slides. There is no "Questions?" slide: Eliott's last line opens the Q&A, and everything for the Q&A (data definitions, likely questions, how each number is computed) is in `DEFENSE_NOTES.md`. Each slide's speaker notes contain its text below, with the speaker and the timing. Rebuilt by `scripts/08_build_deck.py`.
+**The deck:** [`Track1_presentation.pptx`](Track1_presentation.pptx), 12 slides. There is no "Questions?" slide: Eliott's last line opens the Q&A, and everything for the Q&A (data definitions, likely questions, how each number is computed) is in `DEFENSE_NOTES.md`. Each slide's speaker notes contain its text below, with the speaker and the timing. Rebuilt by `scripts/08_build_deck.py`; the slide pictures below are exported from it (`slides/`).
 
 **Length.** 1,304 spoken words: 9 min 20 s at 140 words per minute, plus about 3 seconds per slide change, which gives the timings below (end at 9:55). Aim for a steady 140; if a part runs long, cut examples, never the handover sentences.
 
@@ -43,11 +43,15 @@ Slide 1 asks three questions. Every slide after it answers one of them, or the q
 
 ### 1. Is today's climate still the one we planned for?  ·  Saty  ·  0:00–0:40
 
+![Slide 1](slides/slide-01.png)
+
 *On screen:* the title and the three questions of the talk.
 
 > Every plan we make, from when to sow a field to how high to build a dam, assumes that next year will look like the years we remember. We want to know if that is still true. To find out, we looked at temperature and rainfall records for twelve countries, from 1940 to 2025, and asked three things. How far has the climate moved? Is that large next to normal ups and downs? And were the unusual years also unusual for the economy?
 
 ### 2. Our choice of countries  ·  Saty  ·  0:40–1:30
+
+![Slide 2](slides/slide-02.png)
 
 *Point at:* France, Germany and Spain for Europe, then Kenya and South Africa, then Germany (darkest), India and Australia (lightest).
 
@@ -55,11 +59,15 @@ Slide 1 asks three questions. Every slide after it answers one of them, or the q
 
 ### 3. Our data: a capital is not a country  ·  Saty  ·  1:30–2:35
 
+![Slide 3](slides/slide-03.png)
+
 *Point at:* the orange crosses in the legend, the black dots, then the Kenya row on the right panel.
 
 > In that first attempt, we took one point at each capital from a free weather API. Those are the orange crosses. But a capital is not a country, so we rebuilt everything from the Copernicus Climate Atlas. It uses ERA5, a weather model corrected with millions of real observations, and averages it over each country's borders. Those are the black dots. For temperature, on the left, the two mostly agree, typically about 0.2 degrees apart. For rainfall, on the right, they often don't, and in three countries the sign flips. In Kenya, the capital point says rainfall went up 11%; the country average says it fell 13%. A warm year is warm over hundreds of kilometres, while rain is local. That was our first lesson: check what your data measure. So every number from here on is a country average. The next question is how to measure change.
 
 ### 4. How we measure change: three steps  ·  Pollux  ·  2:35–3:40
+
+![Slide 4](slides/slide-04.png)
 
 *Point at:* the step cards one by one; for step 1 the left panel, for step 2 the black arrow, for step 3 the grey band.
 
@@ -67,11 +75,15 @@ Slide 1 asks three questions. Every slide after it answers one of them, or the q
 
 ### 5. How far has the climate moved?  ·  Pollux  ·  3:40–4:25
 
+![Slide 5](slides/slide-05.png)
+
 *Point at:* the "reference 1961–1990" bar on top, the dark-red right edge of the temperature panel, then the rainfall panel.
 
 > Now the same method on all twelve countries, every year since 1940: one row per country, one cell per year, both measured against the same reference, marked on top. Temperature, on the left: mostly blue before the 1980s, red after, and all hundred and twenty country-years since 2016 are warmer than their old normal. Rainfall, on the right: brown is a drier year, blue a wetter one, and they simply alternate, with no trend. The years before 1961 are faded because fewer observations stand behind them. So for temperature, the climate has clearly moved. But is that large next to normal ups and downs?
 
 ### 6. Is it large next to normal swings?  ·  Pollux  ·  4:25–5:20
+
+![Slide 6](slides/slide-06.png)
 
 *Point at:* Mexico, Germany, Australia on the left; Kenya and Senegal on the right.
 
@@ -79,11 +91,15 @@ Slide 1 asks three questions. Every slide after it answers one of them, or the q
 
 ### 7. When in the year  ·  Augustin  ·  5:20–5:50
 
+![Slide 7](slides/slide-07.png)
+
 *Point at:* the boxed summer cells of France and Spain, then Germany's winter.
 
 > Mostly, evenly across the year. Only in France and Spain is one season clearly ahead: summer warmed by about +2.3 degrees, against +1.3 in autumn. Germany's winter warmed even more, +2.5, but German winters vary so much that we cannot call it faster. Summer-heavy warming matters because it lands exactly when crops need water and cities need cooling. Which brings us to our third question.
 
 ### 8. The hottest summers  ·  Augustin  ·  5:50–6:45
+
+![Slide 8](slides/slide-08.png)
 
 *Point at:* France 2003 (purple bar −21, black bar −1.5).
 
@@ -91,11 +107,15 @@ Slide 1 asks three questions. Every slide after it answers one of them, or the q
 
 ### 9. Testing it  ·  Augustin  ·  6:45–7:45
 
+![Slide 9](slides/slide-09.png)
+
 *Point at:* the grey lines, then the red line (model 4) crossing zero.
 
 > We regress growth on the temperature and rainfall anomalies: 756 country-years. The grey lines are the naive versions: comparing each country only with itself, a warmer year costs 0.75 points of growth, and it looks significant. Year effects remove shocks every country shares, like 2009. But the countries that warmed fastest also slowed most: the two trends correlate at −0.57, and dropping India alone moves the estimate from −0.67 to −0.38. So our preferred model, in red, also gives each country its own trend, which leaves only year-to-year weather. The effect: −0.04 points per degree, interval −0.76 to +0.69, and the wild bootstrap gives p = 0.92. No detectable effect, and losses above about 0.8 points per degree are ruled out in our sample. *(handover)* So where do climate shocks bite?
 
 ### 10. Where shocks bite  ·  Eliott  ·  7:45–8:30
+
+![Slide 10](slides/slide-10.png)
 
 *Point at:* the right panel's slope, then the flat red line on the left.
 
@@ -103,9 +123,13 @@ Slide 1 asks three questions. Every slide after it answers one of them, or the q
 
 ### 11. What we can and cannot conclude  ·  Eliott  ·  8:30–9:15
 
+![Slide 11](slides/slide-11.png)
+
 > What kind of claims are these? The climate results are descriptions, and they are solid. The economic results are correlations. Year-to-year weather is close to random, so our design is close to an experiment; but with twelve countries, rich and poor pooled together, we do not claim causal effects, and an effect limited to poorer, farming economies could be hidden. And a hot year is not climate change: it allows no adaptation. Going further would take many more regions, weather weighted by where crops and people are, and a channel fixed in advance.
 
 ### 12. Back to our three questions  ·  Eliott  ·  9:15–9:55
+
+![Slide 12](slides/slide-12.png)
 
 *Point at:* the three columns, left to right.
 
